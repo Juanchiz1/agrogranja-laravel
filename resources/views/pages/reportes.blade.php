@@ -13,6 +13,50 @@
   <a href="?tab={{ $tab }}&anio={{ $anio+1 }}" class="btn btn-sm btn-secondary btn-icon">›</a>
 </div>
 
+@push('head')
+<style>
+  .btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .btn-export:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .btn-pdf-red { background: #dc2626; color: white; }
+  .btn-pdf-red:hover { background: #b91c1c; }
+  .btn-pdf-green { background: #3d8b3d; color: white; }
+  .btn-pdf-green:hover { background: #2d6a2d; }
+  .btn-excel-green { background: #059669; color: white; }
+  .btn-excel-green:hover { background: #047857; }
+  .btn-pdf-brown { background: #7a4f2a; color: white; }
+  .btn-pdf-brown:hover { background: #5c3b1f; }
+  .btn-excel-brown { background: #7a4f2a; color: white; }
+  .btn-excel-brown:hover { background: #5c3b1f; }
+  .btn-pdf-orange { background: #ea580c; color: white; }
+  .btn-pdf-orange:hover { background: #c2410c; }
+  .btn-excel-orange { background: #ea580c; color: white; }
+  .btn-excel-orange:hover { background: #c2410c; }
+</style>
+@endpush
+
+{{-- Botones de exportación --}}
+<div class="flex gap-2 mb-3" style="flex-wrap:wrap;">
+  <a href="{{ route('exportar.reporte.pdf', ['anio' => $anio]) }}" class="btn-export btn-pdf-red">📄 Reporte general PDF</a>
+  <a href="{{ route('exportar.cultivos.pdf') }}" class="btn-export btn-pdf-green">🌱 Cultivos PDF</a>
+  <a href="{{ route('exportar.cultivos.excel') }}" class="btn-export btn-excel-green">📊 Cultivos Excel</a>
+  <a href="{{ route('exportar.gastos.pdf', ['anio' => $anio]) }}" class="btn-export btn-pdf-brown">💰 Gastos PDF</a>
+  <a href="{{ route('exportar.gastos.excel', ['anio' => $anio]) }}" class="btn-export btn-excel-brown">📊 Gastos Excel</a>
+  <a href="{{ route('exportar.cosechas.pdf', ['anio' => $anio]) }}" class="btn-export btn-pdf-orange">🌾 Cosechas PDF</a>
+  <a href="{{ route('exportar.cosechas.excel', ['anio' => $anio]) }}" class="btn-export btn-excel-orange">📊 Cosechas Excel</a>
+</div>
+
 <div class="tabs">
   <button class="tab-btn {{ $tab==='resumen'?'active':'' }}"  onclick="location.href='?tab=resumen&anio={{ $anio }}'">📋 Resumen</button>
   <button class="tab-btn {{ $tab==='gastos'?'active':'' }}"   onclick="location.href='?tab=gastos&anio={{ $anio }}'">💰 Gastos</button>

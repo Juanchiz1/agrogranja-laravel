@@ -11,6 +11,8 @@ use App\Http\Controllers\TareaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\CosechaController;
+use App\Http\Controllers\ExportController;
+
 
 // ── Públicas ─────────────────────────────────────────────────
 Route::get('/',         [AuthController::class, 'welcome'])->name('welcome');
@@ -19,6 +21,16 @@ Route::post('/login',   [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register',[AuthController::class, 'register'])->name('register.post');
 Route::post('/logout',  [AuthController::class, 'logout'])->name('logout');
+
+
+// Exportaciones
+Route::get('/exportar/cultivos/pdf',    [ExportController::class, 'cultivosPdf'])->name('exportar.cultivos.pdf');
+Route::get('/exportar/cultivos/excel',  [ExportController::class, 'cultivosExcel'])->name('exportar.cultivos.excel');
+Route::get('/exportar/gastos/pdf',      [ExportController::class, 'gastosPdf'])->name('exportar.gastos.pdf');
+Route::get('/exportar/gastos/excel',    [ExportController::class, 'gastosExcel'])->name('exportar.gastos.excel');
+Route::get('/exportar/cosechas/pdf',    [ExportController::class, 'cosechasPdf'])->name('exportar.cosechas.pdf');
+Route::get('/exportar/cosechas/excel',  [ExportController::class, 'cosechasExcel'])->name('exportar.cosechas.excel');
+Route::get('/exportar/reporte/pdf',     [ExportController::class, 'reporteGeneralPdf'])->name('exportar.reporte.pdf');
 
 // ── Protegidas (requieren auth) ───────────────────────────────
 Route::middleware('auth.session')->group(function () {
