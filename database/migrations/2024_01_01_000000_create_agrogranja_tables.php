@@ -113,6 +113,36 @@ return new class extends Migration
             $table->timestamp('creado_en')->useCurrent();
             $table->timestamp('actualizado_en')->useCurrent()->useCurrentOnUpdate();
         });
+
+         Schema::create('inventario', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
+            $table->string('nombre', 150);
+            $table->string('categoria', 100);          // Semillas, Fertilizantes...
+            $table->decimal('cantidad_actual', 10, 2)->default(0);
+            $table->decimal('stock_minimo', 10, 2)->default(0);
+            $table->string('unidad', 50);              // kg, litros, bultos...
+            $table->decimal('precio_unitario', 12, 2)->nullable();
+            $table->string('proveedor', 150)->nullable();
+            $table->date('fecha_vencimiento')->nullable();
+            $table->text('notas')->nullable();
+            $table->timestamp('creado_en')->useCurrent();
+            $table->timestamp('actualizado_en')->useCurrent()->useCurrentOnUpdate();
+        });
+
+        // Movimientos de inventario (entradas y salidas)
+        Schema::create('inventario_movimientos', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('inventario_id')->constrained('inventario')->onDelete('cascade');
+            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
+            $table->foreignId('cultivo_id')->nullable()->constrained('cultivos')->onDelete('set null');
+            $table->enum('tipo', ['entrada', 'salida', 'ajuste']);
+            $table->decimal('cantidad', 10, 2);
+            $table->decimal('precio_unitario', 12, 2)->nullable(); // precio en entradas
+            $table->string('motivo', 200)->nullable();  // compra, uso en cultivo, vencimiento...
+            $table->date('fecha');
+            $table->timestamp('creado_en')->useCurrent();
+        });
     }
 
     public function down(): void
@@ -124,5 +154,7 @@ return new class extends Migration
         Schema::dropIfExists('cultivos');
         Schema::dropIfExists('usuarios');
         Schema::dropIfExists('cosechas');
+        Schema::dropIfExists('inventario_movimientos');
+        Schema::dropIfExists('inventario');
     }
 };

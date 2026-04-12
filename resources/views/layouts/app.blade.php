@@ -64,6 +64,14 @@
    class="sidebar-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}">
   <span class="sidebar-icon">🌾</span><span>Cosechas</span>
 </a>
+<a href="{{ route('inventario.index') }}"
+   class="sidebar-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}">
+  <span class="sidebar-icon">📦</span><span>Inventario</span>
+</a>
+<a href="{{ route('rentabilidad.index') }}"
+   class="sidebar-item {{ request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
+  <span class="sidebar-icon">💹</span><span>Rentabilidad</span>
+</a>
     </nav>
 
     <div class="sidebar-footer">
@@ -132,6 +140,7 @@
       <a href="{{ route('calendario.index') }}" class="nav-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}"><span>📅</span><span>Agenda</span></a>
       <a href="{{ route('reportes.index') }}"   class="nav-item {{ request()->routeIs('reportes.*') ? 'active' : '' }}"><span>📊</span><span>Reportes</span></a>
       <a href="{{ route('cosechas.index') }}"   class="nav-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}"><span>🌾</span><span>Cosechas</span></a>
+      <a href="{{ route('inventario.index') }}" class="nav-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}"><span class="sidebar-icon">📦</span><span>Inventario</span></a>
     </nav>
     @endif
 

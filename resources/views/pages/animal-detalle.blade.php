@@ -1,0 +1,489 @@
+@extends('layouts.app')
+@section('title', $animal->nombre_lote ?: $animal->especie)
+@section('page_title', ($emojis[$animal->especie]??'🐾').' '.($animal->nombre_lote ?: $animal->especie))
+@section('back_url', route('animales.index'))
+
+@push('head')
+<style>
+.animal-hero { border-radius:var(--radius-xl); overflow:hidden; margin-bottom:20px;
+  position:relative; background:var(--verde-bg); min-height:180px; display:flex; align-items:flex-end; }
+.animal-hero img { width:100%; height:220px; object-fit:cover; display:block; }
+.animal-hero-placeholder { width:100%; height:180px; display:flex; align-items:center;
+  justify-content:center; font-size:6rem; background:linear-gradient(135deg,var(--verde-bg),#d4edda); }
+.section-card { background:var(--surface); border-radius:var(--radius-lg); padding:16px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.section-title { font-weight:700; font-size:.95rem; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+.info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:.87rem; }
+.info-row:last-child { border:none; }
+.info-label { color:var(--text-secondary); }
+.info-value { font-weight:600; }
+.foto-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.foto-thumb { aspect-ratio:1; border-radius:var(--radius-md); overflow:hidden; position:relative; background:var(--verde-bg); cursor:pointer; }
+.foto-thumb img { width:100%; height:100%; object-fit:cover; }
+.foto-thumb-del { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.55); border:none; border-radius:50%; width:24px; height:24px; font-size:.7rem; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.foto-upload-btn { aspect-ratio:1; border-radius:var(--radius-md); border:2px dashed var(--verde-light); background:var(--verde-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.75rem; color:var(--verde-dark); cursor:pointer; gap:4px; }
+.peso-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:.87rem; }
+.peso-row:last-child { border:none; }
+/* Timeline */
+.timeline { position:relative; padding-left:28px; }
+.timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:var(--verde-light); }
+.tl-item { position:relative; margin-bottom:16px; }
+.tl-dot { position:absolute; left:-24px; top:3px; width:14px; height:14px; border-radius:50%; background:var(--verde); border:2px solid var(--surface); box-shadow:0 0 0 2px var(--verde-light); }
+.tl-dot.medicamento,.tl-dot.vacuna { background:#6366f1; box-shadow:0 0 0 2px #c7d2fe; }
+.tl-dot.gasto { background:#f59e0b; box-shadow:0 0 0 2px #fde68a; }
+.tl-dot.peso  { background:#0ea5e9; box-shadow:0 0 0 2px #bae6fd; }
+.tl-dot.venta { background:#16a34a; box-shadow:0 0 0 2px #bbf7d0; }
+.tl-dot.sacrificio,.tl-dot.enfermedad { background:#dc2626; box-shadow:0 0 0 2px #fca5a5; }
+.tl-dot.traslado { background:#d97706; box-shadow:0 0 0 2px #fde68a; }
+.tl-body { background:var(--surface); border-radius:var(--radius-md); padding:10px 12px; box-shadow:var(--shadow-sm); }
+.tl-title { font-weight:600; font-size:.88rem; }
+.tl-desc  { font-size:.8rem; color:var(--text-secondary); margin-top:2px; }
+.tl-date  { font-size:.72rem; color:var(--text-muted); margin-top:4px; }
+.tl-img   { width:100%; border-radius:6px; margin-top:8px; max-height:150px; object-fit:cover; }
+.propietario-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+.propietario-row:last-child { border:none; }
+.venta-calc { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-radius:var(--radius-lg); padding:16px; margin-bottom:16px; border:1px solid #86efac; }
+.lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; align-items:center; justify-content:center; }
+.lightbox.open { display:flex; }
+.lightbox img { max-width:94vw; max-height:88vh; border-radius:10px; }
+.lightbox-close { position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.4rem; width:40px; height:40px; border-radius:50%; cursor:pointer; }
+</style>
+@endpush
+
+@section('content')
+@php
+  $em = $emojis[$animal->especie] ?? '🐾';
+  $badgeClass = ['activo'=>'badge-green','vendido'=>'badge-brown','muerte'=>'badge-red'][$animal->estado] ?? 'badge-green';
+  $balance = $totalIngresos - $totalGastos;
+  $dias = $animal->fecha_ingreso ? \Carbon\Carbon::parse($animal->fecha_ingreso)->diffInDays(now()) : null;
+@endphp
+
+{{-- HERO --}}
+<div class="animal-hero">
+  @if($animal->foto)
+    <img src="{{ asset($animal->foto) }}" alt="{{ $animal->nombre_lote }}" onclick="openLightbox(this.src)">
+  @elseif($fotos->count())
+    <img src="{{ asset($fotos->first()->ruta) }}" onclick="openLightbox(this.src)">
+  @else
+    <div class="animal-hero-placeholder">{{ $em }}</div>
+  @endif
+  <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;">
+    <span class="badge {{ $badgeClass }}">{{ $animal->estado }}</span>
+    @if($animal->favorito) <span style="background:#fef9c3;border-radius:99px;padding:2px 8px;font-size:.8rem;">⭐ Favorito</span>@endif
+    @if($animal->atencion_especial) <span style="background:#fef2f2;border-radius:99px;padding:2px 8px;font-size:.8rem;color:#dc2626;">🚨 Atención</span>@endif
+  </div>
+</div>
+
+{{-- MINI STATS --}}
+<div class="stats-grid mb-3" style="grid-template-columns:repeat(3,1fr);gap:10px;">
+  <div class="stat-card"><div class="stat-value text-green">{{ $animal->cantidad }}</div><div class="stat-label">animales</div></div>
+  <div class="stat-card"><div class="stat-value" style="{{ $balance<0?'color:var(--rojo)':'' }}">${{ abs($balance)>=1000?round(abs($balance)/1000,1).'k':number_format(abs($balance),0,',','.') }}</div><div class="stat-label">balance</div></div>
+  <div class="stat-card"><div class="stat-value">{{ $animal->peso_promedio ? $animal->peso_promedio.$animal->unidad_peso : '—' }}</div><div class="stat-label">peso prom.</div></div>
+</div>
+
+{{-- CALCULADORA DE VENTA --}}
+@if($animal->estado === 'activo' && ($animal->precio_kilo || $animal->precio_unidad))
+<div class="venta-calc">
+  <p style="font-weight:700;color:#166534;margin-bottom:8px;">💰 Valor estimado de venta</p>
+  @if($animal->vende_por_kilo && $animal->precio_kilo && $animal->peso_promedio)
+    <div style="font-size:1.4rem;font-weight:800;color:#16a34a;">
+      ${{ number_format($animal->precio_kilo * $animal->peso_promedio * $animal->cantidad, 0, ',', '.') }}
+    </div>
+    <div style="font-size:.78rem;color:#166534;">{{ $animal->cantidad }} animal(es) × {{ $animal->peso_promedio }}{{ $animal->unidad_peso }} × ${{ number_format($animal->precio_kilo,0,',','.') }}/kg</div>
+  @elseif($animal->precio_unidad)
+    <div style="font-size:1.4rem;font-weight:800;color:#16a34a;">
+      ${{ number_format($animal->precio_unidad * $animal->cantidad, 0, ',', '.') }}
+    </div>
+    <div style="font-size:.78rem;color:#166534;">{{ $animal->cantidad }} animal(es) × ${{ number_format($animal->precio_unidad,0,',','.') }}/cabeza</div>
+  @endif
+  @if($animal->estado === 'activo')
+  <button onclick="openModal('modalSalida')" class="btn btn-sm btn-primary mt-2" style="font-size:.82rem;">Registrar venta / sacrificio →</button>
+  @endif
+</div>
+@endif
+
+{{-- INFORMACIÓN --}}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title">📋 Información</div>
+    <button onclick="openModal('modalEditar')" class="btn btn-sm btn-secondary">✏️ Editar</button>
+  </div>
+  <div class="info-row"><span class="info-label">Especie</span><span class="info-value">{{ $em }} {{ $animal->especie }}</span></div>
+  <div class="info-row"><span class="info-label">Etapa</span><span class="info-value">{{ ['cria'=>'🐣 Cría','juvenil'=>'🐥 Juvenil','adulto'=>'✅ Adulto'][$animal->etapa_vida??'adulto'] }}</span></div>
+  @if($animal->ubicacion)<div class="info-row"><span class="info-label">Ubicación</span><span class="info-value">📍 {{ $animal->ubicacion }}</span></div>@endif
+  @if($animal->propietario)<div class="info-row"><span class="info-label">Propietario</span><span class="info-value">👤 {{ $animal->propietario }}</span></div>@endif
+  @if($animal->produccion)<div class="info-row"><span class="info-label">Produce</span><span class="info-value">🥛 {{ $animal->produccion }}</span></div>@endif
+  @if($animal->fecha_nacimiento)<div class="info-row"><span class="info-label">Nacimiento</span><span class="info-value">🎂 {{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->format('d/m/Y') }} ({{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->diffForHumans(null,true) }})</span></div>@endif
+  @if($animal->fecha_ingreso)<div class="info-row"><span class="info-label">Ingreso a finca</span><span class="info-value">{{ \Carbon\Carbon::parse($animal->fecha_ingreso)->format('d/m/Y') }}</span></div>@endif
+  @if($animal->atencion_motivo)<div style="margin-top:10px;padding:8px 10px;background:#fef2f2;border-radius:8px;font-size:.83rem;color:#dc2626;">🚨 {{ $animal->atencion_motivo }}</div>@endif
+  @if($animal->notas)<div style="margin-top:10px;padding:8px 10px;background:var(--verde-bg);border-radius:8px;font-size:.83rem;color:var(--verde-dark);">📝 {{ $animal->notas }}</div>@endif
+
+  {{-- Acciones rápidas --}}
+  <div class="flex gap-2 mt-3" style="flex-wrap:wrap;">
+    <form method="POST" action="{{ route('animales.favorito',$animal->id) }}">@csrf
+      <button class="btn btn-sm btn-ghost">{{ $animal->favorito?'⭐ Quitar favorito':'⭐ Marcar favorito' }}</button>
+    </form>
+    <form method="POST" action="{{ route('animales.atencion',$animal->id) }}">@csrf
+      <button class="btn btn-sm btn-ghost" style="{{ $animal->atencion_especial?'color:var(--rojo)':'' }}">{{ $animal->atencion_especial?'✅ Sin atención':'🚨 Necesita atención' }}</button>
+    </form>
+    @if($animal->estado==='activo')
+    <button onclick="openModal('modalSalida')" class="btn btn-sm btn-ghost" style="color:var(--marron);">💰 Venta/Sacrificio</button>
+    @endif
+  </div>
+</div>
+
+{{-- RENTABILIDAD --}}
+<div class="section-card">
+  <div class="section-title mb-3">💹 Rentabilidad</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+    <div style="background:var(--verde-bg);border-radius:10px;padding:10px;text-align:center;">
+      <div style="font-size:.72rem;color:var(--text-secondary);">Ingresos</div>
+      <div style="font-weight:800;color:var(--verde-dark);">${{ number_format($totalIngresos,0,',','.') }}</div>
+    </div>
+    <div style="background:#fef2f2;border-radius:10px;padding:10px;text-align:center;">
+      <div style="font-size:.72rem;color:var(--text-secondary);">Gastos</div>
+      <div style="font-weight:800;color:var(--rojo);">${{ number_format($totalGastos,0,',','.') }}</div>
+    </div>
+  </div>
+  <div class="flex justify-between" style="font-size:.85rem;">
+    <span>Balance</span>
+    <strong style="{{ $balance>=0?'color:var(--verde-dark)':'color:var(--rojo)' }}">{{ $balance>=0?'+':'-' }}${{ number_format(abs($balance),0,',','.') }}</strong>
+  </div>
+</div>
+
+{{-- GALERÍA --}}
+<div class="section-card">
+  <div class="section-header"><div class="section-title">📷 Galería ({{ $fotos->count() }})</div></div>
+  <div class="foto-grid">
+    @foreach($fotos as $f)
+    <div class="foto-thumb">
+      <img src="{{ asset($f->ruta) }}" onclick="openLightbox('{{ asset($f->ruta) }}')">
+      <form method="POST" action="{{ route('animales.fotos.delete',[$animal->id,$f->id]) }}" onsubmit="return confirm('¿Eliminar?')">@csrf
+        <button class="foto-thumb-del">✕</button>
+      </form>
+    </div>
+    @endforeach
+    <label class="foto-upload-btn" for="fotoAnimalInput">
+      <span style="font-size:1.5rem;">📷</span><span>Agregar foto</span>
+    </label>
+  </div>
+  <form method="POST" action="{{ route('animales.fotos.upload',$animal->id) }}" enctype="multipart/form-data" id="fotoAnimalForm" style="display:none;margin-top:12px;">@csrf
+    <input type="file" id="fotoAnimalInput" name="foto" accept="image/*" style="display:none;" onchange="previewAnimalFoto(this)">
+    <div id="fotoAnimalPreviewWrap" style="display:none;">
+      <img id="fotoAnimalPreview" style="width:100%;border-radius:10px;margin-bottom:10px;max-height:200px;object-fit:cover;">
+      <div class="form-group"><label>Título (opcional)</label><input type="text" name="titulo" class="form-control" placeholder="Ej: Julio 2026"></div>
+      <div class="flex gap-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="cancelFotoA()">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">📷 Subir</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{{-- HISTORIAL DE PESO --}}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title">⚖️ Historial de peso ({{ $pesos->count() }})</div>
+    <button onclick="openModal('modalPeso')" class="btn btn-sm btn-primary">+ Pesaje</button>
+  </div>
+  @if($pesos->isEmpty())
+    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:10px 0;">Sin pesajes registrados.</p>
+  @else
+    @foreach($pesos->take(6) as $p)
+    <div class="peso-row">
+      <div><div style="font-weight:600;">{{ $p->peso }} {{ $p->unidad }}</div>@if($p->notas)<div style="font-size:.75rem;color:var(--text-secondary);">{{ $p->notas }}</div>@endif</div>
+      <div style="font-size:.78rem;color:var(--text-muted);">{{ \Carbon\Carbon::parse($p->fecha)->format('d/m/Y') }}</div>
+    </div>
+    @endforeach
+    @if($pesos->count() > 1)
+    @php $primero=$pesos->last(); $ultimo=$pesos->first(); $ganancia=$ultimo->peso-$primero->peso; @endphp
+    <div style="margin-top:10px;padding:8px;background:var(--verde-bg);border-radius:8px;font-size:.82rem;color:var(--verde-dark);">
+      📈 Ganancia de peso: {{ $ganancia>0?'+':'' }}{{ $ganancia }} {{ $ultimo->unidad }} desde {{ \Carbon\Carbon::parse($primero->fecha)->format('d/m/Y') }}
+    </div>
+    @endif
+  @endif
+</div>
+
+{{-- PROPIETARIOS --}}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title">👥 Propietarios</div>
+    <button onclick="openModal('modalPropietario')" class="btn btn-sm btn-ghost">+ Agregar</button>
+  </div>
+  @if($propietarios->isEmpty())
+    <div style="font-size:.85rem;color:var(--text-secondary);padding:8px 0;">{{ $animal->propietario ?? 'Sin propietario asignado.' }}</div>
+  @else
+    @foreach($propietarios as $pr)
+    <div class="propietario-row">
+      <div><div style="font-weight:600;">{{ $pr->nombre }}</div>@if($pr->telefono)<div style="font-size:.75rem;"><a href="tel:{{ $pr->telefono }}" style="color:var(--verde-dark);">📞 {{ $pr->telefono }}</a></div>@endif</div>
+      <div class="flex gap-2 items-center">
+        <span class="badge badge-green">{{ $pr->porcentaje }}%</span>
+        <form method="POST" action="{{ route('animales.propietario.delete',[$animal->id,$pr->id]) }}" onsubmit="return confirm('¿Eliminar?')">@csrf
+          <button class="btn btn-sm btn-danger btn-icon">🗑️</button>
+        </form>
+      </div>
+    </div>
+    @endforeach
+  @endif
+</div>
+
+{{-- GASTOS --}}
+@if($gastos->count())
+<div class="section-card">
+  <div class="section-header"><div class="section-title">💰 Gastos ({{ $gastos->count() }})</div><a href="{{ route('gastos.index') }}" class="btn btn-sm btn-ghost">Ver todos →</a></div>
+  @foreach($gastos->take(4) as $g)
+  <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.86rem;">
+    <div><div style="font-weight:600;">{{ $g->descripcion }}</div><div style="font-size:.74rem;color:var(--text-secondary);">{{ $g->categoria }} · {{ \Carbon\Carbon::parse($g->fecha)->format('d/m/Y') }}</div></div>
+    <div style="font-weight:700;color:var(--rojo);">-${{ number_format($g->valor,0,',','.') }}</div>
+  </div>
+  @endforeach
+</div>
+@endif
+
+{{-- LÍNEA DE TIEMPO --}}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title">📜 Línea de tiempo</div>
+    <button onclick="openModal('modalEvento')" class="btn btn-sm btn-primary">+ Evento</button>
+  </div>
+  @if($timeline->isEmpty())
+    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:12px 0;">La línea de tiempo se irá llenando con eventos, pesajes y gastos.</p>
+  @else
+  <div class="timeline">
+    @foreach($timeline as $item)
+    <div class="tl-item">
+      <div class="tl-dot {{ $item['tipo'] }}"></div>
+      <div class="tl-body">
+        <div class="tl-title">{{ $item['titulo'] }}</div>
+        @if($item['descripcion'])<div class="tl-desc">{{ $item['descripcion'] }}</div>@endif
+        @if($item['dosis']??null)<div class="tl-desc" style="color:#4f46e5;">💊 Dosis: {{ $item['dosis'] }}</div>@endif
+        @if($item['proxima_dosis']??null)<div class="tl-desc" style="color:#f59e0b;">📅 Próxima: {{ \Carbon\Carbon::parse($item['proxima_dosis'])->format('d/m/Y') }}</div>@endif
+        <div class="tl-date">📅 {{ \Carbon\Carbon::parse($item['fecha'])->format('d/m/Y') }}</div>
+        @if($item['foto']??null)<img class="tl-img" src="{{ asset($item['foto']) }}" onclick="openLightbox('{{ asset($item['foto']) }}')">@endif
+        @if($item['origen']==='evento')
+        <form method="POST" action="{{ route('animales.eventos.delete',[$animal->id,$item['id']]) }}" onsubmit="return confirm('¿Eliminar?')" style="margin-top:6px;">@csrf
+          <button class="btn btn-sm btn-ghost" style="font-size:.72rem;padding:2px 8px;color:var(--text-muted);">✕ Eliminar</button>
+        </form>
+        @endif
+      </div>
+    </div>
+    @endforeach
+  </div>
+  @endif
+</div>
+
+<div style="margin-bottom:80px;"></div>
+
+{{-- ═══ MODALES ═══ --}}
+
+{{-- Modal Editar --}}
+<div class="modal-overlay" id="modalEditar" style="display:none;">
+  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">✏️ Editar animal</h3>
+    <form method="POST" action="{{ route('animales.update',$animal->id) }}" enctype="multipart/form-data">@csrf
+      <input type="hidden" name="back" value="detalle">
+      <div class="form-group"><label>Especie *</label>
+        <select name="especie" class="form-control" required>
+          @foreach($especies as $e)<option {{ $animal->especie===$e?'selected':'' }}>{{ $e }}</option>@endforeach
+        </select>
+      </div>
+      <div class="form-group"><label>Nombre del lote</label><input type="text" name="nombre_lote" class="form-control" value="{{ $animal->nombre_lote }}"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" class="form-control" value="{{ $animal->cantidad }}"></div>
+        <div class="form-group"><label>Estado</label>
+          <select name="estado" class="form-control">
+            <option {{ $animal->estado==='activo'?'selected':'' }} value="activo">Activo</option>
+            <option {{ $animal->estado==='vendido'?'selected':'' }} value="vendido">Vendido</option>
+            <option {{ $animal->estado==='muerte'?'selected':'' }} value="muerte">Baja</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>Peso promedio</label><input type="number" step="0.1" name="peso_promedio" class="form-control" value="{{ $animal->peso_promedio }}"></div>
+        <div class="form-group"><label>Unidad</label>
+          <select name="unidad_peso" class="form-control">
+            <option {{ ($animal->unidad_peso??'kg')==='kg'?'selected':'' }} value="kg">kg</option>
+            <option {{ ($animal->unidad_peso??'kg')==='lb'?'selected':'' }} value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>Ubicación</label><input type="text" name="ubicacion" class="form-control" value="{{ $animal->ubicacion }}" placeholder="Corral, potrero..."></div>
+        <div class="form-group"><label>Etapa de vida</label>
+          <select name="etapa_vida" class="form-control">
+            <option {{ ($animal->etapa_vida??'adulto')==='cria'?'selected':'' }} value="cria">🐣 Cría</option>
+            <option {{ ($animal->etapa_vida??'adulto')==='juvenil'?'selected':'' }} value="juvenil">🐥 Juvenil</option>
+            <option {{ ($animal->etapa_vida??'adulto')==='adulto'?'selected':'' }} value="adulto">✅ Adulto</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Propietario</label><input type="text" name="propietario" class="form-control" value="{{ $animal->propietario }}"></div>
+      <div class="form-group"><label>Produce</label><input type="text" name="produccion" class="form-control" value="{{ $animal->produccion }}" placeholder="Leche, Huevos, Lana, Cría..."></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Precio/kg (COP)</label><input type="number" step="100" name="precio_kilo" class="form-control" value="{{ $animal->precio_kilo }}"></div>
+        <div class="form-group"><label>Precio/cabeza (COP)</label><input type="number" step="100" name="precio_unidad" class="form-control" value="{{ $animal->precio_unidad }}"></div>
+      </div>
+      <div class="form-group"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="vende_por_kilo" {{ ($animal->vende_por_kilo??1)?'checked':'' }}> Se vende por kg</label></div>
+      <div class="form-group"><label>Motivo atención especial</label><input type="text" name="atencion_motivo" class="form-control" value="{{ $animal->atencion_motivo }}" placeholder="Ej: Lesión en pata derecha"></div>
+      <div class="form-group"><label>Foto principal</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas" class="form-control" rows="2">{{ $animal->notas }}</textarea></div>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEditar')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Modal Pesaje --}}
+<div class="modal-overlay" id="modalPeso" style="display:none;">
+  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">⚖️ Registrar pesaje</h3>
+    <form method="POST" action="{{ route('animales.pesos.store',$animal->id) }}">@csrf
+      <div class="grid-2">
+        <div class="form-group"><label>Peso *</label><input type="number" step="0.1" name="peso" class="form-control" required placeholder="0"></div>
+        <div class="form-group"><label>Unidad</label>
+          <select name="unidad" class="form-control">
+            <option value="kg" {{ ($animal->unidad_peso??'kg')==='kg'?'selected':'' }}>kg</option>
+            <option value="lb" {{ ($animal->unidad_peso??'kg')==='lb'?'selected':'' }}>lb</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required></div>
+      <div class="form-group"><label>Notas</label><input type="text" name="notas" class="form-control" placeholder="Observaciones..."></div>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalPeso')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Guardar pesaje</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Modal Evento --}}
+<div class="modal-overlay" id="modalEvento" style="display:none;">
+  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">📝 Registrar evento</h3>
+    <form method="POST" action="{{ route('animales.eventos.store',$animal->id) }}" enctype="multipart/form-data">@csrf
+      <div class="form-group"><label>Tipo *</label>
+        <select name="tipo" class="form-control" required id="tipoEvento" onchange="toggleDosis()">
+          <option value="nota">📝 Nota</option>
+          <option value="medicamento">💊 Medicamento</option>
+          <option value="vacuna">💉 Vacuna</option>
+          <option value="traslado">🏃 Traslado de lote</option>
+          <option value="marcado">🏷️ Marcado / herrado</option>
+          <option value="nacimiento">🐣 Nacimiento / parto</option>
+          <option value="destete">🍼 Destete</option>
+          <option value="castracion">✂️ Castración</option>
+          <option value="enfermedad">🤒 Enfermedad</option>
+          <option value="recuperacion">💪 Recuperación</option>
+          <option value="otro">🔧 Otro</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Descripción *</label><input type="text" name="titulo" class="form-control" required placeholder="Ej: Ivermectina 1% · Dosis: 5ml"></div>
+      <div id="dosisWrap" style="display:none;">
+        <div class="grid-2">
+          <div class="form-group"><label>Dosis / cantidad</label><input type="text" name="dosis" class="form-control" placeholder="Ej: 5ml, 1 pastilla"></div>
+          <div class="form-group"><label>Próxima dosis</label><input type="date" name="proxima_dosis" class="form-control"></div>
+        </div>
+      </div>
+      <div class="form-group"><label>Detalle</label><textarea name="descripcion" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea></div>
+      <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required></div>
+      <div class="form-group"><label>📷 Foto del evento</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEvento')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Guardar evento</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Modal Propietario --}}
+<div class="modal-overlay" id="modalPropietario" style="display:none;">
+  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">👥 Agregar propietario</h3>
+    <form method="POST" action="{{ route('animales.propietario.store',$animal->id) }}">@csrf
+      <div class="form-group"><label>Nombre *</label><input type="text" name="nombre" class="form-control" required placeholder="Nombre del dueño"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>% participación</label><input type="number" step="0.1" name="porcentaje" class="form-control" value="50" min="1" max="100"></div>
+        <div class="form-group"><label>Teléfono</label><input type="tel" name="telefono" class="form-control" placeholder="3001234567"></div>
+      </div>
+      <div class="form-group"><label>Notas</label><input type="text" name="notas" class="form-control" placeholder="Condiciones, acuerdos..."></div>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalPropietario')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Agregar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Modal Venta/Sacrificio --}}
+<div class="modal-overlay" id="modalSalida" style="display:none;">
+  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">💰 Registrar salida</h3>
+    <form method="POST" action="{{ route('animales.salida',$animal->id) }}">@csrf
+      <div class="form-group"><label>Tipo de salida *</label>
+        <select name="tipo_salida" class="form-control" required id="tipoSalida" onchange="toggleVentaFields()">
+          <option value="venta">💰 Venta</option>
+          <option value="sacrificio">🔪 Sacrificio</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required></div>
+      <div id="ventaFields">
+        <div class="form-group"><label>Valor de venta (COP)</label>
+          <input type="number" step="100" name="valor_venta" class="form-control"
+            placeholder="{{ $valorVentaEst ? 'Estimado: $'.number_format($valorVentaEst,0,',','.') : 'Se calculará automáticamente' }}"
+            value="{{ $valorVentaEst }}">
+        </div>
+        <div class="form-group"><label>Comprador</label><input type="text" name="comprador" class="form-control" placeholder="Nombre del comprador"></div>
+      </div>
+      <div class="form-group"><label>Notas</label><textarea name="notas_salida" class="form-control" rows="2" placeholder="Observaciones..."></textarea></div>
+      <div style="background:#eff6ff;border-radius:8px;padding:10px;font-size:.82rem;color:#1d4ed8;margin-bottom:12px;">
+        💡 Si es una <strong>venta</strong>, se creará automáticamente un ingreso en el módulo de Ingresos.
+      </div>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalSalida')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Confirmar salida</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Lightbox --}}
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+@push('scripts')
+<script>
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function previewAnimalFoto(input) {
+  if (input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = e => {
+      document.getElementById('fotoAnimalPreview').src = e.target.result;
+      document.getElementById('fotoAnimalPreviewWrap').style.display = 'block';
+      document.getElementById('fotoAnimalForm').style.display = 'block';
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+function cancelFotoA() {
+  document.getElementById('fotoAnimalInput').value = '';
+  document.getElementById('fotoAnimalPreviewWrap').style.display = 'none';
+  document.getElementById('fotoAnimalForm').style.display = 'none';
+}
+function toggleDosis() {
+  const tipo = document.getElementById('tipoEvento').value;
+  document.getElementById('dosisWrap').style.display = ['medicamento','vacuna'].includes(tipo) ? 'block' : 'none';
+}
+function toggleVentaFields() {
+  const tipo = document.getElementById('tipoSalida').value;
+  document.getElementById('ventaFields').style.display = tipo === 'venta' ? 'block' : 'none';
+}
+</script>
+@endpush
+@endsection

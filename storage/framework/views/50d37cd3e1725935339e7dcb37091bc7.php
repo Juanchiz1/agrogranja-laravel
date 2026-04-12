@@ -37,6 +37,9 @@
   <a href="<?php echo e(route('animales.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#f5f3ff;">🐄</div><span class="menu-label">Mis Animales</span></a>
   <a href="<?php echo e(route('reportes.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#eef2ff;">📊</div><span class="menu-label">Reportes</span></a>
   <a href="<?php echo e(route('cosechas.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🌾</div><span class="menu-label">Cosechas y<br>Producción</span></a>
+  <a href="<?php echo e(route('inventario.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#fff7ed;">📦</div><span class="menu-label">Inventario<br>Insumos</span></a>
+  <a href="<?php echo e(route('rentabilidad.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#ecfdf5;">💹</div><span class="menu-label">Rentabilidad<br>Cultivos</span>
+</a>
 </div>
 
 
@@ -69,5 +72,12 @@
 <?php endif; ?>
 
 <?php $__env->stopSection(); ?>
+
+
+<?php if(isset($alertasInventario) && $alertasInventario > 0): ?>
+<div class="alert alert-warning mb-3" style="cursor:pointer;" onclick="location.href='<?php echo e(route('inventario.alertas')); ?>'">
+  ⚠️ <?php echo e($alertasInventario); ?> insumo(s) con stock bajo mínimo — <strong>Ver →</strong>
+</div>
+<?php endif; ?>
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/dashboard.blade.php ENDPATH**/ ?>

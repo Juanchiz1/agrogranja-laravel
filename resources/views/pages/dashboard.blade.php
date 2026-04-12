@@ -37,6 +37,9 @@
   <a href="{{ route('animales.index') }}" class="menu-card"><div class="menu-icon" style="background:#f5f3ff;">🐄</div><span class="menu-label">Mis Animales</span></a>
   <a href="{{ route('reportes.index') }}" class="menu-card"><div class="menu-icon" style="background:#eef2ff;">📊</div><span class="menu-label">Reportes</span></a>
   <a href="{{ route('cosechas.index') }}" class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🌾</div><span class="menu-label">Cosechas y<br>Producción</span></a>
+  <a href="{{ route('inventario.index') }}" class="menu-card"><div class="menu-icon" style="background:#fff7ed;">📦</div><span class="menu-label">Inventario<br>Insumos</span></a>
+  <a href="{{ route('rentabilidad.index') }}" class="menu-card"><div class="menu-icon" style="background:#ecfdf5;">💹</div><span class="menu-label">Rentabilidad<br>Cultivos</span>
+</a>
 </div>
 
 {{-- TAREAS HOY --}}
@@ -69,3 +72,10 @@
 @endif
 
 @endsection
+
+{{-- Alerta de inventario --}}
+@if(isset($alertasInventario) && $alertasInventario > 0)
+<div class="alert alert-warning mb-3" style="cursor:pointer;" onclick="location.href='{{ route('inventario.alertas') }}'">
+  ⚠️ {{ $alertasInventario }} insumo(s) con stock bajo mínimo — <strong>Ver →</strong>
+</div>
+@endif

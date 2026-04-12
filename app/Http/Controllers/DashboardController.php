@@ -42,9 +42,26 @@ $valorCosechasMes = DB::table('cosechas')
         $recentCultivos = DB::table('cultivos')->where('usuario_id', $uid)
             ->orderBy('id', 'desc')->limit(3)->get();
 
+        // Alertas de inventario para el dashboard
+$alertasInventario = DB::table('inventario')
+    ->where('usuario_id', $uid)
+    ->whereRaw('cantidad_actual <= stock_minimo')
+    ->count();   
+    
+    // Top cultivo por rentabilidad este año
+$topCultivo = DB::table('cultivos as c')
+    ->where('c.usuario_id', $uid)
+    ->selectRaw('c.id, c.nombre, c.tipo,
+        COALESCE((SELECT SUM(valor_total) FROM ingresos WHERE cultivo_id=c.id AND YEAR(fecha)=YEAR(CURDATE())),0)
+        - COALESCE((SELECT SUM(valor) FROM gastos WHERE cultivo_id=c.id AND YEAR(fecha)=YEAR(CURDATE())),0)
+        AS rentabilidad')
+    ->orderByDesc('rentabilidad')
+    ->first();
+
         return view('pages.dashboard', compact(
-            'user','cultivosActivos','gastosMes','ingresosMes','tareasPend','tareasHoy','recentCultivos'
+            'user','cultivosActivos','gastosMes','ingresosMes','tareasPend','tareasHoy','recentCultivos','alertasInventario','topCultivo'
         ));
+
     }
 }
 
