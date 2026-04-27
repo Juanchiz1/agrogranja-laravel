@@ -1,12 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Traits\ManejadorImagenes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PersonaController extends Controller
 {
-    private function tipos(): array {
+    use ManejadorImagenes;
+
+    private function tipos(): array
+    {
         return [
             'trabajador' => ['label'=>'Trabajador/Jornalero', 'emoji'=>'👷'],
             'proveedor'  => ['label'=>'Proveedor',            'emoji'=>'🏪'],
@@ -18,23 +23,13 @@ class PersonaController extends Controller
         ];
     }
 
-    private function guardarImagen($file, string $sub='personas'): string {
-        $dir = public_path("img/{$sub}");
-        if (!file_exists($dir)) mkdir($dir, 0775, true);
-        $n = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-        $file->move($dir, $n);
-        return "img/{$sub}/{$n}";
-    }
-
-    private function eliminarImagen(?string $ruta): void {
-        if ($ruta) { $f = public_path($ruta); if (file_exists($f)) unlink($f); }
-    }
-
-    /* ── LISTADO ── */
+    /**
+     * Muestra el listado de personas con estadísticas de nómina.
+     */
     public function index(Request $request)
     {
-        $uid   = session('usuario_id');
-        $tab   = $request->tab ?? 'todos';
+        $uid  = session('usuario_id');
+        $tab  = $request->tab ?? 'todos';
         $query = DB::table('personas')->where('usuario_id',$uid)->where('activo',1);
 
         if ($request->q)      $query->where('nombre','like',"%{$request->q}%");
@@ -69,7 +64,9 @@ class PersonaController extends Controller
         ));
     }
 
-    /* ── DETALLE ── */
+    /**
+     * Muestra el detalle de una persona con historial de pagos y labores.
+     */
     public function show($id)
     {
         $uid     = session('usuario_id');
@@ -105,13 +102,17 @@ class PersonaController extends Controller
         ));
     }
 
-    /* ── CREAR ── */
+    /**
+     * Registra una nueva persona en el sistema.
+     */
     public function store(Request $request)
     {
         $request->validate(['nombre'=>'required','tipo'=>'required']);
         $uid  = session('usuario_id');
         $foto = null;
-        if ($request->hasFile('foto')) $foto = $this->guardarImagen($request->file('foto'));
+        if ($request->hasFile('foto')) {
+            $foto = $this->guardarImagen($request->file('foto'), 'personas');
+        }
 
         DB::table('personas')->insert([
             'usuario_id'    => $uid,
@@ -139,7 +140,9 @@ class PersonaController extends Controller
             ->with('msg','Persona registrada.')->with('msgType','success');
     }
 
-    /* ── ACTUALIZAR ── */
+    /**
+     * Actualiza los datos de una persona existente.
+     */
     public function update(Request $request, $id)
     {
         $request->validate(['nombre'=>'required','tipo'=>'required']);
@@ -166,7 +169,7 @@ class PersonaController extends Controller
 
         if ($request->hasFile('foto')) {
             $this->eliminarImagen($persona->foto ?? null);
-            $data['foto'] = $this->guardarImagen($request->file('foto'));
+            $data['foto'] = $this->guardarImagen($request->file('foto'), 'personas');
         }
 
         DB::table('personas')->where('id',$id)->where('usuario_id',$uid)->update($data);
@@ -180,7 +183,9 @@ class PersonaController extends Controller
             ->with('msg','Persona actualizada.')->with('msgType','success');
     }
 
-    /* ── ELIMINAR ── */
+    /**
+     * Desactiva (soft delete) una persona y elimina su foto.
+     */
     public function destroy($id)
     {
         $uid     = session('usuario_id');
@@ -191,7 +196,9 @@ class PersonaController extends Controller
             ->with('msg','Persona eliminada.')->with('msgType','warning');
     }
 
-    /* ── TOGGLE FAVORITO ── */
+    /**
+     * Alterna el estado de favorito de una persona.
+     */
     public function toggleFavorito($id)
     {
         $uid = session('usuario_id');
@@ -200,20 +207,21 @@ class PersonaController extends Controller
         return back();
     }
 
-    /* ── REGISTRAR PAGO ── */
+    /**
+     * Registra un pago y crea automáticamente el gasto de mano de obra.
+     */
     public function storePago(Request $request, $id)
     {
         $request->validate([
-            'valor'    => 'required|numeric|min:0.01',
-            'fecha'    => 'required|date',
-            'tipo_pago'=> 'required',
+            'valor'     => 'required|numeric|min:0.01',
+            'fecha'     => 'required|date',
+            'tipo_pago' => 'required',
         ]);
 
         $uid     = session('usuario_id');
         $persona = DB::table('personas')->where('id',$id)->where('usuario_id',$uid)->first();
         if (!$persona) abort(404);
 
-        // 1. Guardar el pago
         DB::table('persona_pagos')->insert([
             'persona_id' => $id,
             'usuario_id' => $uid,
@@ -228,24 +236,23 @@ class PersonaController extends Controller
             'creado_en'  => now()->toDateTimeString(),
         ]);
 
-        // 2. Crear gasto automático SIEMPRE — mano de obra es un costo real
-        //    independiente de si está vinculado a un cultivo o no.
+        // Crear gasto automático — la mano de obra es un costo real independiente del cultivo
         DB::table('gastos')->insert([
-            'usuario_id'     => $uid,
-            'persona_id'     => $id,
-            'cultivo_id'     => $request->cultivo_id ?: null,
-            'animal_id'      => $request->animal_id  ?: null,
-            'categoria'      => 'Mano de obra',
-            'descripcion'    => $request->concepto
+            'usuario_id'      => $uid,
+            'persona_id'      => $id,
+            'cultivo_id'      => $request->cultivo_id ?: null,
+            'animal_id'       => $request->animal_id  ?: null,
+            'categoria'       => 'Mano de obra',
+            'descripcion'     => $request->concepto
                                     ? $request->concepto . ' — ' . $persona->nombre
                                     : 'Pago a ' . $persona->nombre,
-            'cantidad'       => $request->dias ?: null,
-            'unidad_cantidad'=> $request->dias ? 'días' : null,
-            'valor'          => $request->valor,
-            'fecha'          => $request->fecha,
-            'notas'          => 'Generado automáticamente desde pago a persona #' . $id,
-            'pendiente_sync' => 0,
-            'creado_en'      => now()->toDateTimeString(),
+            'cantidad'        => $request->dias ?: null,
+            'unidad_cantidad' => $request->dias ? 'días' : null,
+            'valor'           => $request->valor,
+            'fecha'           => $request->fecha,
+            'notas'           => 'Generado automáticamente desde pago a persona #' . $id,
+            'pendiente_sync'  => 0,
+            'creado_en'       => now()->toDateTimeString(),
         ]);
 
         return redirect()->route('personas.show',$id)
@@ -253,12 +260,13 @@ class PersonaController extends Controller
             ->with('msgType','success');
     }
 
-    /* ── ELIMINAR PAGO ── */
+    /**
+     * Elimina un pago y su gasto de mano de obra asociado.
+     */
     public function destroyPago($personaId, $pagoId)
     {
         $uid = session('usuario_id');
 
-        // Obtener el pago antes de eliminar para ubicar el gasto asociado
         $pago = DB::table('persona_pagos')
             ->where('id', $pagoId)
             ->where('persona_id', $personaId)
@@ -266,7 +274,6 @@ class PersonaController extends Controller
             ->first();
 
         if ($pago) {
-            // Eliminar el gasto automático asociado (mismo valor, fecha y persona_id)
             DB::table('gastos')
                 ->where('usuario_id', $uid)
                 ->where('persona_id', $personaId)
@@ -287,29 +294,33 @@ class PersonaController extends Controller
             ->with('msgType','warning');
     }
 
-    /* ── REGISTRAR LABOR ── */
+    /**
+     * Registra una labor realizada por la persona.
+     */
     public function storeLabor(Request $request, $id)
     {
         $request->validate(['descripcion'=>'required','fecha'=>'required|date']);
 
         DB::table('persona_labores')->insert([
-            'persona_id'    => $id,
-            'usuario_id'    => session('usuario_id'),
-            'fecha'         => $request->fecha,
-            'descripcion'   => $request->descripcion,
-            'cultivo_id'    => $request->cultivo_id ?: null,
-            'animal_id'     => $request->animal_id  ?: null,
-            'horas'         => $request->horas ?: null,
-            'insumos_usados'=> $request->insumos_usados,
-            'notas'         => $request->notas,
-            'creado_en'     => now()->toDateTimeString(),
+            'persona_id'     => $id,
+            'usuario_id'     => session('usuario_id'),
+            'fecha'          => $request->fecha,
+            'descripcion'    => $request->descripcion,
+            'cultivo_id'     => $request->cultivo_id ?: null,
+            'animal_id'      => $request->animal_id  ?: null,
+            'horas'          => $request->horas ?: null,
+            'insumos_usados' => $request->insumos_usados,
+            'notas'          => $request->notas,
+            'creado_en'      => now()->toDateTimeString(),
         ]);
 
         return redirect()->route('personas.show',$id)
             ->with('msg','Labor registrada.')->with('msgType','success');
     }
 
-    /* ── ELIMINAR LABOR ── */
+    /**
+     * Elimina una labor registrada.
+     */
     public function destroyLabor($personaId, $laborId)
     {
         DB::table('persona_labores')

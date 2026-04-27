@@ -1,38 +1,39 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Traits\ManejadorImagenes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class InventarioController extends Controller
 {
-    private function categorias(): array {
+    use ManejadorImagenes;
+
+    private function categorias(): array
+    {
         return [
-            '🌱 Cultivos'  => ['Semillas','Fertilizantes','Abonos','Plaguicidas','Herbicidas','Fungicidas'],
-            '🐄 Animales'  => ['Alimento animal','Medicamentos veterinarios','Vacunas animales','Suplementos'],
-            '🔧 Finca'     => ['Herramientas','Equipos','Combustible','Repuestos','Empaques'],
-            '📦 General'   => ['Otros'],
+            '🌱 Cultivos' => ['Semillas','Fertilizantes','Abonos','Plaguicidas','Herbicidas','Fungicidas'],
+            '🐄 Animales' => ['Alimento animal','Medicamentos veterinarios','Vacunas animales','Suplementos'],
+            '🔧 Finca'    => ['Herramientas','Equipos','Combustible','Repuestos','Empaques'],
+            '📦 General'  => ['Otros'],
         ];
     }
 
-    private function categoriasPlanas(): array {
+    private function categoriasPlanas(): array
+    {
         $r = [];
-        foreach ($this->categorias() as $g => $items) foreach ($items as $c) $r[] = $c;
+        foreach ($this->categorias() as $items) {
+            foreach ($items as $c) {
+                $r[] = $c;
+            }
+        }
         return $r;
     }
 
-    private function guardarImagen($file, string $sub='inventario'): string {
-        $dir = public_path("img/{$sub}");
-        if (!file_exists($dir)) mkdir($dir, 0775, true);
-        $nombre = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-        $file->move($dir, $nombre);
-        return "img/{$sub}/{$nombre}";
-    }
-
-    private function eliminarImagen(?string $ruta): void {
-        if ($ruta) { $f = public_path($ruta); if (file_exists($f)) unlink($f); }
-    }
-
+    /**
+     * Muestra el listado de insumos con estadísticas y últimos movimientos.
+     */
     public function index(Request $request)
     {
         $uid   = session('usuario_id');
@@ -76,6 +77,9 @@ class InventarioController extends Controller
         ));
     }
 
+    /**
+     * Registra un nuevo insumo en el inventario con stock inicial.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -88,7 +92,9 @@ class InventarioController extends Controller
 
         $uid  = session('usuario_id');
         $foto = null;
-        if ($request->hasFile('foto')) $foto = $this->guardarImagen($request->file('foto'),'inventario');
+        if ($request->hasFile('foto')) {
+            $foto = $this->guardarImagen($request->file('foto'), 'inventario');
+        }
 
         $id = DB::table('inventario')->insertGetId([
             'usuario_id'       => $uid,
@@ -127,6 +133,9 @@ class InventarioController extends Controller
             ->with('msgType','success');
     }
 
+    /**
+     * Actualiza los datos de un insumo existente.
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -156,7 +165,7 @@ class InventarioController extends Controller
 
         if ($request->hasFile('foto')) {
             $this->eliminarImagen($insumo->foto ?? null);
-            $data['foto'] = $this->guardarImagen($request->file('foto'),'inventario');
+            $data['foto'] = $this->guardarImagen($request->file('foto'), 'inventario');
         }
 
         DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->update($data);
@@ -166,6 +175,9 @@ class InventarioController extends Controller
             ->with('msgType','success');
     }
 
+    /**
+     * Elimina un insumo y su foto asociada.
+     */
     public function destroy($id)
     {
         $uid    = session('usuario_id');
@@ -178,6 +190,10 @@ class InventarioController extends Controller
             ->with('msgType','warning');
     }
 
+    /**
+     * Registra un movimiento de stock (entrada, salida, ajuste, en_uso, devolución).
+     * Las entradas con precio generan un gasto automático.
+     */
     public function movimiento(Request $request, $id)
     {
         $request->validate([
@@ -209,7 +225,7 @@ class InventarioController extends Controller
 
         $fotoSoporte = null;
         if ($request->hasFile('foto_soporte')) {
-            $fotoSoporte = $this->guardarImagen($request->file('foto_soporte'),'inventario/soportes');
+            $fotoSoporte = $this->guardarImagen($request->file('foto_soporte'), 'inventario/soportes');
         }
 
         DB::table('inventario_movimientos')->insert([
@@ -228,8 +244,7 @@ class InventarioController extends Controller
             'creado_en'      => now()->toDateTimeString(),
         ]);
 
-        // ── GASTO AUTOMÁTICO al registrar una entrada con precio ──────────
-        // Se crea siempre que haya precio_unitario, sin necesidad de checkbox.
+        // Gasto automático al registrar una entrada con precio unitario
         if ($request->tipo === 'entrada' && $request->precio_unitario) {
             DB::table('gastos')->insert([
                 'usuario_id'      => $uid,
@@ -247,7 +262,6 @@ class InventarioController extends Controller
                 'creado_en'       => now()->toDateTimeString(),
             ]);
         }
-        // ─────────────────────────────────────────────────────────────────
 
         $msg = match($request->tipo) {
             'entrada'    => "Entrada registrada. Stock: {$nueva} {$insumo->unidad}",
@@ -258,13 +272,18 @@ class InventarioController extends Controller
             default      => "Movimiento registrado. Stock: {$nueva} {$insumo->unidad}",
         };
 
-        if ($nueva <= $insumo->stock_minimo) $msg .= " ⚠️ Stock bajo mínimo.";
+        if ($nueva <= $insumo->stock_minimo) {
+            $msg .= ' ⚠️ Stock bajo mínimo.';
+        }
 
         return redirect()->route('inventario.index')
             ->with('msg', $msg)
             ->with('msgType', $nueva <= $insumo->stock_minimo ? 'warning' : 'success');
     }
 
+    /**
+     * Muestra la vista de alertas de stock bajo y productos por vencer.
+     */
     public function alertas()
     {
         $uid = session('usuario_id');

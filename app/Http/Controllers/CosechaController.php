@@ -1,48 +1,44 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Traits\ManejadorImagenes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CosechaController extends Controller
 {
-    private function destinos(): array {
+    use ManejadorImagenes;
+
+    private function destinos(): array
+    {
         return [
-            'venta'           => ['label'=>'💵 Venta directa',    'crea_ingreso'=>true],
-            'intermediario'   => ['label'=>'🤝 Intermediario',    'crea_ingreso'=>true],
-            'plaza_mercado'   => ['label'=>'🏪 Plaza de mercado', 'crea_ingreso'=>true],
-            'exportacion'     => ['label'=>'🌎 Exportación',      'crea_ingreso'=>true],
-            'autoconsumo'     => ['label'=>'🏠 Autoconsumo',      'crea_ingreso'=>false],
-            'almacenaje'      => ['label'=>'📦 Almacenaje',       'crea_ingreso'=>false],
-            'semilla'         => ['label'=>'🌱 Reserva semilla',  'crea_ingreso'=>false],
-            'donacion'        => ['label'=>'🤲 Donación',         'crea_ingreso'=>false],
+            'venta'         => ['label'=>'💵 Venta directa',    'crea_ingreso'=>true],
+            'intermediario' => ['label'=>'🤝 Intermediario',    'crea_ingreso'=>true],
+            'plaza_mercado' => ['label'=>'🏪 Plaza de mercado', 'crea_ingreso'=>true],
+            'exportacion'   => ['label'=>'🌎 Exportación',      'crea_ingreso'=>true],
+            'autoconsumo'   => ['label'=>'🏠 Autoconsumo',      'crea_ingreso'=>false],
+            'almacenaje'    => ['label'=>'📦 Almacenaje',       'crea_ingreso'=>false],
+            'semilla'       => ['label'=>'🌱 Reserva semilla',  'crea_ingreso'=>false],
+            'donacion'      => ['label'=>'🤲 Donación',         'crea_ingreso'=>false],
         ];
     }
 
-    private function guardarImagen($file, string $sub = 'cosechas'): string {
-        $dir = public_path("img/{$sub}");
-        if (!file_exists($dir)) mkdir($dir, 0775, true);
-        $nombre = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-        $file->move($dir, $nombre);
-        return "img/{$sub}/{$nombre}";
-    }
-
-    private function eliminarImagen(?string $ruta): void {
-        if ($ruta) { $f = public_path($ruta); if (file_exists($f)) unlink($f); }
-    }
-
+    /**
+     * Muestra el listado de cosechas con estadísticas del período.
+     */
     public function index(Request $request)
     {
-        $uid = session('usuario_id');
+        $uid   = session('usuario_id');
         $query = DB::table('cosechas as cs')
             ->leftJoin('cultivos as c','c.id','=','cs.cultivo_id')
             ->where('cs.usuario_id',$uid)
             ->select('cs.*','c.nombre as cultivo_nombre');
 
-        if ($request->q)        $query->where(fn($w) => $w->where('cs.producto','like',"%{$request->q}%")->orWhere('cs.comprador','like',"%{$request->q}%"));
-        if ($request->mes)      $query->whereRaw("DATE_FORMAT(cs.fecha_cosecha,'%Y-%m') = ?",[$request->mes]);
-        if ($request->calidad)  $query->where('cs.calidad',$request->calidad);
-        if ($request->destino)  $query->where('cs.destino',$request->destino);
+        if ($request->q)       $query->where(fn($w) => $w->where('cs.producto','like',"%{$request->q}%")->orWhere('cs.comprador','like',"%{$request->q}%"));
+        if ($request->mes)     $query->whereRaw("DATE_FORMAT(cs.fecha_cosecha,'%Y-%m') = ?",[$request->mes]);
+        if ($request->calidad) $query->where('cs.calidad',$request->calidad);
+        if ($request->destino) $query->where('cs.destino',$request->destino);
 
         $cosechas = $query->orderBy('cs.fecha_cosecha','desc')->get();
 
@@ -54,14 +50,13 @@ class CosechaController extends Controller
             ->selectRaw('producto, SUM(cantidad) as total_qty, SUM(valor_estimado) as total_valor')
             ->groupBy('producto')->orderByDesc('total_valor')->limit(5)->get();
 
-        // En almacenaje activo
         try {
             $enAlmacen = DB::table('cosechas')->where('usuario_id',$uid)->where('destino','almacenaje')
                 ->whereNotNull('almacen_hasta')->where('almacen_hasta','>=',now()->toDateString())->count();
         } catch (\Exception $e) { $enAlmacen = 0; }
 
-        $cultivos  = DB::table('cultivos')->where('usuario_id',$uid)->orderBy('nombre')->get();
-        $destinos  = $this->destinos();
+        $cultivos = DB::table('cultivos')->where('usuario_id',$uid)->orderBy('nombre')->get();
+        $destinos = $this->destinos();
 
         try {
             $clientes = DB::table('clientes')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
@@ -73,6 +68,9 @@ class CosechaController extends Controller
         ));
     }
 
+    /**
+     * Registra una nueva cosecha y opcionalmente crea un ingreso automático.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -87,15 +85,15 @@ class CosechaController extends Controller
         $punit = $request->precio_unitario ? (float) $request->precio_unitario : null;
         $valor = $punit ? $cant * $punit : ($request->valor_estimado ? (float)$request->valor_estimado : null);
 
-        // Merma aplicada
         if ($valor && $request->merma_porcentaje) {
-            $valor = $valor * (1 - $request->merma_porcentaje/100);
+            $valor = $valor * (1 - $request->merma_porcentaje / 100);
         }
 
         $foto = null;
-        if ($request->hasFile('foto')) $foto = $this->guardarImagen($request->file('foto'),'cosechas');
+        if ($request->hasFile('foto')) {
+            $foto = $this->guardarImagen($request->file('foto'), 'cosechas');
+        }
 
-        // Comprador desde cliente guardado
         $comprador = $request->comprador;
         if ($request->cliente_id) {
             $cli = DB::table('clientes')->find($request->cliente_id);
@@ -125,13 +123,11 @@ class CosechaController extends Controller
             'actualizado_en'   => now()->toDateTimeString(),
         ]);
 
-        // Marcar cultivo como cosechado
         if ($request->cultivo_id && $request->marcar_cosechado) {
             DB::table('cultivos')->where('id',$request->cultivo_id)->where('usuario_id',$uid)
                 ->update(['estado'=>'cosechado','actualizado_en'=>now()->toDateTimeString()]);
         }
 
-        // Crear ingreso automático si el destino genera venta
         $destinoInfo = $this->destinos()[$request->destino] ?? null;
         if ($valor && $destinoInfo && $destinoInfo['crea_ingreso'] && $request->crear_ingreso) {
             DB::table('ingresos')->insert([
@@ -156,9 +152,18 @@ class CosechaController extends Controller
         return redirect()->route('cosechas.index')->with('msg','Cosecha registrada correctamente.')->with('msgType','success');
     }
 
+    /**
+     * Actualiza los datos de una cosecha existente.
+     */
     public function update(Request $request, $id)
     {
-        $request->validate(['producto'=>'required|min:2','cantidad'=>'required|numeric|min:0.01','unidad'=>'required','fecha_cosecha'=>'required|date']);
+        $request->validate([
+            'producto'      => 'required|min:2',
+            'cantidad'      => 'required|numeric|min:0.01',
+            'unidad'        => 'required',
+            'fecha_cosecha' => 'required|date',
+        ]);
+
         $uid     = session('usuario_id');
         $cosecha = DB::table('cosechas')->where('id',$id)->where('usuario_id',$uid)->first();
         if (!$cosecha) abort(404);
@@ -187,13 +192,16 @@ class CosechaController extends Controller
 
         if ($request->hasFile('foto')) {
             $this->eliminarImagen($cosecha->foto ?? null);
-            $data['foto'] = $this->guardarImagen($request->file('foto'),'cosechas');
+            $data['foto'] = $this->guardarImagen($request->file('foto'), 'cosechas');
         }
 
         DB::table('cosechas')->where('id',$id)->where('usuario_id',$uid)->update($data);
         return redirect()->route('cosechas.index')->with('msg','Cosecha actualizada.')->with('msgType','success');
     }
 
+    /**
+     * Elimina una cosecha y su foto asociada.
+     */
     public function destroy($id)
     {
         $uid     = session('usuario_id');

@@ -2,33 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\ManejadorImagenes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CultivoController extends Controller
 {
-    /**
-     * Guarda una imagen en public/img/cultivos/ y retorna la ruta relativa.
-     * No depende de storage:link.
-     */
-    private function guardarImagen($file, string $subdir = 'cultivos'): string
-    {
-        $carpeta = public_path("img/{$subdir}");
-        if (!file_exists($carpeta)) {
-            mkdir($carpeta, 0775, true);
-        }
-        $nombre   = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->move($carpeta, $nombre);
-        return "img/{$subdir}/{$nombre}";   // ruta relativa al public/
-    }
-
-    private function eliminarImagen(?string $ruta): void
-    {
-        if ($ruta) {
-            $full = public_path($ruta);
-            if (file_exists($full)) unlink($full);
-        }
-    }
+    use ManejadorImagenes;
 
     private function emojis(): array
     {
@@ -48,7 +28,9 @@ class CultivoController extends Controller
             'Ganado bovino','Cerdos','Gallinas','Peces','Caballos','Cabras','Otro'];
     }
 
-    /* ── LISTADO ── */
+    /**
+     * Muestra el listado de cultivos con filtros opcionales.
+     */
     public function index(Request $request)
     {
         $uid   = session('usuario_id');
@@ -65,7 +47,9 @@ class CultivoController extends Controller
         return view('pages.cultivos', compact('cultivos','stats','tiposCultivo'));
     }
 
-    /* ── DETALLE ── */
+    /**
+     * Muestra el detalle completo de un cultivo con timeline unificado.
+     */
     public function show($id)
     {
         $uid     = session('usuario_id');
@@ -126,7 +110,9 @@ class CultivoController extends Controller
         ));
     }
 
-    /* ── CREAR ── */
+    /**
+     * Registra un nuevo cultivo.
+     */
     public function store(Request $request)
     {
         $request->validate(['tipo'=>'required','nombre'=>'required']);
@@ -162,7 +148,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.index')->with('msg','Cultivo registrado correctamente.')->with('msgType','success');
     }
 
-    /* ── ACTUALIZAR ── */
+    /**
+     * Actualiza los datos de un cultivo existente.
+     */
     public function update(Request $request, $id)
     {
         $request->validate(['tipo'=>'required','nombre'=>'required']);
@@ -202,7 +190,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.index')->with('msg','Cultivo actualizado.')->with('msgType','success');
     }
 
-    /* ── ELIMINAR ── */
+    /**
+     * Elimina un cultivo y su imagen asociada.
+     */
     public function destroy($id)
     {
         $uid     = session('usuario_id');
@@ -212,7 +202,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.index')->with('msg','Cultivo eliminado.')->with('msgType','warning');
     }
 
-    /* ── SUBIR FOTO ── */
+    /**
+     * Sube una foto al log fotográfico del cultivo.
+     */
     public function uploadFoto(Request $request, $id)
     {
         $request->validate(['foto'=>'required|image|max:5120']);
@@ -238,7 +230,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.show',$id)->with('msg','Foto agregada.')->with('msgType','success');
     }
 
-    /* ── ELIMINAR FOTO ── */
+    /**
+     * Elimina una foto del log fotográfico.
+     */
     public function deleteFoto($cultivoId, $fotoId)
     {
         $uid  = session('usuario_id');
@@ -251,7 +245,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.show',$cultivoId)->with('msg','Foto eliminada.')->with('msgType','warning');
     }
 
-    /* ── REGISTRAR EVENTO ── */
+    /**
+     * Registra un evento en el timeline del cultivo.
+     */
     public function storeEvento(Request $request, $id)
     {
         $request->validate(['tipo'=>'required','titulo'=>'required|string|max:200','fecha'=>'required|date']);
@@ -275,7 +271,9 @@ class CultivoController extends Controller
         return redirect()->route('cultivos.show',$id)->with('msg','Evento registrado.')->with('msgType','success');
     }
 
-    /* ── ELIMINAR EVENTO ── */
+    /**
+     * Elimina un evento del timeline.
+     */
     public function destroyEvento($cultivoId, $eventoId)
     {
         $uid    = session('usuario_id');
