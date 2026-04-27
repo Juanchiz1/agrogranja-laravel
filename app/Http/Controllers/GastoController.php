@@ -56,14 +56,14 @@ class GastoController extends Controller
             ->leftJoin('cultivos as c',  'c.id',  '=', 'g.cultivo_id')
             ->leftJoin('animales as a',  'a.id',  '=', 'g.animal_id')
             ->leftJoin('cosechas as co', 'co.id', '=', 'g.cosecha_id')
-            ->leftJoin('proveedores as p','p.id',  '=', 'g.proveedor_id')
+            ->leftJoin('personas as p','p.id','=','g.persona_id')
             ->where('g.usuario_id', $uid)
             ->select(
                 'g.*',
                 'c.nombre  as cultivo_nombre',
                 'a.nombre_lote as animal_nombre', 'a.especie as animal_especie',
                 'co.producto as cosecha_nombre',
-                'p.nombre as proveedor_nombre_bd'
+                'p.nombre as proveedor_nombre_bd','p.tipo as proveedor_tipo'
             );
 
         if ($request->q) {
@@ -98,7 +98,7 @@ class GastoController extends Controller
         $categoriasPlanas = $this->categoriasPlanas();
 
         try {
-            $proveedores = DB::table('proveedores')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
+            $proveedores = DB::table('personas')->where('usuario_id',$uid)->where('tipo','proveedor')->where('activo',1)->orderBy('nombre')->get();
         } catch (\Exception $e) { $proveedores = collect(); }
 
         try {
@@ -126,7 +126,7 @@ class GastoController extends Controller
         // Si seleccionó proveedor de la BD, usar su nombre
         $proveedorNombre = $request->proveedor;
         if ($request->proveedor_id) {
-            $prov = DB::table('proveedores')->find($request->proveedor_id);
+            $prov = DB::table('personas')->find($request->persona_id);
             if ($prov) $proveedorNombre = $prov->nombre;
         }
 
@@ -202,23 +202,29 @@ class GastoController extends Controller
     public function storeProveedor(Request $request)
     {
         $request->validate(['nombre'=>'required|string|max:150']);
-        DB::table('proveedores')->insert([
-            'usuario_id' => session('usuario_id'),
-            'nombre'     => $request->nombre,
-            'telefono'   => $request->telefono,
-            'email'      => $request->email,
-            'direccion'  => $request->direccion,
-            'categoria'  => $request->categoria,
-            'notas'      => $request->notas,
-            'activo'     => 1,
-            'creado_en'  => now()->toDateTimeString(),
-        ]);
+        try {
+            DB::table('personas')->insert([
+                'usuario_id' => session('usuario_id'),
+                'nombre'     => $request->nombre,
+                'telefono'   => $request->telefono,
+                'email'      => $request->email,
+                'direccion'  => $request->direccion,
+                'categoria'  => $request->categoria,
+                'notas'      => $request->notas,
+                'activo'     => 1,
+                'creado_en'  => now()->toDateTimeString(),
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('gastos.index')
+                ->with('msg', '⚠️ Error: La tabla "proveedores" no existe. Ejecuta el archivo gastos_upgrade.sql en tu base de datos.')
+                ->with('msgType', 'error');
+        }
         return redirect()->route('gastos.index')->with('msg','Proveedor guardado.')->with('msgType','success');
     }
 
     public function destroyProveedor($id)
     {
-        DB::table('proveedores')->where('id',$id)->where('usuario_id',session('usuario_id'))->delete();
+        DB::table('personas')->where('id',$id)->where('tipo','proveedor')->where('usuario_id',session('usuario_id'))->update(['activo'=>0]);
         return redirect()->route('gastos.index')->with('msg','Proveedor eliminado.')->with('msgType','warning');
     }
 
@@ -229,26 +235,31 @@ class GastoController extends Controller
         $uid  = session('usuario_id');
         $dia  = $request->dia_del_mes ?? 1;
 
-        // Calcular próximo vencimiento
         $proximo = now()->day($dia);
         if ($proximo->isPast()) $proximo->addMonth();
 
-        DB::table('gastos_recurrentes')->insert([
-            'usuario_id'         => $uid,
-            'categoria'          => $request->categoria,
-            'descripcion'        => $request->descripcion,
-            'valor'              => $request->valor,
-            'proveedor'          => $request->proveedor,
-            'proveedor_id'       => $request->proveedor_id ?: null,
-            'cultivo_id'         => $request->cultivo_id ?: null,
-            'animal_id'          => $request->animal_id ?: null,
-            'frecuencia'         => $request->frecuencia,
-            'dia_del_mes'        => $dia,
-            'activo'             => 1,
-            'proximo_vencimiento'=> $proximo->toDateString(),
-            'notas'              => $request->notas,
-            'creado_en'          => now()->toDateTimeString(),
-        ]);
+        try {
+            DB::table('gastos_recurrentes')->insert([
+                'usuario_id'         => $uid,
+                'categoria'          => $request->categoria,
+                'descripcion'        => $request->descripcion,
+                'valor'              => $request->valor,
+                'proveedor'          => $request->proveedor,
+                'proveedor_id'       => $request->proveedor_id ?: null,
+                'cultivo_id'         => $request->cultivo_id ?: null,
+                'animal_id'          => $request->animal_id ?: null,
+                'frecuencia'         => $request->frecuencia,
+                'dia_del_mes'        => $dia,
+                'activo'             => 1,
+                'proximo_vencimiento'=> $proximo->toDateString(),
+                'notas'              => $request->notas,
+                'creado_en'          => now()->toDateTimeString(),
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('gastos.index')
+                ->with('msg', '⚠️ Error: La tabla "gastos_recurrentes" no existe. Ejecuta el archivo gastos_upgrade.sql en tu base de datos.')
+                ->with('msgType', 'error');
+        }
         return redirect()->route('gastos.index')->with('msg','Gasto recurrente creado.')->with('msgType','success');
     }
 

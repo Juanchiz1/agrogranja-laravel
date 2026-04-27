@@ -126,6 +126,7 @@ class AnimalController extends Controller
 
         $emojis  = $this->emojis();
         $especies = $this->especies();
+        $personas = DB::table('personas')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
         return view('pages.animal-detalle', compact(
             'animal','gastos','ingresos','totalGastos','totalIngresos',
             'fotos','pesos','eventos','propietarios','timeline',
@@ -179,35 +180,84 @@ class AnimalController extends Controller
     }
 
     /* ── ACTUALIZAR ── */
-    public function update(Request $request, $id)
-    {
-        $request->validate(['especie'=>'required']);
-        $uid    = session('usuario_id');
-        $animal = DB::table('animales')->where('id',$id)->where('usuario_id',$uid)->first();
-        if (!$animal) abort(404);
+   public function update(Request $request, $id)
+{
+    $request->validate(['especie'=>'required']);
+    $uid    = session('usuario_id');
+    $animal = DB::table('animales')->where('id',$id)->where('usuario_id',$uid)->first();
+    if (!$animal) abort(404);
 
-        $data = [
-            'especie'=>$request->especie,'nombre_lote'=>$request->nombre_lote,
-            'cantidad'=>$request->cantidad??1,'fecha_ingreso'=>$request->fecha_ingreso?:null,
-            'fecha_nacimiento'=>$request->fecha_nacimiento?:null,
-            'estado'=>$request->estado,'peso_promedio'=>$request->peso_promedio?:null,
-            'unidad_peso'=>$request->unidad_peso,'ubicacion'=>$request->ubicacion,
-            'propietario'=>$request->propietario,'etapa_vida'=>$request->etapa_vida??'adulto',
-            'produccion'=>$request->produccion,'vende_por_kilo'=>$request->has('vende_por_kilo')?1:0,
-            'precio_kilo'=>$request->precio_kilo?:null,'precio_unidad'=>$request->precio_unidad?:null,
-            'atencion_motivo'=>$request->atencion_motivo,'notas'=>$request->notas,
-            'actualizado_en'=>now()->toDateTimeString(),
-        ];
-        if ($request->hasFile('foto')) {
-            $this->eliminarImagen($animal->foto);
-            $data['foto'] = $this->guardarImagen($request->file('foto'),'animales');
+    // Guardar el estado ANTES de actualizar
+    $estadoAnterior = $animal->estado;
+
+    $data = [
+        'especie'=>$request->especie,'nombre_lote'=>$request->nombre_lote,
+        'cantidad'=>$request->cantidad??1,'fecha_ingreso'=>$request->fecha_ingreso?:null,
+        'fecha_nacimiento'=>$request->fecha_nacimiento?:null,
+        'estado'=>$request->estado,'peso_promedio'=>$request->peso_promedio?:null,
+        'unidad_peso'=>$request->unidad_peso,'ubicacion'=>$request->ubicacion,
+        'propietario'=>$request->propietario,'etapa_vida'=>$request->etapa_vida??'adulto',
+        'produccion'=>$request->produccion,'vende_por_kilo'=>$request->has('vende_por_kilo')?1:0,
+        'precio_kilo'=>$request->precio_kilo?:null,'precio_unidad'=>$request->precio_unidad?:null,
+        'atencion_motivo'=>$request->atencion_motivo,'notas'=>$request->notas,
+        'actualizado_en'=>now()->toDateTimeString(),
+    ];
+
+    if ($request->hasFile('foto')) {
+        $this->eliminarImagen($animal->foto);
+        $data['foto'] = $this->guardarImagen($request->file('foto'),'animales');
+    }
+
+    DB::table('animales')->where('id',$id)->where('usuario_id',$uid)->update($data);
+
+    // ✅ =============================================================
+    // ✅ CREAR INGRESO AUTOMÁTICO si el animal cambió de estado a "vendido"
+    // ✅ =============================================================
+    if ($estadoAnterior === 'activo' && $request->estado === 'vendido') {
+        
+        // Calcular valor de venta si no viene en el request
+        $valorVenta = $request->valor_venta;
+        if (!$valorVenta) {
+            if ($request->vende_por_kilo && $request->precio_kilo && $request->peso_promedio) {
+                $valorVenta = $request->precio_kilo * $request->peso_promedio * ($request->cantidad ?? 1);
+            } elseif ($request->precio_unidad) {
+                $valorVenta = $request->precio_unidad * ($request->cantidad ?? 1);
+            }
         }
 
-        DB::table('animales')->where('id',$id)->where('usuario_id',$uid)->update($data);
-        $back = $request->input('back','list');
-        if ($back === 'detalle') return redirect()->route('animales.show',$id)->with('msg','Animal actualizado.')->with('msgType','success');
-        return redirect()->route('animales.index')->with('msg','Animal actualizado.')->with('msgType','success');
+        // Verificar si ya existe un ingreso para este animal (evitar duplicados)
+        if ($valorVenta && $valorVenta > 0) {
+            $yaExiste = DB::table('ingresos')
+                ->where('usuario_id', $uid)
+                ->where('animal_id', $animal->id)
+                ->where('tipo', 'animal')
+                ->exists();
+
+            if (!$yaExiste) {
+                DB::table('ingresos')->insert([
+                    'usuario_id'      => $uid,
+                    'descripcion'     => 'Venta de ' . $animal->especie .
+                                         ($animal->nombre_lote ? ' — ' . $animal->nombre_lote : ''),
+                    'valor_total'     => $valorVenta,
+                    'categoria'       => 'Venta de animales',
+                    'fecha'           => $request->fecha_venta ?? now()->toDateString(),
+                    'tipo'            => 'animal',
+                    'animal_id'       => $animal->id,
+                    'comprador'       => $request->comprador,
+                    'notas'           => $request->notas,
+                    'creado_en'       => now(),
+                    'actualizado_en'  => now(),
+                ]);
+            }
+        }
     }
+
+    $back = $request->input('back','list');
+    if ($back === 'detalle') {
+        return redirect()->route('animales.show',$id)->with('msg','Animal actualizado.')->with('msgType','success');
+    }
+    return redirect()->route('animales.index')->with('msg','Animal actualizado.')->with('msgType','success');
+}
 
     /* ── ELIMINAR ── */
     public function destroy($id)
@@ -287,7 +337,9 @@ class AnimalController extends Controller
         DB::table('animal_eventos')->insert(['animal_id'=>$id,'usuario_id'=>$uid,
             'tipo'=>$request->tipo,'titulo'=>$request->titulo,'descripcion'=>$request->descripcion,
             'foto_ruta'=>$fotoRuta,'fecha'=>$request->fecha,'dosis'=>$request->dosis,
-            'proxima_dosis'=>$request->proxima_dosis?:null,'creado_en'=>now()->toDateTimeString()]);
+            'proxima_dosis'=>$request->proxima_dosis?:null,
+            'persona_id'=>$request->persona_id ?: null,
+            'creado_en'=>now()->toDateTimeString()]);
         return redirect()->route('animales.show',$id)->with('msg','Evento registrado.')->with('msgType','success');
     }
 

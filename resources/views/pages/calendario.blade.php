@@ -238,15 +238,25 @@ foreach($tipos as $grupo => $items) foreach($items as $k=>$v) $tiposPlanos2[$k]=
 @if(!$t->completada)
 <div class="modal-overlay" id="completarTarea{{ $t->id }}" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div>
-    <h3 class="modal-title">✅ Completar tarea</h3>
+    <h3 class="modal-title">Completar tarea</h3>
     <p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:14px;">{{ $t->titulo }}</p>
     <form method="POST" action="{{ route('tareas.completar',$t->id) }}">@csrf
-      <div class="form-group"><label>¿Cómo quedó? (opcional)</label>
-        <textarea name="notas_completada" class="form-control" rows="3" placeholder="Ej: Se aplicaron 3 litros, todo bien. / Nació una ternera sana."></textarea>
+      @if(isset($personas) && $personas->count())
+      <div class="form-group"><label>Quien la realizo (opcional)</label>
+        <select name="persona_completada_id" class="form-control">
+          <option value="">Sin asignar</option>
+          @foreach($personas as $per)
+            <option value="{{ $per->id }}">{{ $per->nombre }}{{ $per->cargo ? ' ('.$per->cargo.')' : '' }}</option>
+          @endforeach
+        </select>
+      </div>
+      @endif
+      <div class="form-group"><label>Como quedo? (opcional)</label>
+        <textarea name="notas_completada" class="form-control" rows="3" placeholder="Ej: Se aplicaron 3 litros, todo bien."></textarea>
       </div>
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('completarTarea{{ $t->id }}')">Cancelar</button>
-        <button type="submit" class="btn btn-primary btn-full">✅ Marcar como hecha</button>
+        <button type="submit" class="btn btn-primary btn-full">Marcar como hecha</button>
       </div>
     </form>
   </div>

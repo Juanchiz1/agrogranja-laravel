@@ -105,6 +105,42 @@ class ReporteController extends Controller
         if ($tareasPendientes > 0) $insights[] = ['tipo'=>'alerta','texto'=>$tareasPendientes.' tarea(s) vencida(s) sin completar en la agenda.'];
         if ($animalesPorEspecie->count()) $insights[] = ['tipo'=>'info','texto'=>'Tienes '.$animalesEst['activo'].' animal(es) activo(s) con un valor estimado de hato de $'.number_format($valorHato,0,',','.').'.'];
 
+        /* ─── Rentabilidad por cultivo (tab dedicado) ─── */
+        $rentDatos = collect();
+        if ($tab === 'rentabilidad') {
+            $orden = $request->orden ?? 'rentabilidad';
+            $cultivos = DB::table('cultivos')->where('usuario_id',$uid)->get();
+            $rentDatos = $cultivos->map(function($cultivo) use ($uid,$anio) {
+                $gastos    = DB::table('gastos')->where('usuario_id',$uid)->where('cultivo_id',$cultivo->id)->whereYear('fecha',$anio)->sum('valor');
+                $ingresos  = DB::table('ingresos')->where('usuario_id',$uid)->where('cultivo_id',$cultivo->id)->whereYear('fecha',$anio)->sum('valor_total');
+                $cosechas  = DB::table('cosechas')->where('usuario_id',$uid)->where('cultivo_id',$cultivo->id)->whereYear('fecha_cosecha',$anio)->sum('valor_estimado');
+                $ingresoTotal = $ingresos > 0 ? $ingresos : $cosechas;
+                $rent = $ingresoTotal - $gastos;
+                $roi  = $gastos > 0 ? round(($rent/$gastos)*100,1) : ($ingresoTotal > 0 ? 100 : 0);
+                $margen = $ingresoTotal > 0 ? round(($rent/$ingresoTotal)*100,1) : 0;
+                $gastosCat = DB::table('gastos')->where('usuario_id',$uid)->where('cultivo_id',$cultivo->id)->whereYear('fecha',$anio)
+                    ->selectRaw('categoria, SUM(valor) as total')->groupBy('categoria')->orderByDesc('total')->get();
+                return (object)['id'=>$cultivo->id,'nombre'=>$cultivo->nombre,'tipo'=>$cultivo->tipo,
+                    'estado'=>$cultivo->estado,'area'=>$cultivo->area,'unidad'=>$cultivo->unidad,
+                    'gastos'=>(float)$gastos,'ingresos'=>(float)$ingresoTotal,'rentabilidad'=>(float)$rent,
+                    'roi'=>$roi,'margen'=>$margen,'gastosPorCategoria'=>$gastosCat];
+            });
+            $rentDatos = match($orden ?? 'rentabilidad') {
+                'nombre'   => $rentDatos->sortBy('nombre'),
+                'ingresos' => $rentDatos->sortByDesc('ingresos'),
+                'gastos'   => $rentDatos->sortByDesc('gastos'),
+                default    => $rentDatos->sortByDesc('rentabilidad'),
+            };
+            $rentDatos = $rentDatos->values();
+        } else {
+            $orden = 'rentabilidad';
+        }
+        $rentMejor = $rentDatos->filter(fn($d) => $d->rentabilidad > 0)->sortByDesc('rentabilidad')->first();
+        $rentPeor  = $rentDatos->filter(fn($d) => $d->gastos > 0 || $d->ingresos > 0)->sortBy('rentabilidad')->first();
+        $rentChartLabels   = $rentDatos->pluck('nombre')->toArray();
+        $rentChartGastos   = $rentDatos->pluck('gastos')->toArray();
+        $rentChartIngresos = $rentDatos->pluck('ingresos')->toArray();
+
         return view('pages.reportes', compact(
             'anio','tab','gastosArr','ingresosArr','balanceArr','totalGastos','totalIngresos','balance',
             'gastosCat','gastosCultivo','gastosAnimal','gastosGeneral',
@@ -112,7 +148,8 @@ class ReporteController extends Controller
             'cultivosEst','cultivosTipo','rentCultivos',
             'cosechasArr','totalCosechas','valorCosechas',
             'animalesEst','animalesPorEspecie','valorHato','ventasAnimales',
-            'tareasStats','tareasTipo','insights'
+            'tareasStats','tareasTipo','insights',
+            'rentDatos','rentMejor','rentPeor','rentChartLabels','rentChartGastos','rentChartIngresos','orden'
         ));
     }
 }

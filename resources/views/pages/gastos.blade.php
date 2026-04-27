@@ -189,9 +189,9 @@
 
         {{-- Proveedor --}}
         <div class="form-group"><label>Proveedor</label>
-          <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_e{{ $g->id }}')">
+          <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_e{{ $g->id }}')">
             <option value="">-- Escribir manualmente --</option>
-            @foreach($proveedores as $pv)<option value="{{ $pv->id }}" {{ $g->proveedor_id==$pv->id?'selected':'' }}>{{ $pv->nombre }}</option>@endforeach
+            @foreach($proveedores as $pv)<option value="{{ $pv->id }}" {{ $g->persona_id==$pv->id?'selected':'' }}>{{ $pv->nombre }}</option>@endforeach
           </select>
           <input type="text" name="proveedor" id="prov_text_e{{ $g->id }}" class="form-control mt-1" placeholder="O escribe el nombre" value="{{ $g->proveedor }}">
         </div>
@@ -330,7 +330,7 @@
 
       {{-- Proveedor --}}
       <div class="form-group"><label>Proveedor</label>
-        <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_nuevo')">
+        <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_nuevo')">
           <option value="">-- Seleccionar guardado --</option>
           @foreach($proveedores as $pv)<option value="{{ $pv->id }}">{{ $pv->nombre }}</option>@endforeach
         </select>
@@ -418,7 +418,7 @@
       </div>
       <div class="form-group"><label>Día del mes en que vence</label><input type="number" name="dia_del_mes" class="form-control" min="1" max="28" value="1" placeholder="Ej: 5 = cada día 5 del mes"></div>
       <div class="form-group"><label>Proveedor</label>
-        <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_rec')">
+        <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_rec')">
           <option value="">-- Seleccionar --</option>
           @foreach($proveedores as $pv)<option value="{{ $pv->id }}">{{ $pv->nombre }}</option>@endforeach
         </select>

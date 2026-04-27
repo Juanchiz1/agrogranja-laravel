@@ -188,9 +188,9 @@
 
         
         <div class="form-group"><label>Proveedor</label>
-          <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_e<?php echo e($g->id); ?>')">
+          <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_e<?php echo e($g->id); ?>')">
             <option value="">-- Escribir manualmente --</option>
-            <?php $__currentLoopData = $proveedores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pv->id); ?>" <?php echo e($g->proveedor_id==$pv->id?'selected':''); ?>><?php echo e($pv->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php $__currentLoopData = $proveedores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pv->id); ?>" <?php echo e($g->persona_id==$pv->id?'selected':''); ?>><?php echo e($pv->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </select>
           <input type="text" name="proveedor" id="prov_text_e<?php echo e($g->id); ?>" class="form-control mt-1" placeholder="O escribe el nombre" value="<?php echo e($g->proveedor); ?>">
         </div>
@@ -330,7 +330,7 @@
 
       
       <div class="form-group"><label>Proveedor</label>
-        <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_nuevo')">
+        <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_nuevo')">
           <option value="">-- Seleccionar guardado --</option>
           <?php $__currentLoopData = $proveedores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pv->id); ?>"><?php echo e($pv->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
@@ -418,7 +418,7 @@
       </div>
       <div class="form-group"><label>Día del mes en que vence</label><input type="number" name="dia_del_mes" class="form-control" min="1" max="28" value="1" placeholder="Ej: 5 = cada día 5 del mes"></div>
       <div class="form-group"><label>Proveedor</label>
-        <select name="proveedor_id" class="form-control" onchange="syncProvText(this,'prov_text_rec')">
+        <select name="persona_id" class="form-control" onchange="syncProvText(this,'prov_text_rec')">
           <option value="">-- Seleccionar --</option>
           <?php $__currentLoopData = $proveedores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pv->id); ?>"><?php echo e($pv->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>

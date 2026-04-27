@@ -14,6 +14,9 @@ use App\Http\Controllers\CosechaController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\RentabilidadController;
+use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\EncuestaController;
+use App\Http\Controllers\ProduccionAnimalController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -33,6 +36,13 @@ Route::get('/exportar/gastos/excel',    [ExportController::class, 'gastosExcel']
 Route::get('/exportar/cosechas/pdf',    [ExportController::class, 'cosechasPdf'])->name('exportar.cosechas.pdf');
 Route::get('/exportar/cosechas/excel',  [ExportController::class, 'cosechasExcel'])->name('exportar.cosechas.excel');
 Route::get('/exportar/reporte/pdf',     [ExportController::class, 'reporteGeneralPdf'])->name('exportar.reporte.pdf');
+
+// ── Nuevas exportaciones ───────────────────────────────────
+Route::get('/exportar/animales/pdf',      [ExportController::class, 'animalesPdf'])->name('exportar.animales.pdf');
+Route::get('/exportar/nomina/pdf',        [ExportController::class, 'nominaPdf'])->name('exportar.nomina.pdf');
+Route::get('/exportar/inventario/pdf',    [ExportController::class, 'inventarioPdf'])->name('exportar.inventario.pdf');
+Route::get('/exportar/rentabilidad/pdf',  [ExportController::class, 'rentabilidadPdf'])->name('exportar.rentabilidad.pdf');
+Route::get('/exportar/produccion/pdf',    [ExportController::class, 'produccionPdf'])->name('exportar.produccion.pdf');
 
 // Inventario de insumos
 Route::get('/inventario',                    [InventarioController::class, 'index'])->name('inventario.index');
@@ -106,6 +116,11 @@ Route::post('/cosechas/{id}/delete', [CosechaController::class, 'destroy'])->nam
     Route::post('/animales/{id}',                            [AnimalController::class, 'update'])->name('animales.update');
     Route::post('/animales/{id}/delete',                     [AnimalController::class, 'destroy'])->name('animales.destroy');
 
+    //Producción animal
+    Route::get('/produccion-animal',         [ProduccionAnimalController::class, 'index'])->name('produccion-animal.index');
+Route::post('/produccion-animal',        [ProduccionAnimalController::class, 'store'])->name('produccion-animal.store');
+Route::delete('/produccion-animal/{id}', [ProduccionAnimalController::class, 'destroy'])->name('produccion-animal.destroy');
+
     // Tareas / Calendario
     Route::get('/calendario',        [TareaController::class, 'index'])->name('calendario.index');
     Route::post('/tareas',           [TareaController::class, 'store'])->name('tareas.store');
@@ -117,7 +132,25 @@ Route::post('/cosechas/{id}/delete', [CosechaController::class, 'destroy'])->nam
     Route::get('/reportes',          [ReporteController::class, 'index'])->name('reportes.index');
 
     // Perfil
-    Route::get('/perfil',            [PerfilController::class, 'index'])->name('perfil.index');
-    Route::post('/perfil',           [PerfilController::class, 'update'])->name('perfil.update');
-    Route::post('/perfil/password',  [PerfilController::class, 'changePassword'])->name('perfil.password');
+    Route::get('/perfil',                    [PerfilController::class, 'index'])->name('perfil.index');
+    Route::post('/perfil',                   [PerfilController::class, 'update'])->name('perfil.update');
+    Route::post('/perfil/password',          [PerfilController::class, 'changePassword'])->name('perfil.password');
+    Route::post('/perfil/preferencias',      [PerfilController::class, 'updateNotificaciones'])->name('perfil.notificaciones');
+
+    // Personas
+    Route::get('/personas',                                [PersonaController::class, 'index'])->name('personas.index');
+    Route::post('/personas',                               [PersonaController::class, 'store'])->name('personas.store');
+    Route::get('/personas/{id}',                          [PersonaController::class, 'show'])->name('personas.show');
+    Route::post('/personas/{id}',                         [PersonaController::class, 'update'])->name('personas.update');
+    Route::post('/personas/{id}/delete',                 [PersonaController::class, 'destroy'])->name('personas.destroy');
+    Route::post('/personas/{id}/favorito',               [PersonaController::class, 'toggleFavorito'])->name('personas.favorito');
+    Route::post('/personas/{id}/pagos',                  [PersonaController::class, 'storePago'])->name('personas.pago.store');
+    Route::post('/personas/{pid}/pagos/{lid}/delete',  [PersonaController::class, 'destroyPago'])->name('personas.pago.delete');
+    Route::post('/personas/{id}/labores',                [PersonaController::class, 'storeLabor'])->name('personas.labor.store');
+    Route::post('/personas/{pid}/labores/{lid}/delete', [PersonaController::class, 'destroyLabor'])->name('personas.labor.delete');
+
+    //Encuesta de impacto
+    Route::get('/encuesta',  [EncuestaController::class, 'show'])->name('encuesta.show');
+    Route::post('/encuesta', [EncuestaController::class, 'store'])->name('encuesta.store');
+    Route::post('/encuesta/ignorar', [EncuestaController::class, 'ignorar'])->name('encuesta.ignorar');
 });

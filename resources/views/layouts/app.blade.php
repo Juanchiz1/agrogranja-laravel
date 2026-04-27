@@ -29,7 +29,8 @@
   @if(session('usuario_id'))
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="sidebar-logo">🌾</span>
+      <span class="sidebar-logo"><img src="{{ asset('img/logo-seedling-transparente.svg') }}"
+     alt="" style="height: 60px; width: 60px; margin-right: 8px;"></span>
       <div>
         <div class="sidebar-name">Agrogranja</div>
         <div class="sidebar-finca">{{ session('usuario_nombre', 'Mi Finca') }}</div>
@@ -52,10 +53,13 @@
       <a href="{{ route('animales.index') }}" class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
+      <a href="{{ route('personas.index') }}" class="sidebar-item {{ request()->routeIs('personas.*') ? 'active' : '' }}">
+        <span class="sidebar-icon">👥</span><span>Personas</span>
+      </a>
       <a href="{{ route('calendario.index') }}" class="sidebar-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📅</span><span>Agenda</span>
       </a>
-      <a href="{{ route('reportes.index') }}" class="sidebar-item {{ request()->routeIs('reportes.*') ? 'active' : '' }}">
+      <a href="{{ route('reportes.index') }}" class="sidebar-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
 
@@ -68,9 +72,6 @@
    class="sidebar-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}">
   <span class="sidebar-icon">📦</span><span>Inventario</span>
 </a>
-<a href="{{ route('rentabilidad.index') }}"
-   class="sidebar-item {{ request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
-  <span class="sidebar-icon">💹</span><span>Rentabilidad</span>
 </a>
     </nav>
 
@@ -138,9 +139,8 @@
       <a href="{{ route('cultivos.index') }}"   class="nav-item {{ request()->routeIs('cultivos.*') ? 'active' : '' }}"><span>🌱</span><span>Cultivos</span></a>
       <a href="{{ route('gastos.index') }}"     class="nav-item {{ request()->routeIs('gastos.*') ? 'active' : '' }}"><span>💰</span><span>Gastos</span></a>
       <a href="{{ route('calendario.index') }}" class="nav-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}"><span>📅</span><span>Agenda</span></a>
-      <a href="{{ route('reportes.index') }}"   class="nav-item {{ request()->routeIs('reportes.*') ? 'active' : '' }}"><span>📊</span><span>Reportes</span></a>
-      <a href="{{ route('cosechas.index') }}"   class="nav-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}"><span>🌾</span><span>Cosechas</span></a>
-      <a href="{{ route('inventario.index') }}" class="nav-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}"><span class="sidebar-icon">📦</span><span>Inventario</span></a>
+      <a href="{{ route('reportes.index') }}"   class="nav-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}"><span>📊</span><span>Reportes</span></a>
+     
     </nav>
     @endif
 

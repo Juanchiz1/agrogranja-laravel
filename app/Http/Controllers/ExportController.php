@@ -455,4 +455,201 @@ class ExportController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
+
+    /* ─── PDF ANIMALES ─────────────────────────────────────────── */
+public function animalesPdf(Request $request)
+{
+    $uid      = session('usuario_id');
+    $usuario  = DB::table('usuarios')->find($uid);
+    $estado   = $request->estado ?? 'todos';
+
+    $query = DB::table('animales')->where('usuario_id', $uid);
+    if ($estado !== 'todos') $query->where('estado', $estado);
+    $animales = $query->orderBy('especie')->orderBy('nombre_lote')->get();
+
+    // Gastos e ingresos por animal
+    $animales = $animales->map(function ($a) use ($uid) {
+        $a->total_gastos   = DB::table('gastos')->where('usuario_id',$uid)->where('animal_id',$a->id)->sum('valor');
+        $a->total_ingresos = DB::table('ingresos')->where('usuario_id',$uid)->where('animal_id',$a->id)->sum('valor_total');
+        $a->balance        = $a->total_ingresos - $a->total_gastos;
+        return $a;
+    });
+
+    $stats = [
+        'total'   => $animales->count(),
+        'activos' => $animales->where('estado','activo')->count(),
+        'vendidos'=> $animales->where('estado','vendido')->count(),
+        'ingresos'=> $animales->sum('total_ingresos'),
+        'gastos'  => $animales->sum('total_gastos'),
+    ];
+
+    $pdf = app('dompdf.wrapper');
+    $pdf->loadView('exports.animales-pdf', compact('animales','usuario','estado','stats'));
+    $pdf->setPaper('A4','portrait');
+    return $pdf->download('animales-'.now()->format('Y-m-d').'.pdf');
+}
+
+/* ─── PDF NÓMINA / PAGOS PERSONAS ──────────────────────────── */
+public function nominaPdf(Request $request)
+{
+    $uid     = session('usuario_id');
+    $usuario = DB::table('usuarios')->find($uid);
+    $mes     = $request->mes ?? now()->format('Y-m');
+    [$anio, $numMes] = explode('-', $mes);
+
+    $pagos = DB::table('persona_pagos as pp')
+        ->join('personas as per', 'per.id', '=', 'pp.persona_id')
+        ->leftJoin('cultivos as c', 'c.id', '=', 'pp.cultivo_id')
+        ->leftJoin('animales as a', 'a.id', '=', 'pp.animal_id')
+        ->where('pp.usuario_id', $uid)
+        ->whereYear('pp.fecha', $anio)
+        ->whereMonth('pp.fecha', $numMes)
+        ->select(
+            'pp.*',
+            'per.nombre as trabajador',
+            'per.cargo',
+            'per.tipo_contrato',
+            'c.nombre as cultivo_nombre',
+            'a.nombre_lote as animal_nombre'
+        )
+        ->orderBy('per.nombre')
+        ->orderBy('pp.fecha')
+        ->get();
+
+    // Agrupar por trabajador
+    $porTrabajador = $pagos->groupBy('persona_id')->map(function ($pagos_trabajador) {
+        $primero = $pagos_trabajador->first();
+        return (object)[
+            'nombre'       => $primero->trabajador,
+            'cargo'        => $primero->cargo,
+            'tipo_contrato'=> $primero->tipo_contrato,
+            'total'        => $pagos_trabajador->sum('valor'),
+            'dias'         => $pagos_trabajador->sum('dias'),
+            'pagos'        => $pagos_trabajador,
+        ];
+    });
+
+    $totalNomina = $pagos->sum('valor');
+    $totalDias   = $pagos->sum('dias');
+
+    $mesesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    $mesNombre = $mesesNombres[(int)$numMes] . ' ' . $anio;
+
+    $pdf = app('dompdf.wrapper');
+    $pdf->loadView('exports.nomina-pdf', compact(
+        'pagos','porTrabajador','usuario','mesNombre','totalNomina','totalDias'
+    ));
+    $pdf->setPaper('A4','portrait');
+    return $pdf->download('nomina-'.$mes.'.pdf');
+}
+
+/* ─── PDF INVENTARIO ────────────────────────────────────────── */
+public function inventarioPdf(Request $request)
+{
+    $uid     = session('usuario_id');
+    $usuario = DB::table('usuarios')->find($uid);
+
+    $insumos = DB::table('inventario')
+        ->where('usuario_id', $uid)
+        ->orderBy('categoria')
+        ->orderBy('nombre')
+        ->get();
+
+    // Agrupar por categoría
+    $porCategoria = $insumos->groupBy('categoria');
+
+    $stats = [
+        'total'         => $insumos->count(),
+        'valor_total'   => $insumos->sum(fn($i) => $i->cantidad_actual * ($i->precio_unitario ?? 0)),
+        'bajo_stock'    => $insumos->filter(fn($i) => $i->cantidad_actual <= $i->stock_minimo)->count(),
+        'por_vencer'    => $insumos->filter(fn($i) => $i->fecha_vencimiento &&
+                           \Carbon\Carbon::parse($i->fecha_vencimiento)->isFuture() &&
+                           \Carbon\Carbon::parse($i->fecha_vencimiento)->diffInDays(now()) <= 30)->count(),
+    ];
+
+    $pdf = app('dompdf.wrapper');
+    $pdf->loadView('exports.inventario-pdf', compact('insumos','porCategoria','usuario','stats'));
+    $pdf->setPaper('A4','portrait');
+    return $pdf->download('inventario-'.now()->format('Y-m-d').'.pdf');
+}
+
+/* ─── PDF RENTABILIDAD ──────────────────────────────────────── */
+public function rentabilidadPdf(Request $request)
+{
+    $uid     = session('usuario_id');
+    $usuario = DB::table('usuarios')->find($uid);
+    $anio    = $request->anio ?? now()->year;
+
+    $cultivos = DB::table('cultivos')->where('usuario_id',$uid)->get();
+
+    $datos = $cultivos->map(function ($c) use ($uid, $anio) {
+        $gastos     = DB::table('gastos')->where('usuario_id',$uid)->where('cultivo_id',$c->id)->whereYear('fecha',$anio)->sum('valor');
+        $manoObra   = DB::table('persona_pagos')->where('usuario_id',$uid)->where('cultivo_id',$c->id)->whereYear('fecha',$anio)->sum('valor');
+        $ingresos   = DB::table('ingresos')->where('usuario_id',$uid)->where('cultivo_id',$c->id)->whereYear('fecha',$anio)->sum('valor_total');
+        $cosechas   = DB::table('cosechas')->where('usuario_id',$uid)->where('cultivo_id',$c->id)->whereYear('fecha_cosecha',$anio)->sum('valor_estimado');
+        $ingresoReal = $ingresos > 0 ? $ingresos : $cosechas;
+        $costoTotal  = $gastos + $manoObra;
+        $rent        = $ingresoReal - $costoTotal;
+        $roi         = $costoTotal > 0 ? round(($rent/$costoTotal)*100,1) : 0;
+        return (object)[
+            'nombre'     => $c->nombre, 'tipo' => $c->tipo,
+            'estado'     => $c->estado, 'area' => $c->area, 'unidad' => $c->unidad,
+            'ingresos'   => (float)$ingresoReal, 'gastos'   => (float)$gastos,
+            'mano_obra'  => (float)$manoObra,    'costo_total'=> (float)$costoTotal,
+            'rentabilidad'=> (float)$rent,        'roi'      => $roi,
+        ];
+    })->sortByDesc('rentabilidad')->values();
+
+    $resumen = [
+        'total_ingresos' => $datos->sum('ingresos'),
+        'total_costos'   => $datos->sum('costo_total'),
+        'total_rent'     => $datos->sum('rentabilidad'),
+        'mejor'          => $datos->where('rentabilidad','>',0)->first(),
+    ];
+
+    $pdf = app('dompdf.wrapper');
+    $pdf->loadView('exports.rentabilidad-pdf', compact('datos','usuario','anio','resumen'));
+    $pdf->setPaper('A4','portrait');
+    return $pdf->download('rentabilidad-'.$anio.'.pdf');
+}
+
+/* ─── PDF PRODUCCIÓN ANIMAL ─────────────────────────────────── */
+public function produccionPdf(Request $request)
+{
+    $uid     = session('usuario_id');
+    $usuario = DB::table('usuarios')->find($uid);
+    $mes     = $request->mes ?? now()->format('Y-m');
+    [$anio, $numMes] = explode('-', $mes);
+
+    $registros = DB::table('animal_produccion as ap')
+        ->join('animales as a', 'a.id', '=', 'ap.animal_id')
+        ->where('ap.usuario_id', $uid)
+        ->whereYear('ap.fecha', $anio)
+        ->whereMonth('ap.fecha', $numMes)
+        ->select('ap.*','a.nombre_lote','a.especie')
+        ->orderBy('a.nombre_lote')
+        ->orderBy('ap.fecha')
+        ->get();
+
+    $resumen = $registros->groupBy('tipo_produccion')->map(function ($items, $tipo) {
+        return (object)[
+            'tipo'        => $tipo,
+            'total_qty'   => $items->sum('cantidad'),
+            'unidad'      => $items->first()->unidad,
+            'total_valor' => $items->sum('valor_total'),
+            'dias'        => $items->count(),
+            'vendido'     => $items->where('vendido',1)->sum('cantidad'),
+        ];
+    });
+
+    $mesesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    $mesNombre = $mesesNombres[(int)$numMes] . ' ' . $anio;
+
+    $pdf = app('dompdf.wrapper');
+    $pdf->loadView('exports.produccion-pdf', compact('registros','resumen','usuario','mesNombre'));
+    $pdf->setPaper('A4','portrait');
+    return $pdf->download('produccion-'.$mes.'.pdf');
+}
 }

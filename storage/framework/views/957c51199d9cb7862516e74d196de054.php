@@ -167,7 +167,7 @@
           <div class="form-group"><label>Comprador</label><input type="text" name="comprador" id="comp_e<?php echo e($i->id); ?>" class="form-control" value="<?php echo e($i->comprador); ?>"></div>
         </div>
         <div class="form-group"><label>Cliente guardado</label>
-          <select name="cliente_id" class="form-control" onchange="syncCliente(this,'comp_e<?php echo e($i->id); ?>')">
+          <select name="persona_id" class="form-control" onchange="syncCliente(this,'comp_e<?php echo e($i->id); ?>')">
             <option value="">-- Seleccionar --</option>
             <?php $__currentLoopData = $clientes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($cl->id); ?>" <?php echo e(($i->cliente_id??null)==$cl->id?'selected':''); ?>><?php echo e($cl->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </select>
@@ -311,7 +311,7 @@
       
       <?php if($clientes->count()): ?>
       <div class="form-group"><label>Cliente guardado</label>
-        <select name="cliente_id" class="form-control" onchange="syncCliente(this,'compN')">
+        <select name="persona_id" class="form-control" onchange="syncCliente(this,'compN')">
           <option value="">-- Seleccionar --</option>
           <?php $__currentLoopData = $clientes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($cl->id); ?>"><?php echo e($cl->nombre); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>

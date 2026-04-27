@@ -72,6 +72,7 @@
   <a href="?tab=finanzas&anio={{ $anio }}" class="tab-rep {{ $tab==='finanzas'?'active':'' }}">💰 Finanzas</a>
   <a href="?tab=cultivos&anio={{ $anio }}" class="tab-rep {{ $tab==='cultivos'?'active':'' }}">🌱 Cultivos</a>
   <a href="?tab=animales&anio={{ $anio }}" class="tab-rep {{ $tab==='animales'?'active':'' }}">🐄 Animales</a>
+  <a href="?tab=rentabilidad&anio={{ $anio }}" class="tab-rep {{ $tab==='rentabilidad'?'active':'' }}">💹 Rentabilidad</a>
   <a href="?tab=exportar&anio={{ $anio }}" class="tab-rep {{ $tab==='exportar'?'active':'' }}">📤 Exportar</a>
 </div>
 
@@ -333,11 +334,87 @@
 </div>
 @endif
 
+
+{{-- ═══════════════════ TAB RENTABILIDAD ═══════════════════ --}}
+@elseif($tab === 'rentabilidad')
+
+<div class="flex gap-2 mb-3 items-center">
+  <span style="font-size:.82rem;color:var(--text-secondary);">Ordenar por:</span>
+  <select onchange="location.href='?tab=rentabilidad&anio={{ $anio }}&orden='+this.value" class="form-control" style="width:160px;font-size:.82rem;">
+    @foreach(['rentabilidad'=>'Mejor balance','ingresos'=>'Mayor ingreso','gastos'=>'Mayor gasto','nombre'=>'Nombre'] as $val => $lbl)
+      <option value="{{ $val }}" {{ $orden===$val ? 'selected' : '' }}>{{ $lbl }}</option>
+    @endforeach
+  </select>
+</div>
+
+@if($rentMejor || $rentPeor)
+<div class="grid-2 mb-3">
+  @if($rentMejor)
+  <div style="background:var(--verde-bg);border-radius:var(--radius-lg);padding:14px;border-left:3px solid var(--verde-dark);">
+    <p style="font-size:.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;">&#11088; Mejor cultivo</p>
+    <p style="font-weight:700;">{{ $rentMejor->nombre }}</p>
+    <p style="color:var(--verde-dark);font-weight:800;font-size:1.1rem;">${{ number_format($rentMejor->rentabilidad,0,',','.') }}</p>
+    <p style="font-size:.78rem;color:var(--text-secondary);">ROI: {{ $rentMejor->roi }}%</p>
+  </div>
+  @endif
+  @if($rentPeor && $rentPeor->rentabilidad < 0)
+  <div style="background:#fef2f2;border-radius:var(--radius-lg);padding:14px;border-left:3px solid var(--rojo);">
+    <p style="font-size:.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;">&#9888; Atencion</p>
+    <p style="font-weight:700;">{{ $rentPeor->nombre }}</p>
+    <p style="color:var(--rojo);font-weight:800;font-size:1.1rem;">${{ number_format($rentPeor->rentabilidad,0,',','.') }}</p>
+    <p style="font-size:.78rem;color:var(--text-secondary);">ROI: {{ $rentPeor->roi }}%</p>
+  </div>
+  @endif
+</div>
+@endif
+
+@if(count($rentChartLabels) > 0)
+<div class="rep-card">
+  <div class="rep-card-title">Ingresos vs Gastos por cultivo</div>
+  <canvas id="chartRentComp" height="220"></canvas>
+</div>
+@endif
+
+@if($rentDatos->isEmpty())
+<div class="empty-state"><div class="emoji">&#127807;</div><p>No hay cultivos con datos para {{ $anio }}.</p></div>
+@else
+@foreach($rentDatos as $d)
+@php
+  $dPos  = $d->rentabilidad >= 0;
+  $dMaxV = max($d->gastos, $d->ingresos, 1);
+  $dPG   = round($d->gastos / $dMaxV * 100);
+  $dPI   = round($d->ingresos / $dMaxV * 100);
+  $dBadge= ['activo'=>'badge-green','cosechado'=>'badge-orange','vendido'=>'badge-brown'][$d->estado] ?? 'badge-green';
+@endphp
+<div class="rep-card" style="border-left:3px solid {{ $dPos ? 'var(--verde-dark)' : 'var(--rojo)' }};">
+  <div class="flex items-center justify-between mb-3">
+    <div><div style="font-weight:700;">{{ $d->nombre }}</div><div style="font-size:.75rem;color:var(--text-secondary);">{{ $d->tipo }}</div></div>
+    <div class="flex items-center gap-2">
+      <span class="badge {{ $dBadge }}">{{ $d->estado }}</span>
+      <a href="{{ route('rentabilidad.detalle',$d->id) }}?anio={{ $anio }}" class="btn btn-sm btn-secondary" style="font-size:.78rem;">Detalle</a>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <div class="flex items-center justify-between mb-1"><span style="font-size:.78rem;color:var(--text-secondary);">Gastos</span><span style="font-size:.78rem;font-weight:700;color:var(--marron);">${{ number_format($d->gastos,0,',','.') }}</span></div>
+    <div style="background:#e5e7eb;border-radius:99px;height:7px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:var(--marron-light);width:{{ $dPG }}%;"></div></div>
+    <div class="flex items-center justify-between mt-2 mb-1"><span style="font-size:.78rem;color:var(--text-secondary);">Ingresos</span><span style="font-size:.78rem;font-weight:700;color:var(--verde-dark);">${{ number_format($d->ingresos,0,',','.') }}</span></div>
+    <div style="background:#e5e7eb;border-radius:99px;height:7px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:var(--verde-dark);width:{{ $dPI }}%;"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#f8fafc;border-radius:10px;">
+    <div style="text-align:center;"><div style="font-weight:800;color:{{ $dPos ? 'var(--verde-dark)' : 'var(--rojo)' }};">${{ number_format($d->rentabilidad,0,',','.') }}</div><div style="font-size:.7rem;color:var(--text-secondary);">Balance</div></div>
+    <div style="text-align:center;"><div style="font-weight:800;color:{{ $d->roi >= 0 ? 'var(--verde-dark)' : 'var(--rojo)' }};">{{ $d->roi }}%</div><div style="font-size:.7rem;color:var(--text-secondary);">ROI</div></div>
+    <div style="text-align:center;"><div style="font-weight:800;color:var(--text-secondary);">{{ $d->margen }}%</div><div style="font-size:.7rem;color:var(--text-secondary);">Margen</div></div>
+  </div>
+</div>
+@endforeach
+@endif
+
 {{-- ═══════════════════ TAB EXPORTAR ═══════════════════ --}}
 @elseif($tab === 'exportar')
 
 <p style="font-size:.87rem;color:var(--text-secondary);margin-bottom:16px;">Genera reportes en PDF o Excel con todos los datos del año <strong>{{ $anio }}</strong>.</p>
 
+{{-- Reporte general --}}
 <div class="export-group">
   <div class="export-group-title">📋 Reporte general</div>
   <div class="export-btns">
@@ -345,6 +422,7 @@
   </div>
 </div>
 
+{{-- Cultivos --}}
 <div class="export-group">
   <div class="export-group-title">🌱 Cultivos</div>
   <div class="export-btns">
@@ -353,6 +431,7 @@
   </div>
 </div>
 
+{{-- Gastos --}}
 <div class="export-group">
   <div class="export-group-title">💰 Gastos</div>
   <div class="export-btns">
@@ -361,6 +440,7 @@
   </div>
 </div>
 
+{{-- Cosechas --}}
 <div class="export-group">
   <div class="export-group-title">🌾 Cosechas</div>
   <div class="export-btns">
@@ -369,13 +449,48 @@
   </div>
 </div>
 
+{{-- Animales (NUEVO) --}}
+<div class="export-group">
+  <div class="export-group-title">🐄 Animales</div>
+  <div class="export-btns">
+    <a href="{{ route('exportar.animales.pdf') }}" class="exp-btn exp-pdf">📄 PDF</a>
+  </div>
+</div>
+
+{{-- Inventario (NUEVO) --}}
+<div class="export-group">
+  <div class="export-group-title">📦 Inventario</div>
+  <div class="export-btns">
+    <a href="{{ route('exportar.inventario.pdf') }}" class="exp-btn exp-pdf">📄 PDF</a>
+  </div>
+</div>
+
+{{-- Nómina (NUEVO) --}}
+<div class="export-group">
+  <div class="export-group-title">👷 Nómina</div>
+  <div class="export-btns">
+    <a href="{{ route('exportar.nomina.pdf') }}?mes={{ now()->format('Y-m') }}" class="exp-btn exp-purple">📄 PDF</a>
+  </div>
+</div>
+
+{{-- Producción (NUEVO) --}}
+<div class="export-group">
+  <div class="export-group-title">🥛 Producción</div>
+  <div class="export-btns">
+    <a href="{{ route('exportar.produccion.pdf') }}?mes={{ now()->format('Y-m') }}" class="exp-btn exp-purple">📄 PDF</a>
+  </div>
+</div>
+
+{{-- Rentabilidad --}}
 <div class="export-group">
   <div class="export-group-title">💹 Rentabilidad</div>
   <div class="export-btns">
     <a href="{{ route('rentabilidad.index') }}" class="exp-btn exp-purple">💹 Ver detalle por cultivo</a>
+    <a href="{{ route('exportar.rentabilidad.pdf') }}?anio={{ $anio }}" class="exp-btn exp-pdf">📄 PDF</a>
   </div>
 </div>
 
+{{-- Consejo --}}
 <div style="background:#eff6ff;border-radius:var(--radius-lg);padding:14px;margin-top:8px;">
   <p style="font-size:.82rem;color:#1d4ed8;font-weight:600;margin-bottom:6px;">💡 Consejo para reportes</p>
   <p style="font-size:.8rem;color:#1e40af;">Los PDFs incluyen tablas detalladas con toda la información del año seleccionado. Puedes cambiar el año con las flechas ‹ › arriba de la página.</p>
@@ -493,6 +608,19 @@ new Chart(document.getElementById('chartAnimalesEspecie'), {
   type:'doughnut',
   data:{ labels:@json($aeL), datasets:[{ data:@json($aeV), backgroundColor:['#3d8b3d','#ea580c','#7c3aed','#2563eb','#d97706','#0891b2','#dc2626','#64748b','#059669','#7a4f2a'], borderWidth:2, borderColor:'#fff' }]},
   options:{ responsive:true, plugins:{legend:{position:'bottom',labels:{boxWidth:12}}} }
+});
+@endif
+
+@elseif($tab === 'rentabilidad')
+@if(count($rentChartLabels) > 0)
+new Chart(document.getElementById('chartRentComp'), {
+  type:'bar',
+  data:{ labels:@json($rentChartLabels), datasets:[
+    { label:'Ingresos', data:@json($rentChartIngresos), backgroundColor:'rgba(61,139,61,.75)', borderRadius:4 },
+    { label:'Gastos',   data:@json($rentChartGastos),   backgroundColor:'rgba(122,79,42,.65)', borderRadius:4 }
+  ]},
+  options:{ responsive:true, plugins:{legend:{position:'bottom'}},
+    scales:{ y:{ ticks:{ callback:v=>'$'+(v/1000).toFixed(0)+'k' } } } }
 });
 @endif
 @endif

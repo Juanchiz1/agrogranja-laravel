@@ -167,7 +167,7 @@
           <div class="form-group"><label>Comprador</label><input type="text" name="comprador" id="comp_e{{ $i->id }}" class="form-control" value="{{ $i->comprador }}"></div>
         </div>
         <div class="form-group"><label>Cliente guardado</label>
-          <select name="cliente_id" class="form-control" onchange="syncCliente(this,'comp_e{{ $i->id }}')">
+          <select name="persona_id" class="form-control" onchange="syncCliente(this,'comp_e{{ $i->id }}')">
             <option value="">-- Seleccionar --</option>
             @foreach($clientes as $cl)<option value="{{ $cl->id }}" {{ ($i->cliente_id??null)==$cl->id?'selected':'' }}>{{ $cl->nombre }}</option>@endforeach
           </select>
@@ -311,7 +311,7 @@
       {{-- Cliente guardado --}}
       @if($clientes->count())
       <div class="form-group"><label>Cliente guardado</label>
-        <select name="cliente_id" class="form-control" onchange="syncCliente(this,'compN')">
+        <select name="persona_id" class="form-control" onchange="syncCliente(this,'compN')">
           <option value="">-- Seleccionar --</option>
           @foreach($clientes as $cl)<option value="{{ $cl->id }}">{{ $cl->nombre }}</option>@endforeach
         </select>

@@ -29,7 +29,7 @@
   </div>
   <div class="stat-card" style="background:var(--marron-bg);">
     <div class="stat-value text-brown" style="font-size:1rem;">${{ number_format($totalGastos/1000,0) }}k</div>
-    <div class="stat-label">Total gastos</div>
+    <div class="stat-label">Total costos</div>
   </div>
   <div class="stat-card" style="background:{{ $totalBalance >= 0 ? 'var(--verde-bg)' : '#fef2f2' }};">
     <div class="stat-value" style="font-size:1rem;color:{{ $totalBalance >= 0 ? 'var(--verde-dark)' : 'var(--rojo)' }};">
@@ -63,11 +63,11 @@
 
 {{-- GRÁFICA COMPARATIVA --}}
 <div class="card mb-3">
-  <p class="font-bold mb-3">Ingresos vs Gastos por cultivo</p>
+  <p class="font-bold mb-3">Ingresos vs Costos por cultivo</p>
   <canvas id="chartComparativo" height="220"></canvas>
 </div>
 
-{{-- TABLA DE CULTIVOS --}}
+{{-- TARJETAS POR CULTIVO --}}
 @if($datos->isEmpty())
 <div class="empty-state">
   <div class="emoji">🌱</div>
@@ -76,16 +76,16 @@
 @else
 @foreach($datos as $d)
 @php
-  $positivo = $d->rentabilidad >= 0;
-  $maxVal   = max($d->gastos, $d->ingresos, 1);
-  $pctG     = round($d->gastos / $maxVal * 100);
-  $pctI     = round($d->ingresos / $maxVal * 100);
+  $positivo    = $d->rentabilidad >= 0;
+  $maxVal      = max($d->costo_total, $d->ingresos, 1);
+  $pctCosto    = round($d->costo_total / $maxVal * 100);
+  $pctI        = round($d->ingresos   / $maxVal * 100);
   $estadoBadge = ['activo'=>'badge-green','cosechado'=>'badge-orange','vendido'=>'badge-brown'][$d->estado] ?? 'badge-green';
 @endphp
 
 <div class="card mb-2" style="border-left:3px solid {{ $positivo ? 'var(--verde-dark)' : 'var(--rojo)' }};">
 
-  {{-- Cabecera del cultivo --}}
+  {{-- Cabecera --}}
   <div class="flex items-center justify-between mb-3">
     <div class="flex items-center gap-2">
       <span style="font-size:1.2rem;">🌿</span>
@@ -101,23 +101,35 @@
     </div>
   </div>
 
-  {{-- Barras de gastos vs ingresos --}}
+  {{-- Barras de ingresos vs costo total --}}
   <div style="margin-bottom:10px;">
     <div class="flex items-center justify-between mb-2">
-      <span class="text-xs text-gray">💰 Gastos</span>
-      <span class="text-xs font-bold text-brown">${{ number_format($d->gastos,0,',','.') }}</span>
-    </div>
-    <div class="progress-bar" style="height:8px;">
-      <div class="progress-fill" style="width:{{ $pctG }}%;background:var(--marron-light);"></div>
-    </div>
-
-    <div class="flex items-center justify-between mt-2 mb-2">
       <span class="text-xs text-gray">📈 Ingresos</span>
       <span class="text-xs font-bold text-green">${{ number_format($d->ingresos,0,',','.') }}</span>
     </div>
     <div class="progress-bar" style="height:8px;">
       <div class="progress-fill" style="width:{{ $pctI }}%;background:var(--verde-dark);"></div>
     </div>
+
+    <div class="flex items-center justify-between mt-2 mb-2">
+      <span class="text-xs text-gray">💸 Costos</span>
+      <span class="text-xs font-bold text-brown">${{ number_format($d->costo_total,0,',','.') }}</span>
+    </div>
+    <div class="progress-bar" style="height:8px;">
+      <div class="progress-fill" style="width:{{ $pctCosto }}%;background:var(--marron-light);"></div>
+    </div>
+
+    {{-- Desglose del costo si hay mano de obra --}}
+    @if($d->mano_de_obra > 0)
+    <div style="display:flex;gap:12px;margin-top:6px;">
+      <span style="font-size:11px;color:#9CA3AF;">
+        Insumos: ${{ number_format($d->gastos,0,',','.') }}
+      </span>
+      <span style="font-size:11px;color:#7C3AED;">
+        M.O.: ${{ number_format($d->mano_de_obra,0,',','.') }}
+      </span>
+    </div>
+    @endif
   </div>
 
   {{-- Indicadores --}}
@@ -142,16 +154,21 @@
     </div>
   </div>
 
-  {{-- Desglose de gastos por categoría --}}
+  {{-- Pills de categorías de gasto --}}
   @if($d->gastosPorCategoria->count())
   <div style="margin-top:10px;">
     <p class="text-xs text-gray font-bold" style="margin-bottom:6px;">Principales gastos:</p>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      @foreach($d->gastosPorCategoria->take(4) as $cat)
+      @foreach($d->gastosPorCategoria->take(3) as $cat)
       <span style="background:#fff;border:1px solid var(--gris-border);border-radius:20px;padding:2px 9px;font-size:.72rem;">
-        {{ $cat->categoria }}: ${{ number_format($cat->total/1000,0) }}k
+        {{ $cat->categoria }}: ${{ number_format($cat->total/1000,1) }}k
       </span>
       @endforeach
+      @if($d->mano_de_obra > 0)
+      <span style="background:#EDE9FE;border:1px solid #DDD6FE;border-radius:20px;padding:2px 9px;font-size:.72rem;color:#6D28D9;">
+        M.O.: ${{ number_format($d->mano_de_obra/1000,1) }}k
+      </span>
+      @endif
     </div>
   </div>
   @endif
@@ -168,8 +185,6 @@ Chart.defaults.color = '#64748b';
 const labels   = @json($chartLabels);
 const gastos   = @json($chartGastos);
 const ingresos = @json($chartIngresos);
-
-// Acortar etiquetas largas
 const labelsCortos = labels.map(l => l.length > 12 ? l.substring(0,12)+'…' : l);
 
 new Chart(document.getElementById('chartComparativo'), {
@@ -177,36 +192,18 @@ new Chart(document.getElementById('chartComparativo'), {
   data: {
     labels: labelsCortos,
     datasets: [
-      {
-        label: 'Ingresos',
-        data: ingresos,
-        backgroundColor: 'rgba(61,139,61,.75)',
-        borderRadius: 5,
-        borderSkipped: false,
-      },
-      {
-        label: 'Gastos',
-        data: gastos,
-        backgroundColor: 'rgba(122,79,42,.65)',
-        borderRadius: 5,
-        borderSkipped: false,
-      },
+      { label: 'Ingresos', data: ingresos, backgroundColor: 'rgba(61,139,61,.75)',  borderRadius: 5 },
+      { label: 'Costos',   data: gastos,   backgroundColor: 'rgba(122,79,42,.65)', borderRadius: 5 },
     ]
   },
   options: {
     responsive: true,
     plugins: {
       legend: { position: 'bottom' },
-      tooltip: {
-        callbacks: {
-          label: ctx => ' $' + ctx.raw.toLocaleString('es-CO')
-        }
-      }
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString('es-CO') } }
     },
     scales: {
-      y: {
-        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' }
-      }
+      y: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
     }
   }
 });

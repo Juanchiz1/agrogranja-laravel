@@ -91,7 +91,7 @@ class IngresoController extends Controller
         $tipos    = $this->tipos();
 
         try {
-            $clientes = DB::table('clientes')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
+            $clientes = DB::table('personas')->where('usuario_id',$uid)->where('tipo','comprador')->where('activo',1)->orderBy('nombre')->get();
         } catch (\Exception $e) { $clientes = collect(); }
 
         return view('pages.ingresos', compact(
@@ -130,7 +130,7 @@ class IngresoController extends Controller
             'valor_total'    => $total,
             'fecha'          => $request->fecha ?? now()->toDateString(),
             'comprador'      => $comprador,
-            'cliente_id'     => $request->cliente_id ?: null,
+            'persona_id' => $request->persona_id ?: null,
             'tipo'           => $request->tipo ?? 'venta',
             'cultivo_id'     => $request->cultivo_id ?: null,
             'animal_id'      => $request->animal_id ?: null,
@@ -159,7 +159,7 @@ class IngresoController extends Controller
             'valor_total'    => $request->valor_total,
             'fecha'          => $request->fecha,
             'comprador'      => $request->comprador,
-            'cliente_id'     => $request->cliente_id ?: null,
+            'persona_id' => $request->persona_id ?: null,
             'tipo'           => $request->tipo ?? 'venta',
             'cultivo_id'     => $request->cultivo_id ?: null,
             'animal_id'      => $request->animal_id ?: null,
@@ -191,7 +191,7 @@ class IngresoController extends Controller
     {
         $request->validate(['nombre'=>'required|string|max:150']);
         try {
-            DB::table('clientes')->insert([
+            DB::table('personas')->insert([
                 'usuario_id' => session('usuario_id'),
                 'nombre'     => $request->nombre,
                 'telefono'   => $request->telefono,
@@ -212,7 +212,7 @@ class IngresoController extends Controller
 
     public function destroyCliente($id)
     {
-        DB::table('clientes')->where('id',$id)->where('usuario_id',session('usuario_id'))->delete();
+        DB::table('personas')->where('id',$id)->where('tipo','comprador')->where('usuario_id',session('usuario_id'))->update(['activo'=>0]);
         return redirect()->route('ingresos.index')->with('msg','Cliente eliminado.')->with('msgType','warning');
     }
 }

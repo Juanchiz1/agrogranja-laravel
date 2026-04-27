@@ -47,6 +47,12 @@
 .lightbox.open { display:flex; }
 .lightbox img { max-width:94vw; max-height:88vh; border-radius:10px; }
 .lightbox-close { position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.4rem; width:40px; height:40px; border-radius:50%; cursor:pointer; }
+/* Chips de período en modal producción */
+.chip-p { padding:5px 12px; border-radius:99px; border:1.5px solid var(--border);
+  background:var(--surface); font-size:.8rem; font-weight:500; cursor:pointer;
+  color:var(--text-secondary); transition:all .15s; }
+.chip-p.active { background:var(--verde-bg); border-color:var(--verde-dark);
+  color:var(--verde-dark); font-weight:700; }
 </style>
 @endpush
 
@@ -55,7 +61,7 @@
   $em = $emojis[$animal->especie] ?? '🐾';
   $badgeClass = ['activo'=>'badge-green','vendido'=>'badge-brown','muerte'=>'badge-red'][$animal->estado] ?? 'badge-green';
   $balance = $totalIngresos - $totalGastos;
-  $dias = $animal->fecha_ingreso ? \Carbon\Carbon::parse($animal->fecha_ingreso)->diffInDays(now()) : null;
+  $tieneProduccion = $animal->produccion && !in_array(strtolower(trim($animal->produccion)), ['carne','','null']);
 @endphp
 
 {{-- HERO --}}
@@ -118,16 +124,31 @@
   @if($animal->atencion_motivo)<div style="margin-top:10px;padding:8px 10px;background:#fef2f2;border-radius:8px;font-size:.83rem;color:#dc2626;">🚨 {{ $animal->atencion_motivo }}</div>@endif
   @if($animal->notas)<div style="margin-top:10px;padding:8px 10px;background:var(--verde-bg);border-radius:8px;font-size:.83rem;color:var(--verde-dark);">📝 {{ $animal->notas }}</div>@endif
 
-  {{-- Acciones rápidas --}}
+  {{-- ── ACCIONES RÁPIDAS ── --}}
   <div class="flex gap-2 mt-3" style="flex-wrap:wrap;">
     <form method="POST" action="{{ route('animales.favorito',$animal->id) }}">@csrf
       <button class="btn btn-sm btn-ghost">{{ $animal->favorito?'⭐ Quitar favorito':'⭐ Marcar favorito' }}</button>
     </form>
     <form method="POST" action="{{ route('animales.atencion',$animal->id) }}">@csrf
-      <button class="btn btn-sm btn-ghost" style="{{ $animal->atencion_especial?'color:var(--rojo)':'' }}">{{ $animal->atencion_especial?'✅ Sin atención':'🚨 Necesita atención' }}</button>
+      <button class="btn btn-sm btn-ghost" style="{{ $animal->atencion_especial?'color:var(--rojo)':'' }}">
+        {{ $animal->atencion_especial?'✅ Sin atención':'🚨 Necesita atención' }}
+      </button>
     </form>
     @if($animal->estado==='activo')
-    <button onclick="openModal('modalSalida')" class="btn btn-sm btn-ghost" style="color:var(--marron);">💰 Venta/Sacrificio</button>
+    <button onclick="openModal('modalSalida')" class="btn btn-sm btn-ghost" style="color:var(--marron);">
+      💰 Venta/Sacrificio
+    </button>
+    @endif
+
+    {{-- Botón producción: mismo estilo que los demás --}}
+    @if($tieneProduccion)
+    <button onclick="openModal('modalProduccion')" class="btn btn-sm btn-ghost" style="color:var(--verde-dark);">
+      🥛 Registrar producción
+    </button>
+    <a href="{{ route('produccion-animal.index') }}?animal_id={{ $animal->id }}"
+       class="btn btn-sm btn-ghost">
+      📊 Ver historial
+    </a>
     @endif
   </div>
 </div>
@@ -150,6 +171,39 @@
     <strong style="{{ $balance>=0?'color:var(--verde-dark)':'color:var(--rojo)' }}">{{ $balance>=0?'+':'-' }}${{ number_format(abs($balance),0,',','.') }}</strong>
   </div>
 </div>
+
+{{-- RENTABILIDAD ANIMAL VENDIDO --}}
+@if($animal->estado === 'vendido' && $animal->valor_venta)
+@php
+    $fechaInicio   = $animal->fecha_ingreso ?? $animal->creado_en;
+    $fechaFin      = $animal->fecha_venta   ?? now()->toDateString();
+    $gastosPeriodo = DB::table('gastos')
+        ->where('usuario_id', session('usuario_id'))
+        ->where('animal_id', $animal->id)
+        ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+        ->sum('valor');
+    $rentabilidad = $animal->valor_venta - $gastosPeriodo;
+@endphp
+<div class="section-card">
+    <div class="section-title mb-3">📊 Rentabilidad estimada</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div style="background:#f0faf5;border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:11px;color:#6B7280;margin-bottom:4px;">Valor venta</p>
+            <p style="font-size:1.1rem;font-weight:700;color:#1D9E75;">${{ number_format($animal->valor_venta,0,',','.') }}</p>
+        </div>
+        <div style="background:#fff8f0;border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:11px;color:#6B7280;margin-bottom:4px;">Gastos</p>
+            <p style="font-size:1.1rem;font-weight:700;color:#B45309;">${{ number_format($gastosPeriodo,0,',','.') }}</p>
+        </div>
+        <div style="background:{{ $rentabilidad>=0?'#f0faf5':'#fef2f2' }};border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:11px;color:#6B7280;margin-bottom:4px;">Ganancia neta</p>
+            <p style="font-size:1.1rem;font-weight:700;color:{{ $rentabilidad>=0?'#1D9E75':'#DC2626' }};">
+                {{ $rentabilidad>=0?'+':'' }}${{ number_format($rentabilidad,0,',','.') }}
+            </p>
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- GALERÍA --}}
 <div class="section-card">
@@ -274,7 +328,116 @@
 
 <div style="margin-bottom:80px;"></div>
 
-{{-- ═══ MODALES ═══ --}}
+{{-- ════════════ MODALES ════════════ --}}
+
+{{-- ── MODAL PRODUCCIÓN (nuevo, inline) ── --}}
+@if($tieneProduccion)
+<div class="modal-overlay" id="modalProduccion" style="display:none;">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">🥛 Registrar producción</h3>
+    <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;">
+      {{ $em }} {{ $animal->nombre_lote ?? $animal->especie }}
+      @if($animal->produccion) · <strong>{{ $animal->produccion }}</strong>@endif
+    </p>
+
+    <form method="POST" action="{{ route('produccion-animal.store') }}">
+      @csrf
+      {{-- Animal fijo --}}
+      <input type="hidden" name="animal_id" value="{{ $animal->id }}">
+
+      {{-- Período --}}
+      <div class="form-group">
+        <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">¿Para qué período?</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="chips-m">
+          <button type="button" class="chip-p active" onclick="setPm('dia',this)">Hoy</button>
+          <button type="button" class="chip-p" onclick="setPm('semana',this)">Esta semana</button>
+          <button type="button" class="chip-p" onclick="setPm('mes',this)">Este mes</button>
+        </div>
+        <input type="hidden" name="periodo" id="m-periodo" value="dia">
+      </div>
+
+      {{-- Fecha y tipo --}}
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" name="fecha" id="m-fecha" class="form-control"
+                 value="{{ now()->toDateString() }}" required>
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select name="tipo_produccion" id="m-tipo" class="form-control" required onchange="mActUnidad(this)">
+            @php
+              $prodLower = strtolower($animal->produccion ?? '');
+              $tipoDefault = str_contains($prodLower,'leche') ? 'leche'
+                : (str_contains($prodLower,'huevo') ? 'huevos'
+                : (str_contains($prodLower,'lana') ? 'lana'
+                : (str_contains($prodLower,'miel') ? 'miel' : 'otro')));
+            @endphp
+            <option value="leche"  {{ $tipoDefault==='leche'  ? 'selected':'' }}>🥛 Leche</option>
+            <option value="huevos" {{ $tipoDefault==='huevos' ? 'selected':'' }}>🥚 Huevos</option>
+            <option value="lana"   {{ $tipoDefault==='lana'   ? 'selected':'' }}>🐑 Lana</option>
+            <option value="miel"   {{ $tipoDefault==='miel'   ? 'selected':'' }}>🍯 Miel</option>
+            <option value="otro"   {{ $tipoDefault==='otro'   ? 'selected':'' }}>📦 Otro</option>
+          </select>
+        </div>
+      </div>
+
+      {{-- Cantidad y unidad --}}
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Cantidad *</label>
+          <input type="number" name="cantidad" class="form-control"
+                 placeholder="0" step="0.1" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Unidad</label>
+          <select name="unidad" id="m-unidad" class="form-control">
+            @if($tipoDefault==='leche')
+              <option>litros</option><option>ml</option>
+            @elseif($tipoDefault==='huevos')
+              <option>unidades</option><option>docenas</option>
+            @elseif($tipoDefault==='lana')
+              <option>kg</option><option>lb</option>
+            @else
+              <option>unidades</option><option>kg</option><option>litros</option>
+            @endif
+          </select>
+        </div>
+      </div>
+
+      {{-- Precio y comprador --}}
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Precio unitario</label>
+          <input type="number" name="precio_unitario" class="form-control"
+                 placeholder="Opcional" step="100">
+        </div>
+        <div class="form-group">
+          <label>Comprador</label>
+          <input type="text" name="comprador" class="form-control" placeholder="Opcional">
+        </div>
+      </div>
+
+      {{-- Vendido --}}
+      <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;margin-bottom:10px;">
+        <input type="checkbox" name="vendido" value="1">
+        Marcar como vendido (crea ingreso automáticamente)
+      </label>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <input type="text" name="notas" id="m-notas" class="form-control" placeholder="Opcional">
+      </div>
+
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalProduccion')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Registrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
 
 {{-- Modal Editar --}}
 <div class="modal-overlay" id="modalEditar" style="display:none;">
@@ -385,7 +548,17 @@
       </div>
       <div class="form-group"><label>Detalle</label><textarea name="descripcion" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea></div>
       <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required></div>
-      <div class="form-group"><label>📷 Foto del evento</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
+      @if(isset($personas) && $personas->count())
+      <div class="form-group"><label>Realizado por (opcional)</label>
+        <select name="persona_id" class="form-control">
+          <option value="">Sin asignar</option>
+          @foreach($personas as $per)
+            <option value="{{ $per->id }}">{{ $per->nombre }}{{ $per->cargo ? ' - '.$per->cargo : '' }}</option>
+          @endforeach
+        </select>
+      </div>
+      @endif
+      <div class="form-group"><label>Foto del evento</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEvento')">Cancelar</button>
         <button type="submit" class="btn btn-primary btn-full">Guardar evento</button>
@@ -483,6 +656,42 @@ function toggleDosis() {
 function toggleVentaFields() {
   const tipo = document.getElementById('tipoSalida').value;
   document.getElementById('ventaFields').style.display = tipo === 'venta' ? 'block' : 'none';
+}
+
+// ── Funciones para modal de producción ─────────────────────────────
+const mesesEs = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function setPm(periodo, btn) {
+  document.querySelectorAll('.chip-p').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('m-periodo').value = periodo;
+  const hoy  = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm   = String(hoy.getMonth()+1).padStart(2,'0');
+  const dd   = String(hoy.getDate()).padStart(2,'0');
+  const notas = document.getElementById('m-notas');
+
+  if (periodo === 'dia') {
+    document.getElementById('m-fecha').value = `${yyyy}-${mm}-${dd}`;
+    if (notas.value.startsWith('Producción semana') || notas.value.startsWith('Producción mes')) notas.value = '';
+  } else if (periodo === 'semana') {
+    const lunes = new Date(hoy);
+    lunes.setDate(hoy.getDate() - (hoy.getDay() === 0 ? 6 : hoy.getDay()-1));
+    const dl = String(lunes.getDate()).padStart(2,'0');
+    const ml = String(lunes.getMonth()+1).padStart(2,'0');
+    document.getElementById('m-fecha').value = `${yyyy}-${mm}-${dd}`;
+    notas.value = `Producción semana del ${dl}/${ml} al ${dd}/${mm}`;
+  } else if (periodo === 'mes') {
+    document.getElementById('m-fecha').value = `${yyyy}-${mm}-${dd}`;
+    notas.value = `Producción mes de ${mesesEs[hoy.getMonth()]} ${yyyy}`;
+  }
+}
+
+function mActUnidad(sel) {
+  const u = document.getElementById('m-unidad');
+  const mapa = { leche:['litros','ml'], huevos:['unidades','docenas'], lana:['kg','lb'], miel:['kg','litros'], otro:['unidades','kg','litros'] };
+  const ops = mapa[sel.value] || ['unidades'];
+  u.innerHTML = ops.map(o => `<option>${o}</option>`).join('');
 }
 </script>
 @endpush

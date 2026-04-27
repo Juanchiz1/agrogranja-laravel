@@ -238,15 +238,25 @@ foreach($tipos as $grupo => $items) foreach($items as $k=>$v) $tiposPlanos2[$k]=
 <?php if(!$t->completada): ?>
 <div class="modal-overlay" id="completarTarea<?php echo e($t->id); ?>" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div>
-    <h3 class="modal-title">✅ Completar tarea</h3>
+    <h3 class="modal-title">Completar tarea</h3>
     <p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:14px;"><?php echo e($t->titulo); ?></p>
     <form method="POST" action="<?php echo e(route('tareas.completar',$t->id)); ?>"><?php echo csrf_field(); ?>
-      <div class="form-group"><label>¿Cómo quedó? (opcional)</label>
-        <textarea name="notas_completada" class="form-control" rows="3" placeholder="Ej: Se aplicaron 3 litros, todo bien. / Nació una ternera sana."></textarea>
+      <?php if(isset($personas) && $personas->count()): ?>
+      <div class="form-group"><label>Quien la realizo (opcional)</label>
+        <select name="persona_completada_id" class="form-control">
+          <option value="">Sin asignar</option>
+          <?php $__currentLoopData = $personas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $per): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <option value="<?php echo e($per->id); ?>"><?php echo e($per->nombre); ?><?php echo e($per->cargo ? ' ('.$per->cargo.')' : ''); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+      </div>
+      <?php endif; ?>
+      <div class="form-group"><label>Como quedo? (opcional)</label>
+        <textarea name="notas_completada" class="form-control" rows="3" placeholder="Ej: Se aplicaron 3 litros, todo bien."></textarea>
       </div>
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('completarTarea<?php echo e($t->id); ?>')">Cancelar</button>
-        <button type="submit" class="btn btn-primary btn-full">✅ Marcar como hecha</button>
+        <button type="submit" class="btn btn-primary btn-full">Marcar como hecha</button>
       </div>
     </form>
   </div>

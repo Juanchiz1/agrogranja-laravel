@@ -71,6 +71,7 @@ class TareaController extends Controller
         $tipos       = $this->tipos();
         $tiposPlanos = $this->tiposPlanos();
 
+        $personas = DB::table('personas')->where('usuario_id',$uid)->where('tipo','trabajador')->where('activo',1)->orderBy('nombre')->get();
         return view('pages.calendario', compact(
             'tareas','tab','mes','diasConTareas','cultivos','animales',
             'tipos','tiposPlanos','statsHoy','statsVencidas','statsProximas','statsCompletadas','vencidas'
@@ -116,11 +117,12 @@ class TareaController extends Controller
     public function completar(Request $request, $id)
     {
         DB::table('tareas')->where('id',$id)->where('usuario_id',session('usuario_id'))->update([
-            'completada'       => 1,
-            'fecha_completada' => now(),
-            'notas_completada' => $request->notas_completada,
+            'completada'             => 1,
+            'fecha_completada'       => now(),
+            'notas_completada'       => $request->notas_completada,
+            'persona_completada_id'  => $request->persona_completada_id ?: null,
         ]);
-        return redirect()->route('calendario.index')->with('msg','¡Tarea completada! ✓')->with('msgType','success');
+        return redirect()->back()->with('msg','¡Tarea completada! ✓')->with('msgType','success');
     }
 
     public function destroy($id)

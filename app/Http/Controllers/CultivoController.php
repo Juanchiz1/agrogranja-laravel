@@ -117,6 +117,7 @@ class CultivoController extends Controller
         $emojis       = $this->emojis();
         $tiposCultivo = $this->tiposCultivo();
 
+        $personas = DB::table('personas')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
         return view('pages.cultivo-detalle', compact(
             'cultivo','gastos','totalGastos','ingresos','totalIngresos',
             'tareas','tareasCompletadas','tareasPendientes',
@@ -266,7 +267,9 @@ class CultivoController extends Controller
         DB::table('cultivo_eventos')->insert([
             'cultivo_id'=>$id,'usuario_id'=>$uid,'tipo'=>$request->tipo,
             'titulo'=>$request->titulo,'descripcion'=>$request->descripcion,
-            'foto_ruta'=>$fotoRuta,'fecha'=>$request->fecha,'creado_en'=>now()->toDateTimeString(),
+            'foto_ruta'=>$fotoRuta,'fecha'=>$request->fecha,
+            'persona_id'=>$request->persona_id ?: null,
+            'creado_en'=>now()->toDateTimeString(),
         ]);
 
         return redirect()->route('cultivos.show',$id)->with('msg','Evento registrado.')->with('msgType','success');

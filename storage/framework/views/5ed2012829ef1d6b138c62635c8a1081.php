@@ -437,6 +437,16 @@
       <div class="form-group"><label>Descripción *</label><input type="text" name="titulo" class="form-control" required placeholder="Ej: Aplicación de urea 46%"></div>
       <div class="form-group"><label>Detalle</label><textarea name="descripcion" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea></div>
       <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="<?php echo e(date('Y-m-d')); ?>" required></div>
+      <?php if(isset($personas) && $personas->count()): ?>
+      <div class="form-group"><label>Realizado por (opcional)</label>
+        <select name="persona_id" class="form-control">
+          <option value="">Sin asignar</option>
+          <?php $__currentLoopData = $personas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $per): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <option value="<?php echo e($per->id); ?>"><?php echo e($per->nombre); ?><?php echo e($per->cargo ? ' - '.$per->cargo : ''); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+      </div>
+      <?php endif; ?>
       <div class="form-group"><label>Foto del evento (opcional)</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEvento')">Cancelar</button>

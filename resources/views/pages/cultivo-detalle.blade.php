@@ -434,6 +434,16 @@
       <div class="form-group"><label>Descripción *</label><input type="text" name="titulo" class="form-control" required placeholder="Ej: Aplicación de urea 46%"></div>
       <div class="form-group"><label>Detalle</label><textarea name="descripcion" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea></div>
       <div class="form-group"><label>Fecha *</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required></div>
+      @if(isset($personas) && $personas->count())
+      <div class="form-group"><label>Realizado por (opcional)</label>
+        <select name="persona_id" class="form-control">
+          <option value="">Sin asignar</option>
+          @foreach($personas as $per)
+            <option value="{{ $per->id }}">{{ $per->nombre }}{{ $per->cargo ? ' - '.$per->cargo : '' }}</option>
+          @endforeach
+        </select>
+      </div>
+      @endif
       <div class="form-group"><label>Foto del evento (opcional)</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEvento')">Cancelar</button>

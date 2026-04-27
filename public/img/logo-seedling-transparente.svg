@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<defs>
+  <linearGradient id="lf-l" x1="1" y1="0.3" x2="0" y2="0.7">
+    <stop offset="0%"   stop-color="#085041"/>
+    <stop offset="45%"  stop-color="#1D9E75"/>
+    <stop offset="100%" stop-color="#5DCAA5"/>
+  </linearGradient>
+  <linearGradient id="lf-r" x1="0" y1="0.3" x2="1" y2="0.7">
+    <stop offset="0%"   stop-color="#085041"/>
+    <stop offset="45%"  stop-color="#1D9E75"/>
+    <stop offset="100%" stop-color="#5DCAA5"/>
+  </linearGradient>
+  <linearGradient id="stem" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%"   stop-color="#074535"/>
+    <stop offset="50%"  stop-color="#0F6E56"/>
+    <stop offset="100%" stop-color="#085041"/>
+  </linearGradient>
+  <linearGradient id="seed" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%"   stop-color="#9B6E1E"/>
+    <stop offset="55%"  stop-color="#EF9F27"/>
+    <stop offset="100%" stop-color="#FAC775"/>
+  </linearGradient>
+  <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%"   stop-color="#1D9E75"/>
+    <stop offset="100%" stop-color="#085041"/>
+  </linearGradient>
+  <filter id="soft">
+    <feGaussianBlur stdDeviation="1.5" result="blur"/>
+    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+  </filter>
+</defs>
+
+<!-- Suelo / mound -->
+<ellipse cx="256" cy="392" rx="62" ry="19" fill="url(#soil)" opacity="0.82"/>
+<ellipse cx="256" cy="386" rx="46" ry="8"  fill="#1D9E75"   opacity="0.28"/>
+
+<!-- Tallo -->
+<rect x="246" y="146" width="20" height="248" rx="10" fill="url(#stem)"/>
+
+<!-- HOJA IZQUIERDA -->
+<path d="
+  M 256 272
+  C 228 260 164 238 132 214
+  C 113 200 112 183 126 175
+  C 142 167 172 178 202 197
+  C 225 212 247 246 256 262 Z"
+  fill="url(#lf-l)"/>
+<!-- vena principal izquierda -->
+<path d="M 256 268 C 233 252 188 228 148 208"
+  fill="none" stroke="#085041" stroke-width="2"
+  stroke-linecap="round" opacity="0.45"/>
+<!-- venas secundarias -->
+<path d="M 220 244 C 208 236 196 230 184 228"
+  fill="none" stroke="#085041" stroke-width="1.2"
+  stroke-linecap="round" opacity="0.30"/>
+<path d="M 190 220 C 178 215 166 214 158 216"
+  fill="none" stroke="#085041" stroke-width="1"
+  stroke-linecap="round" opacity="0.28"/>
+<!-- borde superior hoja izquierda (highlight) -->
+<path d="M 256 263 C 240 255 196 238 160 220 C 140 210 126 198 126 188"
+  fill="none" stroke="#5DCAA5" stroke-width="1.5"
+  stroke-linecap="round" opacity="0.35"/>
+
+<!-- HOJA DERECHA -->
+<path d="
+  M 256 272
+  C 284 260 348 238 380 214
+  C 399 200 400 183 386 175
+  C 370 167 340 178 310 197
+  C 287 212 265 246 256 262 Z"
+  fill="url(#lf-r)"/>
+<!-- vena principal derecha -->
+<path d="M 256 268 C 279 252 324 228 364 208"
+  fill="none" stroke="#085041" stroke-width="2"
+  stroke-linecap="round" opacity="0.45"/>
+<!-- venas secundarias -->
+<path d="M 292 244 C 304 236 316 230 328 228"
+  fill="none" stroke="#085041" stroke-width="1.2"
+  stroke-linecap="round" opacity="0.30"/>
+<path d="M 322 220 C 334 215 346 214 354 216"
+  fill="none" stroke="#085041" stroke-width="1"
+  stroke-linecap="round" opacity="0.28"/>
+<!-- borde superior hoja derecha (highlight) -->
+<path d="M 256 263 C 272 255 316 238 352 220 C 372 210 386 198 386 188"
+  fill="none" stroke="#5DCAA5" stroke-width="1.5"
+  stroke-linecap="round" opacity="0.35"/>
+
+<!-- SEMILLA / GRANO (punta dorada) -->
+<ellipse cx="256" cy="137" rx="17" ry="24" fill="url(#seed)"/>
+<!-- brillo de la semilla -->
+<ellipse cx="249" cy="127" rx="5.5" ry="9" fill="white" opacity="0.22"/>
+<!-- punta de la semilla -->
+<path d="M 256 113 C 254 108 256 104 258 108 C 258 110 257 112 256 113 Z"
+  fill="#EF9F27" opacity="0.7"/>
+
+</svg>

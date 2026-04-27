@@ -601,7 +601,14 @@ textarea.form-control { resize: vertical; min-height: 78px; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 40px 24px 0;
 }
-.welcome-logo  { font-size: 5rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,.2)); }
+.welcome-logo  { font-size: 5rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,.2));
+  
+  img{
+    width: 200px;
+    height: 200px;
+  }
+}
+
 .welcome-title { font-family: var(--font-serif); font-size: 2.4rem; color: #fff; text-align: center; line-height: 1.1; margin-top: 12px; }
 .welcome-sub   { font-size: .95rem; color: rgba(255,255,255,.82); margin: 10px 0 32px; text-align: center; line-height: 1.5; }
 .auth-card {
