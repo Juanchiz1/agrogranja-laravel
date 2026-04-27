@@ -28,22 +28,6 @@
             .photo-panel { display: block; width: 52%; }
         }
 
-        /*
-         * GRID — 2 columnas, 3 filas
-         * Fotos disponibles y sus proporciones:
-         *   crops-2  : portrait alto  (montaña/finca)     → col izq, filas 1-2
-         *   cows     : portrait       (vacas en corral)    → col der, fila 1
-         *   crops-1  : portrait alto  (cultivos vegetales) → col der, fila 2
-         *   farmer-1 : landscape ancho(productor en campo) → ambas cols, fila 3
-         *
-         *   ┌──────────┬──────────┐
-         *   │          │  cows    │  fila 1
-         *   │ crops-2  ├──────────┤
-         *   │          │ crops-1  │  fila 2
-         *   ├──────────┴──────────┤
-         *   │     farmer-1        │  fila 3 (landscape ancho)
-         *   └─────────────────────┘
-         */
         .photo-mosaic {
             width: 100%;
             height: 100%;

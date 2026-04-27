@@ -62,17 +62,12 @@
       <a href="<?php echo e(route('reportes.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
-
-      
-<a href="<?php echo e(route('cosechas.index')); ?>"
-   class="sidebar-item <?php echo e(request()->routeIs('cosechas.*') ? 'active' : ''); ?>">
-  <span class="sidebar-icon">🌾</span><span>Cosechas</span>
-</a>
-<a href="<?php echo e(route('inventario.index')); ?>"
-   class="sidebar-item <?php echo e(request()->routeIs('inventario.*') ? 'active' : ''); ?>">
-  <span class="sidebar-icon">📦</span><span>Inventario</span>
-</a>
-</a>
+      <a href="<?php echo e(route('cosechas.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('cosechas.*') ? 'active' : ''); ?>">
+        <span class="sidebar-icon">🌾</span><span>Cosechas</span>
+      </a>
+      <a href="<?php echo e(route('inventario.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('inventario.*') ? 'active' : ''); ?>">
+        <span class="sidebar-icon">📦</span><span>Inventario</span>
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -142,7 +137,6 @@
       <a href="<?php echo e(route('gastos.index')); ?>"     class="nav-item <?php echo e(request()->routeIs('gastos.*') ? 'active' : ''); ?>"><span>💰</span><span>Gastos</span></a>
       <a href="<?php echo e(route('calendario.index')); ?>" class="nav-item <?php echo e(request()->routeIs('calendario.*') ? 'active' : ''); ?>"><span>📅</span><span>Agenda</span></a>
       <a href="<?php echo e(route('reportes.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>"><span>📊</span><span>Reportes</span></a>
-     
     </nav>
     <?php endif; ?>
 

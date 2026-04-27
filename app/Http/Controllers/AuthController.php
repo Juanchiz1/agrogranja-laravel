@@ -36,19 +36,7 @@ class AuthController extends Controller
             ->where('activo', 1)
             ->first();
 
-        $valid = false;
-        if ($user) {
-            $valid = Hash::check($request->password, $user->password);
-            // Bypass demo
-            if (!$valid && $user->email === 'demo@demo.com' && $request->password === 'demo123') {
-                $valid = true;
-                DB::table('usuarios')->where('id', $user->id)
-                    ->update(['password' => Hash::make('demo123')]);
-                $user = DB::table('usuarios')->where('id', $user->id)->first();
-            }
-        }
-
-        if (!$valid) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return back()->withErrors(['email' => 'Correo o contraseña incorrectos.'])->withInput();
         }
 
@@ -57,6 +45,7 @@ class AuthController extends Controller
         if (!$user->onboarding_completado) {
             return redirect()->route('onboarding');
         }
+
         return redirect()->route('dashboard');
     }
 
@@ -83,7 +72,7 @@ class AuthController extends Controller
 
         $exists = DB::table('usuarios')->where('email', strtolower(trim($request->email)))->exists();
         if ($exists) {
-            return back()->withErrors(['email' => 'Este correo ya está registrado.'])->withInput();
+            return back()->withErrors(['email' => 'Este correo ya está registrado.'])->withInput();;
         }
 
         $id = DB::table('usuarios')->insertGetId([
@@ -94,8 +83,8 @@ class AuthController extends Controller
             'departamento' => $request->departamento,
             'municipio'    => $request->municipio,
             'telefono'     => $request->telefono,
-            'creado_en'   => now()->toDateTimeString(),
-            'actualizado_en'   => now()->toDateTimeString(),
+            'creado_en'    => now()->toDateTimeString(),
+            'actualizado_en' => now()->toDateTimeString(),
         ]);
 
         session(['usuario_id' => $id, 'usuario_nombre' => $request->nombre]);
