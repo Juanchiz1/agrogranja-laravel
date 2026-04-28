@@ -3,59 +3,7 @@
 <?php $__env->startSection('back_url', route('dashboard')); ?>
 
 <?php $__env->startPush('head'); ?>
-<style>
-.perfil-avatar-wrap {
-  position:relative; width:90px; height:90px; margin:0 auto 12px;
-}
-.perfil-avatar {
-  width:90px; height:90px; border-radius:50%; object-fit:cover;
-  border:3px solid var(--verde-light); box-shadow:var(--shadow-md);
-  background:var(--verde-bg); display:flex; align-items:center;
-  justify-content:center; font-size:2.5rem;
-}
-.perfil-avatar-edit {
-  position:absolute; bottom:0; right:0; width:28px; height:28px;
-  background:var(--verde-dark); border-radius:50%; display:flex;
-  align-items:center; justify-content:center; cursor:pointer;
-  border:2px solid #fff; font-size:.85rem; color:#fff;
-}
-.finca-foto {
-  width:100%; height:160px; border-radius:var(--radius-lg);
-  object-fit:cover; margin-bottom:14px; cursor:pointer;
-}
-.finca-foto-placeholder {
-  width:100%; height:120px; border-radius:var(--radius-lg);
-  background:linear-gradient(135deg,var(--verde-bg),#d4edda);
-  display:flex; align-items:center; justify-content:center;
-  font-size:3rem; margin-bottom:14px; border:2px dashed var(--verde-light);
-  cursor:pointer;
-}
-.tabs-perfil { display:flex; gap:4px; margin-bottom:18px; overflow-x:auto; padding-bottom:2px; }
-.tab-perfil { flex-shrink:0; padding:7px 12px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.8rem; font-weight:600; cursor:pointer;
-  color:var(--text-secondary); white-space:nowrap; text-decoration:none; display:inline-block; }
-.tab-perfil.active { background:var(--verde-dark); color:#fff; border-color:var(--verde-dark); }
-.stat-perfil-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
-.stat-perfil { background:var(--surface); border-radius:var(--radius-lg); padding:12px 8px;
-  text-align:center; box-shadow:var(--shadow-sm); }
-.stat-perfil-val { font-size:1.2rem; font-weight:800; color:var(--verde-dark); }
-.stat-perfil-lbl { font-size:.68rem; color:var(--text-secondary); }
-.balance-card { border-radius:var(--radius-lg); padding:16px; margin-bottom:16px;
-  display:flex; justify-content:space-between; align-items:center; }
-.pref-row { display:flex; justify-content:space-between; align-items:center;
-  padding:14px 0; border-bottom:1px solid var(--border); }
-.pref-row:last-child { border:none; }
-.pref-label { font-size:.88rem; font-weight:600; }
-.pref-desc { font-size:.75rem; color:var(--text-secondary); margin-top:2px; }
-.toggle-switch { position:relative; width:44px; height:24px; }
-.toggle-switch input { opacity:0; width:0; height:0; }
-.toggle-slider { position:absolute; cursor:pointer; inset:0; background:#ccc;
-  border-radius:24px; transition:.3s; }
-.toggle-slider:before { position:absolute; content:''; height:18px; width:18px;
-  left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
-input:checked + .toggle-slider { background:var(--verde-dark); }
-input:checked + .toggle-slider:before { transform:translateX(20px); }
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/perfil.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>

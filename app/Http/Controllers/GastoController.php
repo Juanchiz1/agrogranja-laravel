@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\ManejadorImagenes;
+use App\Http\Requests\GastoRequest;
 use App\Models\Gasto;
 use App\Models\Cultivo;
 use App\Models\Animal;
@@ -112,14 +113,8 @@ class GastoController extends Controller
     /**
      * Registra un nuevo gasto.
      */
-    public function store(Request $request)
+    public function store(GastoRequest $request)
     {
-        $request->validate([
-            'categoria'   => 'required',
-            'descripcion' => 'required',
-            'valor'       => 'required|numeric',
-        ]);
-
         $uid  = session('usuario_id');
         $foto = null;
         if ($request->hasFile('foto_factura')) {
@@ -158,14 +153,8 @@ class GastoController extends Controller
     /**
      * Actualiza un gasto existente.
      */
-    public function update(Request $request, $id)
+    public function update(GastoRequest $request, $id)
     {
-        $request->validate([
-            'categoria'   => 'required',
-            'descripcion' => 'required',
-            'valor'       => 'required|numeric',
-        ]);
-
         $uid   = session('usuario_id');
         $gasto = Gasto::where('id',$id)->where('usuario_id',$uid)->firstOrFail();
 

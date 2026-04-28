@@ -700,7 +700,7 @@ body[data-layout="pc"] .bottom-nav {
 }
 
 body[data-layout="pc"] .page-content {
-  padding: 24px 28px 40px;
+  padding: 12px 28px 40px;
 }
 
 body[data-layout="pc"] .fab {
@@ -757,7 +757,7 @@ body[data-layout="pc"] .pc-grid-3 {
   body:not([data-layout="mobile"]) .sidebar { display: flex; position: sticky; height: 100vh; }
   body:not([data-layout="mobile"]) .main-content { margin-left: var(--sidebar-w); max-width: none; width: calc(100% - var(--sidebar-w)); }
   body:not([data-layout="mobile"]) .bottom-nav { display: none; }
-  body:not([data-layout="mobile"]) .page-content { padding: 24px 28px 40px; }
+  body:not([data-layout="mobile"]) .page-content { padding: 12px 28px 40px; }
   body:not([data-layout="mobile"]) .fab { right: 32px; bottom: 32px; }
   body:not([data-layout="mobile"]) .modal-sheet { border-radius: var(--radius-xl); max-width: 560px; margin-bottom: 40px; }
   body:not([data-layout="mobile"]) .modal-overlay { align-items: center; }

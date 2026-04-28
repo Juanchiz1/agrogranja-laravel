@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\ManejadorImagenes;
+use App\Http\Requests\IngresoRequest;
 use App\Models\Ingreso;
 use App\Models\Cultivo;
 use App\Models\Animal;
@@ -94,13 +95,8 @@ class IngresoController extends Controller
     /**
      * Registra un nuevo ingreso.
      */
-    public function store(Request $request)
+    public function store(IngresoRequest $request)
     {
-        $request->validate([
-            'descripcion' => 'required',
-            'valor_total' => 'required|numeric',
-        ]);
-
         $uid   = session('usuario_id');
         $cant  = $request->cantidad;
         $pu    = $request->precio_unitario;
@@ -141,13 +137,8 @@ class IngresoController extends Controller
     /**
      * Actualiza un ingreso existente.
      */
-    public function update(Request $request, $id)
+    public function update(IngresoRequest $request, $id)
     {
-        $request->validate([
-            'descripcion' => 'required',
-            'valor_total' => 'required|numeric',
-        ]);
-
         $uid     = session('usuario_id');
         $ingreso = Ingreso::where('id',$id)->where('usuario_id',$uid)->firstOrFail();
 

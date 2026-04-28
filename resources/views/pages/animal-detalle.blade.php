@@ -4,56 +4,7 @@
 @section('back_url', route('animales.index'))
 
 @push('head')
-<style>
-.animal-hero { border-radius:var(--radius-xl); overflow:hidden; margin-bottom:20px;
-  position:relative; background:var(--verde-bg); min-height:180px; display:flex; align-items:flex-end; }
-.animal-hero img { width:100%; height:220px; object-fit:cover; display:block; }
-.animal-hero-placeholder { width:100%; height:180px; display:flex; align-items:center;
-  justify-content:center; font-size:6rem; background:linear-gradient(135deg,var(--verde-bg),#d4edda); }
-.section-card { background:var(--surface); border-radius:var(--radius-lg); padding:16px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
-.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.section-title { font-weight:700; font-size:.95rem; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
-.info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:.87rem; }
-.info-row:last-child { border:none; }
-.info-label { color:var(--text-secondary); }
-.info-value { font-weight:600; }
-.foto-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.foto-thumb { aspect-ratio:1; border-radius:var(--radius-md); overflow:hidden; position:relative; background:var(--verde-bg); cursor:pointer; }
-.foto-thumb img { width:100%; height:100%; object-fit:cover; }
-.foto-thumb-del { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.55); border:none; border-radius:50%; width:24px; height:24px; font-size:.7rem; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.foto-upload-btn { aspect-ratio:1; border-radius:var(--radius-md); border:2px dashed var(--verde-light); background:var(--verde-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.75rem; color:var(--verde-dark); cursor:pointer; gap:4px; }
-.peso-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:.87rem; }
-.peso-row:last-child { border:none; }
-/* Timeline */
-.timeline { position:relative; padding-left:28px; }
-.timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:var(--verde-light); }
-.tl-item { position:relative; margin-bottom:16px; }
-.tl-dot { position:absolute; left:-24px; top:3px; width:14px; height:14px; border-radius:50%; background:var(--verde); border:2px solid var(--surface); box-shadow:0 0 0 2px var(--verde-light); }
-.tl-dot.medicamento,.tl-dot.vacuna { background:#6366f1; box-shadow:0 0 0 2px #c7d2fe; }
-.tl-dot.gasto { background:#f59e0b; box-shadow:0 0 0 2px #fde68a; }
-.tl-dot.peso  { background:#0ea5e9; box-shadow:0 0 0 2px #bae6fd; }
-.tl-dot.venta { background:#16a34a; box-shadow:0 0 0 2px #bbf7d0; }
-.tl-dot.sacrificio,.tl-dot.enfermedad { background:#dc2626; box-shadow:0 0 0 2px #fca5a5; }
-.tl-dot.traslado { background:#d97706; box-shadow:0 0 0 2px #fde68a; }
-.tl-body { background:var(--surface); border-radius:var(--radius-md); padding:10px 12px; box-shadow:var(--shadow-sm); }
-.tl-title { font-weight:600; font-size:.88rem; }
-.tl-desc  { font-size:.8rem; color:var(--text-secondary); margin-top:2px; }
-.tl-date  { font-size:.72rem; color:var(--text-muted); margin-top:4px; }
-.tl-img   { width:100%; border-radius:6px; margin-top:8px; max-height:150px; object-fit:cover; }
-.propietario-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
-.propietario-row:last-child { border:none; }
-.venta-calc { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-radius:var(--radius-lg); padding:16px; margin-bottom:16px; border:1px solid #86efac; }
-.lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; align-items:center; justify-content:center; }
-.lightbox.open { display:flex; }
-.lightbox img { max-width:94vw; max-height:88vh; border-radius:10px; }
-.lightbox-close { position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.4rem; width:40px; height:40px; border-radius:50%; cursor:pointer; }
-/* Chips de período en modal producción */
-.chip-p { padding:5px 12px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.8rem; font-weight:500; cursor:pointer;
-  color:var(--text-secondary); transition:all .15s; }
-.chip-p.active { background:var(--verde-bg); border-color:var(--verde-dark);
-  color:var(--verde-dark); font-weight:700; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/animales.css') }}">
 @endpush
 
 @section('content')

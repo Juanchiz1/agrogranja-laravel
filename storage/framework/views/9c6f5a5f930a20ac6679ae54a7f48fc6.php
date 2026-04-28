@@ -4,18 +4,7 @@
 <?php $__env->startSection('back_url', route('personas.index')); ?>
 
 <?php $__env->startPush('head'); ?>
-<style>
-.section-card{background:var(--surface);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
-.section-title-row{font-weight:700;font-size:.95rem;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
-.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.87rem;}
-.info-row:last-child{border:none;}
-.info-label{color:var(--text-secondary);}
-.pago-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
-.pago-row:last-child{border:none;}
-.labor-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
-.labor-row:last-child{border:none;}
-.pers-avatar-lg{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--verde-light);background:var(--verde-bg);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px;}
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/personas.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>

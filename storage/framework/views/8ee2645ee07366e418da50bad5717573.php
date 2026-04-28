@@ -3,26 +3,7 @@
 <?php $__env->startSection('back_url', route('dashboard')); ?>
 
 <?php $__env->startPush('head'); ?>
-<style>
-.especie-group { margin-bottom:20px; }
-.especie-header { display:flex; align-items:center; gap:8px; padding:8px 12px;
-  background:var(--verde-bg); border-radius:var(--radius-md);
-  font-weight:700; font-size:.9rem; color:var(--verde-dark); margin-bottom:8px; }
-.especie-count { background:var(--verde-dark); color:#fff; border-radius:99px;
-  padding:1px 8px; font-size:.75rem; }
-.animal-flags { display:flex; gap:4px; }
-.flag-btn { background:none; border:none; cursor:pointer; font-size:1rem; padding:2px; line-height:1; }
-.alert-atencion { background:#fef9c3; border-left:4px solid #f59e0b;
-  border-radius:var(--radius-md); padding:10px 14px; margin-bottom:14px; }
-.proxima-dosis-card { background:var(--surface); border-radius:var(--radius-md);
-  padding:8px 12px; margin-bottom:6px; border-left:3px solid #6366f1;
-  display:flex; justify-content:space-between; align-items:center; font-size:.83rem; }
-.tabs-esp { display:flex; gap:6px; overflow-x:auto; margin-bottom:16px; padding-bottom:4px; }
-.tab-esp { flex-shrink:0; padding:6px 12px; border-radius:99px;
-  border:1.5px solid var(--border); background:var(--surface);
-  font-size:.8rem; font-weight:600; cursor:pointer; color:var(--text-secondary); }
-.tab-esp.active { background:var(--verde-dark); color:#fff; border-color:var(--verde-dark); }
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/animales.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>

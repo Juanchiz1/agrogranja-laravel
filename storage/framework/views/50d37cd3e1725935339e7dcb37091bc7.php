@@ -1,48 +1,31 @@
 <?php $__env->startSection('title','Inicio'); ?>
 <?php $__env->startSection('page_title', '🌾 ' . (now()->hour < 12 ? 'Buenos días' : (now()->hour < 18 ? 'Buenas tardes' : 'Buenas noches')) . ', ' . explode(' ', $user->nombre)[0]); ?>
 
-
-<?php if(!session('encuesta_respondida_en') || \Carbon\Carbon::parse(session('encuesta_respondida_en'))->diffInDays(now()) > 90): ?>
-<div style="background:#fff; border-radius:14px; padding:1rem 1.25rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-left: 4px solid #1D9E75;">
-    <div>
-        <p style="font-weight:600; color:#1a3a1a; margin:0; font-size:15px;">
-            📋 ¿Cómo te ha ido con Agrogranja?
-        </p>
-        <p style="font-size:13px; color:#666; margin:0;">
-            Responde una encuesta rápida · solo 5 minutos
-        </p>
-    </div>
-    <div style="display:flex; align-items:center; gap:8px;">
-        <a href="<?php echo e(route('encuesta.show')); ?>"
-           style="background:#1D9E75; color:#fff; padding:9px 20px; border-radius:10px; text-decoration:none; font-size:14px; font-weight:500; white-space:nowrap;">
-            Responder encuesta
-        </a>
-        <form method="POST" action="<?php echo e(route('encuesta.ignorar')); ?>" style="margin:0;">
-            <?php echo csrf_field(); ?>
-            <button type="submit"
-                style="background:transparent; border:none; color:#aaa; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1;"
-                title="Cerrar">×</button>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
-
 <?php $__env->startPush('head'); ?>
-<style>
-.dash-alert { background:#fffbeb; border-left:4px solid #f59e0b; border-radius:var(--radius-md);
-  padding:10px 14px; margin-bottom:10px; display:flex; justify-content:space-between;
-  align-items:center; cursor:pointer; font-size:.83rem; font-weight:600; color:#92400e; }
-.dash-alert.rojo { background:#fef2f2; border-color:var(--rojo); color:#991b1b; }
-.dash-alert.azul { background:#eff6ff; border-color:#3b82f6; color:#1e40af; }
-.quick-stat { background:var(--surface); border-radius:var(--radius-lg); padding:10px;
-  text-align:center; box-shadow:var(--shadow-sm); }
-.quick-stat-val { font-size:1.1rem; font-weight:800; color:var(--verde-dark); }
-.quick-stat-lbl { font-size:.65rem; color:var(--text-secondary); margin-top:1px; }
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/dashboard.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php $balance = $ingresosMes - $gastosMes; ?>
+
+
+<?php if(!session('encuesta_respondida_en') || \Carbon\Carbon::parse(session('encuesta_respondida_en'))->diffInDays(now()) > 90): ?>
+<div class="encuesta-banner">
+    <div class="encuesta-banner-text">
+        <p class="encuesta-banner-titulo">📋 ¿Cómo te ha ido con Agrogranja?</p>
+        <p class="encuesta-banner-sub">Responde una encuesta rápida · solo 5 minutos</p>
+    </div>
+    <div class="encuesta-banner-actions">
+        <a href="<?php echo e(route('encuesta.show')); ?>" class="encuesta-banner-btn">
+            Responder encuesta
+        </a>
+        <form method="POST" action="<?php echo e(route('encuesta.ignorar')); ?>" style="margin:0;">
+            <?php echo csrf_field(); ?>
+            <button type="submit" class="encuesta-banner-close" title="Cerrar">×</button>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 
 
 <?php if($tareasVencidas > 0): ?>

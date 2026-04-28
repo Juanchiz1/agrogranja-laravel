@@ -4,39 +4,7 @@
 @section('back_url', route('dashboard'))
 
 @push('head')
-<style>
-.tabs-ingresos { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
-.tab-btn-i { flex-shrink:0; padding:7px 14px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.82rem; font-weight:600; cursor:pointer; color:var(--text-secondary); }
-.tab-btn-i.active { background:var(--verde-dark); color:#fff; border-color:var(--verde-dark); }
-.tab-panel-i { display:none; }
-.tab-panel-i.active { display:block; }
-.tipo-chip {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:.72rem; padding:2px 8px; border-radius:99px; font-weight:600;
-  background:var(--verde-bg); color:var(--verde-dark);
-}
-.tipo-chip.animal   { background:#fdf4ff; color:#7e22ce; }
-.tipo-chip.cosecha  { background:#fff7ed; color:#9a3412; }
-.tipo-chip.subsidio { background:#eff6ff; color:#1d4ed8; }
-.tipo-chip.servicio { background:#f0fdf4; color:#166534; }
-.tipo-chip.otro     { background:#f9fafb; color:#6b7280; }
-.cliente-card {
-  background:var(--surface); border-radius:var(--radius-lg); padding:12px 14px;
-  margin-bottom:10px; box-shadow:var(--shadow-sm);
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.ingreso-foto { width:44px; height:44px; border-radius:8px; object-fit:cover;
-  cursor:pointer; border:1.5px solid var(--border); flex-shrink:0; }
-.stat-tipo-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0;
-  border-bottom:1px solid var(--border); font-size:.85rem; }
-.stat-tipo-row:last-child { border:none; }
-.top-comprador-row { display:flex; align-items:center; gap:10px; padding:8px 0;
-  border-bottom:1px solid var(--border); }
-.top-comprador-row:last-child { border:none; }
-.comprador-avatar { width:34px; height:34px; border-radius:50%; background:var(--verde-bg);
-  display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/ingresos.css') }}">
 @endpush
 
 @section('content')

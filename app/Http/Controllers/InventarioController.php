@@ -3,6 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Traits\ManejadorImagenes;
+use App\Http\Requests\StoreInventarioRequest;
+use App\Http\Requests\UpdateInventarioRequest;
+use App\Models\Inventario;
+use App\Models\Gasto;
+use App\Models\Cultivo;
+use App\Models\Animal;
+use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -24,9 +31,7 @@ class InventarioController extends Controller
     {
         $r = [];
         foreach ($this->categorias() as $items) {
-            foreach ($items as $c) {
-                $r[] = $c;
-            }
+            foreach ($items as $c) $r[] = $c;
         }
         return $r;
     }
@@ -37,14 +42,14 @@ class InventarioController extends Controller
     public function index(Request $request)
     {
         $uid   = session('usuario_id');
-        $query = DB::table('inventario as i')->where('i.usuario_id', $uid);
+        $query = Inventario::delUsuario($uid);
 
-        if ($request->q)      $query->where('i.nombre','like',"%{$request->q}%");
-        if ($request->cat)    $query->where('i.categoria',$request->cat);
-        if ($request->uso)    $query->where('i.uso_principal',$request->uso);
-        if ($request->alerta) $query->whereRaw('i.cantidad_actual <= i.stock_minimo');
+        if ($request->q)      $query->where('nombre', 'like', "%{$request->q}%");
+        if ($request->cat)    $query->where('categoria', $request->cat);
+        if ($request->uso)    $query->where('uso_principal', $request->uso);
+        if ($request->alerta) $query->conStockBajo();
 
-        $insumos = $query->orderBy('i.nombre')->get();
+        $insumos = $query->orderBy('nombre')->get();
 
         $alertasStock    = $insumos->filter(fn($i) => $i->cantidad_actual <= $i->stock_minimo)->count();
         $porVencer       = $insumos->filter(fn($i) => $i->fecha_vencimiento
@@ -53,50 +58,43 @@ class InventarioController extends Controller
         $valorInventario = $insumos->sum(fn($i) => $i->cantidad_actual * ($i->precio_unitario ?? 0));
         $totalInsumos    = $insumos->count();
 
+        // Mantiene JOIN en DB::table para traer columnas de 4 tablas distintas
         $movimientos = DB::table('inventario_movimientos as m')
-            ->join('inventario as i','i.id','=','m.inventario_id')
-            ->leftJoin('cultivos as c','c.id','=','m.cultivo_id')
-            ->leftJoin('animales as a','a.id','=','m.animal_id')
-            ->leftJoin('personas as per','per.id','=','m.persona_id')
-            ->where('m.usuario_id',$uid)
-            ->select('m.*','i.nombre as insumo_nombre','i.unidad',
+            ->join('inventario as i',    'i.id',   '=', 'm.inventario_id')
+            ->leftJoin('cultivos as c',  'c.id',   '=', 'm.cultivo_id')
+            ->leftJoin('animales as a',  'a.id',   '=', 'm.animal_id')
+            ->leftJoin('personas as per','per.id', '=', 'm.persona_id')
+            ->where('m.usuario_id', $uid)
+            ->select('m.*', 'i.nombre as insumo_nombre', 'i.unidad',
                      'c.nombre as cultivo_nombre',
-                     'a.nombre_lote as animal_nombre','a.especie as animal_especie',
+                     'a.nombre_lote as animal_nombre', 'a.especie as animal_especie',
                      'per.nombre as persona_nombre')
-            ->orderBy('m.creado_en','desc')->limit(15)->get();
+            ->orderBy('m.creado_en', 'desc')->limit(15)->get();
 
-        $cultivos     = DB::table('cultivos')->where('usuario_id',$uid)->where('estado','activo')->orderBy('nombre')->get();
-        $animales     = DB::table('animales')->where('usuario_id',$uid)->where('estado','activo')->orderBy('nombre_lote')->get();
+        $cultivos     = Cultivo::delUsuario($uid)->activos()->orderBy('nombre')->get();
+        $animales     = Animal::delUsuario($uid)->activos()->orderBy('nombre_lote')->get();
         $categorias   = $this->categorias();
         $catPlanas    = $this->categoriasPlanas();
-        $trabajadores = DB::table('personas')->where('usuario_id',$uid)->where('activo',1)->orderBy('nombre')->get();
+        $trabajadores = Persona::delUsuario($uid)->activos()->orderBy('nombre')->get();
 
         return view('pages.inventario', compact(
-            'insumos','totalInsumos','alertasStock','porVencer','valorInventario',
-            'movimientos','cultivos','animales','categorias','catPlanas','trabajadores'
+            'insumos', 'totalInsumos', 'alertasStock', 'porVencer', 'valorInventario',
+            'movimientos', 'cultivos', 'animales', 'categorias', 'catPlanas', 'trabajadores'
         ));
     }
 
     /**
-     * Registra un nuevo insumo en el inventario con stock inicial.
+     * Registra un nuevo insumo con su stock inicial como primer movimiento.
      */
-    public function store(Request $request)
+    public function store(StoreInventarioRequest $request)
     {
-        $request->validate([
-            'nombre'          => 'required|min:2',
-            'categoria'       => 'required',
-            'cantidad_actual' => 'required|numeric|min:0',
-            'stock_minimo'    => 'required|numeric|min:0',
-            'unidad'          => 'required',
-        ]);
-
         $uid  = session('usuario_id');
         $foto = null;
         if ($request->hasFile('foto')) {
             $foto = $this->guardarImagen($request->file('foto'), 'inventario');
         }
 
-        $id = DB::table('inventario')->insertGetId([
+        $insumo = Inventario::create([
             'usuario_id'       => $uid,
             'nombre'           => $request->nombre,
             'categoria'        => $request->categoria,
@@ -110,13 +108,11 @@ class InventarioController extends Controller
             'foto'             => $foto,
             'ubicacion'        => $request->ubicacion ?: null,
             'uso_principal'    => $request->uso_principal ?? 'general',
-            'creado_en'        => now()->toDateTimeString(),
-            'actualizado_en'   => now()->toDateTimeString(),
         ]);
 
-        if ((float)$request->cantidad_actual > 0) {
+        if ((float) $request->cantidad_actual > 0) {
             DB::table('inventario_movimientos')->insert([
-                'inventario_id'  => $id,
+                'inventario_id'  => $insumo->id,
                 'usuario_id'     => $uid,
                 'tipo'           => 'entrada',
                 'cantidad'       => $request->cantidad_actual,
@@ -129,25 +125,16 @@ class InventarioController extends Controller
         }
 
         return redirect()->route('inventario.index')
-            ->with('msg','Insumo registrado correctamente.')
-            ->with('msgType','success');
+            ->with('msg', 'Insumo registrado correctamente.')->with('msgType', 'success');
     }
 
     /**
      * Actualiza los datos de un insumo existente.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateInventarioRequest $request, $id)
     {
-        $request->validate([
-            'nombre'      => 'required|min:2',
-            'categoria'   => 'required',
-            'stock_minimo'=> 'required|numeric|min:0',
-            'unidad'      => 'required',
-        ]);
-
         $uid    = session('usuario_id');
-        $insumo = DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->first();
-        if (!$insumo) abort(404);
+        $insumo = Inventario::where('id', $id)->where('usuario_id', $uid)->firstOrFail();
 
         $data = [
             'nombre'           => $request->nombre,
@@ -160,19 +147,17 @@ class InventarioController extends Controller
             'notas'            => $request->notas ?: null,
             'ubicacion'        => $request->ubicacion ?: null,
             'uso_principal'    => $request->uso_principal ?? 'general',
-            'actualizado_en'   => now()->toDateTimeString(),
         ];
 
         if ($request->hasFile('foto')) {
-            $this->eliminarImagen($insumo->foto ?? null);
+            $this->eliminarImagen($insumo->foto);
             $data['foto'] = $this->guardarImagen($request->file('foto'), 'inventario');
         }
 
-        DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->update($data);
+        $insumo->update($data);
 
         return redirect()->route('inventario.index')
-            ->with('msg','Insumo actualizado.')
-            ->with('msgType','success');
+            ->with('msg', 'Insumo actualizado.')->with('msgType', 'success');
     }
 
     /**
@@ -181,18 +166,17 @@ class InventarioController extends Controller
     public function destroy($id)
     {
         $uid    = session('usuario_id');
-        $insumo = DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->first();
-        if ($insumo) $this->eliminarImagen($insumo->foto ?? null);
-        DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->delete();
+        $insumo = Inventario::where('id', $id)->where('usuario_id', $uid)->firstOrFail();
+        $this->eliminarImagen($insumo->foto);
+        $insumo->delete();
 
         return redirect()->route('inventario.index')
-            ->with('msg','Insumo eliminado.')
-            ->with('msgType','warning');
+            ->with('msg', 'Insumo eliminado.')->with('msgType', 'warning');
     }
 
     /**
-     * Registra un movimiento de stock (entrada, salida, ajuste, en_uso, devolución).
-     * Las entradas con precio generan un gasto automático.
+     * Registra un movimiento de stock. Las entradas con precio generan gasto automático.
+     * Los tipos en_uso y devolucion NO modifican el stock físico.
      */
     public function movimiento(Request $request, $id)
     {
@@ -202,26 +186,20 @@ class InventarioController extends Controller
             'fecha'    => 'required|date',
         ]);
 
-        $uid    = session('usuario_id');
-        $insumo = DB::table('inventario')->where('id',$id)->where('usuario_id',$uid)->first();
-        if (!$insumo) abort(404);
-
+        $uid      = session('usuario_id');
+        $insumo   = Inventario::where('id', $id)->where('usuario_id', $uid)->firstOrFail();
         $cantidad = (float) $request->cantidad;
 
-        // en_uso y devolucion NO modifican el stock físico
         $nueva = match($request->tipo) {
             'entrada'    => $insumo->cantidad_actual + $cantidad,
             'salida'     => max(0, $insumo->cantidad_actual - $cantidad),
             'ajuste'     => $cantidad,
-            'en_uso'     => $insumo->cantidad_actual,
+            'en_uso',
             'devolucion' => $insumo->cantidad_actual,
             default      => $insumo->cantidad_actual,
         };
 
-        DB::table('inventario')->where('id',$id)->update([
-            'cantidad_actual' => $nueva,
-            'actualizado_en'  => now()->toDateTimeString(),
-        ]);
+        $insumo->update(['cantidad_actual' => $nueva]);
 
         $fotoSoporte = null;
         if ($request->hasFile('foto_soporte')) {
@@ -246,12 +224,12 @@ class InventarioController extends Controller
 
         // Gasto automático al registrar una entrada con precio unitario
         if ($request->tipo === 'entrada' && $request->precio_unitario) {
-            DB::table('gastos')->insert([
+            Gasto::create([
                 'usuario_id'      => $uid,
                 'cultivo_id'      => $request->cultivo_id ?: null,
                 'animal_id'       => $request->animal_id  ?: null,
                 'categoria'       => $insumo->categoria,
-                'descripcion'     => 'Compra de ' . $insumo->nombre,
+                'descripcion'     => 'Compra de '.$insumo->nombre,
                 'cantidad'        => $cantidad,
                 'unidad_cantidad' => $insumo->unidad,
                 'valor'           => $cantidad * (float) $request->precio_unitario,
@@ -259,7 +237,6 @@ class InventarioController extends Controller
                 'proveedor'       => $request->proveedor_mov ?: $insumo->proveedor,
                 'notas'           => 'Generado automáticamente desde inventario',
                 'pendiente_sync'  => 0,
-                'creado_en'       => now()->toDateTimeString(),
             ]);
         }
 
@@ -272,43 +249,33 @@ class InventarioController extends Controller
             default      => "Movimiento registrado. Stock: {$nueva} {$insumo->unidad}",
         };
 
-        if ($nueva <= $insumo->stock_minimo) {
-            $msg .= ' ⚠️ Stock bajo mínimo.';
-        }
+        $stockBajo = $nueva <= $insumo->stock_minimo;
+        if ($stockBajo) $msg .= ' ⚠️ Stock bajo mínimo.';
 
         return redirect()->route('inventario.index')
             ->with('msg', $msg)
-            ->with('msgType', $nueva <= $insumo->stock_minimo ? 'warning' : 'success');
+            ->with('msgType', $stockBajo ? 'warning' : 'success');
     }
 
     /**
-     * Muestra la vista de alertas de stock bajo y productos por vencer.
+     * Muestra la vista de alertas: stock bajo, por vencer y vencidos.
      */
     public function alertas()
     {
         $uid = session('usuario_id');
 
-        $alertasStock = DB::table('inventario')
-            ->where('usuario_id',$uid)
-            ->whereRaw('cantidad_actual <= stock_minimo')
+        $alertasStock = Inventario::delUsuario($uid)->conStockBajo()
             ->orderByRaw('(cantidad_actual / GREATEST(stock_minimo, 0.01)) ASC')
             ->get();
 
-        $porVencer = DB::table('inventario')
-            ->where('usuario_id',$uid)
-            ->whereNotNull('fecha_vencimiento')
-            ->whereDate('fecha_vencimiento','>=',now()->toDateString())
-            ->whereDate('fecha_vencimiento','<=',now()->addDays(30)->toDateString())
-            ->orderBy('fecha_vencimiento')
-            ->get();
+        $porVencer = Inventario::delUsuario($uid)->porVencer(30)
+            ->orderBy('fecha_vencimiento')->get();
 
-        $vencidos = DB::table('inventario')
-            ->where('usuario_id',$uid)
+        $vencidos = Inventario::delUsuario($uid)
             ->whereNotNull('fecha_vencimiento')
-            ->whereDate('fecha_vencimiento','<',now()->toDateString())
-            ->orderBy('fecha_vencimiento')
-            ->get();
+            ->whereDate('fecha_vencimiento', '<', now()->toDateString())
+            ->orderBy('fecha_vencimiento')->get();
 
-        return view('pages.inventario-alertas', compact('alertasStock','porVencer','vencidos'));
+        return view('pages.inventario-alertas', compact('alertasStock', 'porVencer', 'vencidos'));
     }
 }

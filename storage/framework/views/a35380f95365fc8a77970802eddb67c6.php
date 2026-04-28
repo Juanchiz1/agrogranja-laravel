@@ -29,8 +29,9 @@
   <?php if(session('usuario_id')): ?>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="sidebar-logo"><img src="<?php echo e(asset('img/logo-seedling-transparente.svg')); ?>"
-     alt="" style="height: 60px; width: 60px; margin-right: 8px;"></span>
+      <span class="sidebar-logo">
+        <img src="<?php echo e(asset('img/logo-seedling-transparente.svg')); ?>" alt="" style="height:60px;width:60px;margin-right:8px;">
+      </span>
       <div>
         <div class="sidebar-name">Agrogranja</div>
         <div class="sidebar-finca"><?php echo e(session('usuario_nombre', 'Mi Finca')); ?></div>
@@ -38,35 +39,35 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="<?php echo e(route('dashboard')); ?>" class="sidebar-item <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('dashboard')); ?>"        class="sidebar-item <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🏠</span><span>Inicio</span>
       </a>
-      <a href="<?php echo e(route('cultivos.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('cultivos.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('cultivos.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('cultivos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🌱</span><span>Cultivos</span>
       </a>
-      <a href="<?php echo e(route('gastos.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('gastos.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('gastos.index')); ?>"     class="sidebar-item <?php echo e(request()->routeIs('gastos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">💰</span><span>Gastos</span>
       </a>
-      <a href="<?php echo e(route('ingresos.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('ingresos.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('ingresos.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('ingresos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📈</span><span>Ingresos</span>
       </a>
-      <a href="<?php echo e(route('animales.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('animales.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
-      <a href="<?php echo e(route('personas.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('personas.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('personas.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('personas.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">👥</span><span>Personas</span>
       </a>
       <a href="<?php echo e(route('calendario.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('calendario.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📅</span><span>Agenda</span>
       </a>
-      <a href="<?php echo e(route('reportes.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>">
-        <span class="sidebar-icon">📊</span><span>Reportes</span>
-      </a>
-      <a href="<?php echo e(route('cosechas.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('cosechas.*') ? 'active' : ''); ?>">
+      <a href="<?php echo e(route('cosechas.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('cosechas.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🌾</span><span>Cosechas</span>
       </a>
       <a href="<?php echo e(route('inventario.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('inventario.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📦</span><span>Inventario</span>
+      </a>
+      <a href="<?php echo e(route('reportes.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>">
+        <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
     </nav>
 
@@ -118,7 +119,7 @@
     <?php endif; ?>
 
     <?php if($errors->any()): ?>
-    <div class="alert alert-error alert-flash" id="flashMsg">
+    <div class="alert alert-error alert-flash">
       ❌ <?php echo e($errors->first()); ?>
 
     </div>

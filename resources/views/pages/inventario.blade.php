@@ -4,26 +4,7 @@
 @section('back_url', route('dashboard'))
 
 @push('head')
-<style>
-.tabs-inv{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;}
-.tab-inv{flex-shrink:0;padding:7px 13px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);font-size:.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;text-decoration:none;display:inline-block;}
-.tab-inv.active{background:var(--verde-dark);color:#fff;border-color:var(--verde-dark);}
-.insumo-card{background:var(--surface);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);}
-.insumo-foto{width:46px;height:46px;border-radius:var(--radius-md);object-fit:cover;flex-shrink:0;border:1.5px solid var(--border);}
-.insumo-foto-ph{width:46px;height:46px;border-radius:var(--radius-md);background:var(--verde-bg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
-.mov-timeline{position:relative;padding-left:28px;}
-.mov-timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--verde-light);}
-.mov-item{position:relative;margin-bottom:14px;}
-.mov-dot{position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);}
-.mov-dot.entrada{background:var(--verde-dark);box-shadow:0 0 0 2px var(--verde-light);}
-.mov-dot.salida{background:var(--rojo);box-shadow:0 0 0 2px #fca5a5;}
-.mov-dot.ajuste{background:#2563eb;box-shadow:0 0 0 2px #bfdbfe;}
-.mov-body{background:var(--surface);border-radius:var(--radius-md);padding:10px 12px;box-shadow:var(--shadow-sm);}
-.uso-badge{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600;}
-.uso-cultivo{background:var(--verde-bg);color:var(--verde-dark);}
-.uso-animal{background:#fdf4ff;color:#7e22ce;}
-.uso-general{background:#f1f5f9;color:#475569;}
-</style>
+<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
 @endpush
 
 @section('content')

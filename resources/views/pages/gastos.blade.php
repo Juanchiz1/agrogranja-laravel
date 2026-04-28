@@ -4,40 +4,7 @@
 @section('back_url', route('dashboard'))
 
 @push('head')
-<style>
-.tabs-gastos { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
-.tab-btn { flex-shrink:0; padding:7px 14px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.82rem; font-weight:600; cursor:pointer; color:var(--text-secondary); }
-.tab-btn.active { background:var(--marron); color:#fff; border-color:var(--marron); }
-.tab-panel { display:none; }
-.tab-panel.active { display:block; }
-
-.recurrente-card {
-  background:var(--surface); border-radius:var(--radius-lg); padding:12px 14px;
-  margin-bottom:10px; box-shadow:var(--shadow-sm);
-  border-left:4px solid var(--marron-light);
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.proveedor-card {
-  background:var(--surface); border-radius:var(--radius-lg); padding:12px 14px;
-  margin-bottom:10px; box-shadow:var(--shadow-sm);
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.vencimiento-badge {
-  font-size:.72rem; padding:2px 8px; border-radius:99px; font-weight:700;
-}
-.vence-hoy    { background:#fef9c3; color:#854d0e; }
-.vence-pronto { background:#ffedd5; color:#9a3412; }
-.vence-ok     { background:var(--verde-bg); color:var(--verde-dark); }
-.asociado-chip {
-  display:inline-flex; align-items:center; gap:4px;
-  font-size:.72rem; padding:2px 8px; border-radius:99px;
-  background:var(--verde-bg); color:var(--verde-dark); font-weight:600;
-}
-.asociado-chip.animal  { background:#fdf4ff; color:#7e22ce; }
-.asociado-chip.cosecha { background:#fff7ed; color:#9a3412; }
-.foto-factura-thumb { width:44px; height:44px; border-radius:8px; object-fit:cover; cursor:pointer; border:1.5px solid var(--border); }
-</style>
+<link rel="stylesheet" href="{{ asset('css/gastos.css') }}">
 @endpush
 
 @section('content')

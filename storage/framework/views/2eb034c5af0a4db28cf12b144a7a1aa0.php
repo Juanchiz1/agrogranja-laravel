@@ -4,21 +4,7 @@
 <?php $__env->startSection('back_url', route('dashboard')); ?>
 
 <?php $__env->startPush('head'); ?>
-<style>
-.destino-chip {
-  display:inline-flex;align-items:center;gap:3px;
-  font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600;
-}
-.dest-venta,.dest-intermediario,.dest-plaza_mercado,.dest-exportacion { background:#f0fdf4;color:#166534; }
-.dest-autoconsumo { background:#eff6ff;color:#1d4ed8; }
-.dest-almacenaje  { background:#fff7ed;color:#9a3412; }
-.dest-semilla     { background:var(--verde-bg);color:var(--verde-dark); }
-.dest-donacion    { background:#fdf4ff;color:#7e22ce; }
-.merma-badge { background:#fef2f2;color:#dc2626;font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600; }
-.almacen-badge { background:#fffbeb;color:#92400e;font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600; }
-.ingreso-badge { background:#f0fdf4;color:#166534;font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600; }
-.cosecha-foto { width:44px;height:44px;border-radius:8px;object-fit:cover;cursor:pointer;border:1.5px solid var(--border);flex-shrink:0; }
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/cosechas.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>

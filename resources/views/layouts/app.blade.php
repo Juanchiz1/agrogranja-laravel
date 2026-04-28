@@ -13,7 +13,7 @@
 </head>
 <body>
 
-{{-- MODE TOGGLE BUTTON (visible en todas las páginas autenticadas) --}}
+{{-- MODE TOGGLE --}}
 @if(session('usuario_id'))
 <button id="modeToggle" class="mode-toggle" title="Cambiar vista">
   <span class="mode-icon-mobile">📱</span>
@@ -29,8 +29,9 @@
   @if(session('usuario_id'))
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="sidebar-logo"><img src="{{ asset('img/logo-seedling-transparente.svg') }}"
-     alt="" style="height: 60px; width: 60px; margin-right: 8px;"></span>
+      <span class="sidebar-logo">
+        <img src="{{ asset('img/logo-seedling-transparente.svg') }}" alt="" style="height:60px;width:60px;margin-right:8px;">
+      </span>
       <div>
         <div class="sidebar-name">Agrogranja</div>
         <div class="sidebar-finca">{{ session('usuario_nombre', 'Mi Finca') }}</div>
@@ -38,35 +39,35 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="{{ route('dashboard') }}" class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+      <a href="{{ route('dashboard') }}"        class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
         <span class="sidebar-icon">🏠</span><span>Inicio</span>
       </a>
-      <a href="{{ route('cultivos.index') }}" class="sidebar-item {{ request()->routeIs('cultivos.*') ? 'active' : '' }}">
+      <a href="{{ route('cultivos.index') }}"   class="sidebar-item {{ request()->routeIs('cultivos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🌱</span><span>Cultivos</span>
       </a>
-      <a href="{{ route('gastos.index') }}" class="sidebar-item {{ request()->routeIs('gastos.*') ? 'active' : '' }}">
+      <a href="{{ route('gastos.index') }}"     class="sidebar-item {{ request()->routeIs('gastos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">💰</span><span>Gastos</span>
       </a>
-      <a href="{{ route('ingresos.index') }}" class="sidebar-item {{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
+      <a href="{{ route('ingresos.index') }}"   class="sidebar-item {{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📈</span><span>Ingresos</span>
       </a>
-      <a href="{{ route('animales.index') }}" class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
+      <a href="{{ route('animales.index') }}"   class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
-      <a href="{{ route('personas.index') }}" class="sidebar-item {{ request()->routeIs('personas.*') ? 'active' : '' }}">
+      <a href="{{ route('personas.index') }}"   class="sidebar-item {{ request()->routeIs('personas.*') ? 'active' : '' }}">
         <span class="sidebar-icon">👥</span><span>Personas</span>
       </a>
       <a href="{{ route('calendario.index') }}" class="sidebar-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📅</span><span>Agenda</span>
       </a>
-      <a href="{{ route('reportes.index') }}" class="sidebar-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
-        <span class="sidebar-icon">📊</span><span>Reportes</span>
-      </a>
-      <a href="{{ route('cosechas.index') }}" class="sidebar-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}">
+      <a href="{{ route('cosechas.index') }}"   class="sidebar-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🌾</span><span>Cosechas</span>
       </a>
       <a href="{{ route('inventario.index') }}" class="sidebar-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📦</span><span>Inventario</span>
+      </a>
+      <a href="{{ route('reportes.index') }}"   class="sidebar-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
+        <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
     </nav>
 
@@ -87,7 +88,7 @@
   {{-- MAIN CONTENT --}}
   <main class="main-content" id="mainContent">
 
-    {{-- TOP BAR (ambos modos) --}}
+    {{-- TOP BAR --}}
     @if(session('usuario_id'))
     <header class="top-bar">
       <div class="top-bar-left">
@@ -117,7 +118,7 @@
     @endif
 
     @if($errors->any())
-    <div class="alert alert-error alert-flash" id="flashMsg">
+    <div class="alert alert-error alert-flash">
       ❌ {{ $errors->first() }}
     </div>
     @endif

@@ -4,26 +4,7 @@
 @section('back_url', route('dashboard'))
 
 @push('head')
-<style>
-.tabs-personas { display:flex; gap:5px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
-.tab-pers { flex-shrink:0; padding:6px 12px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.8rem; font-weight:600; color:var(--text-secondary);
-  white-space:nowrap; text-decoration:none; display:inline-block; }
-.tab-pers.active { background:var(--verde-dark); color:#fff; border-color:var(--verde-dark); }
-.persona-card { background:var(--surface); border-radius:var(--radius-lg); padding:14px;
-  margin-bottom:10px; box-shadow:var(--shadow-sm); cursor:pointer; }
-.persona-avatar { width:44px; height:44px; border-radius:50%; object-fit:cover;
-  flex-shrink:0; background:var(--verde-bg); display:flex; align-items:center;
-  justify-content:center; font-size:1.3rem; overflow:hidden; }
-.tipo-badge { display:inline-flex; align-items:center; gap:3px; font-size:.7rem;
-  padding:2px 8px; border-radius:99px; font-weight:600; }
-.tipo-trabajador { background:#fff7ed; color:#9a3412; }
-.tipo-proveedor  { background:var(--verde-bg); color:var(--verde-dark); }
-.tipo-comprador  { background:#eff6ff; color:#1d4ed8; }
-.tipo-vecino     { background:#f9fafb; color:#4b5563; }
-.tipo-familiar   { background:#fdf4ff; color:#7e22ce; }
-.tipo-contacto,.tipo-otro { background:#f1f5f9; color:#475569; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/personas.css') }}">
 @endpush
 
 @section('content')

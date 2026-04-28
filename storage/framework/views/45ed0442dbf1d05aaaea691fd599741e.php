@@ -3,54 +3,7 @@
 <?php $__env->startSection('back_url', route('dashboard')); ?>
 
 <?php $__env->startPush('head'); ?>
-<style>
-.agenda-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
-.agenda-stat { background:var(--surface); border-radius:var(--radius-lg); padding:10px 8px;
-  text-align:center; box-shadow:var(--shadow-sm); }
-.agenda-stat-val { font-size:1.3rem; font-weight:800; }
-.agenda-stat-label { font-size:.65rem; color:var(--text-secondary); margin-top:1px; }
-.tabs-agenda { display:flex; gap:5px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
-.tab-agenda { flex-shrink:0; padding:7px 12px; border-radius:99px; border:1.5px solid var(--border);
-  background:var(--surface); font-size:.8rem; font-weight:600; cursor:pointer;
-  color:var(--text-secondary); white-space:nowrap; text-decoration:none; display:inline-block; }
-.tab-agenda.active { background:var(--verde-dark); color:#fff; border-color:var(--verde-dark); }
-.tab-agenda.vencida { border-color:#fca5a5; color:#dc2626; }
-.tab-agenda.vencida.active { background:#dc2626; color:#fff; border-color:#dc2626; }
-.tarea-card { background:var(--surface); border-radius:var(--radius-lg); padding:12px 14px;
-  margin-bottom:10px; box-shadow:var(--shadow-sm); display:flex; gap:12px; align-items:flex-start; }
-.tarea-card.alta    { border-left:3px solid var(--rojo); }
-.tarea-card.media   { border-left:3px solid #f59e0b; }
-.tarea-card.baja    { border-left:3px solid var(--verde-dark); }
-.tarea-card.vencida { border-left:3px solid #dc2626; background:#fef2f2; }
-.tarea-card.completada { opacity:.6; }
-.tarea-icon { width:36px; height:36px; border-radius:var(--radius-md); background:var(--verde-bg);
-  display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
-.tarea-body { flex:1; min-width:0; }
-.tarea-titulo { font-weight:700; font-size:.9rem; }
-.tarea-meta  { font-size:.75rem; color:var(--text-secondary); margin-top:3px; display:flex; flex-wrap:wrap; gap:4px; }
-.tarea-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
-.chip { display:inline-flex; align-items:center; gap:3px; font-size:.7rem; padding:2px 7px;
-  border-radius:99px; font-weight:600; }
-.chip-verde  { background:var(--verde-bg); color:var(--verde-dark); }
-.chip-purple { background:#fdf4ff; color:#7e22ce; }
-.chip-blue   { background:#eff6ff; color:#1d4ed8; }
-.chip-red    { background:#fef2f2; color:#dc2626; }
-.chip-orange { background:#fff7ed; color:#9a3412; }
-.tarea-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
-.fecha-dia { font-size:.72rem; font-weight:700; }
-.vencida-banner { background:#fef2f2; border:1px solid #fca5a5; border-radius:var(--radius-lg);
-  padding:12px 14px; margin-bottom:14px; }
-/* Calendar */
-.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-.cal-day { text-align:center; padding:5px 2px; border-radius:6px; font-size:.8rem;
-  cursor:default; color:var(--text-secondary); }
-.cal-day.today { background:var(--verde-dark); color:#fff; font-weight:800; border-radius:99px; }
-.cal-day.has-task { font-weight:700; color:var(--verde-dark); position:relative; }
-.cal-day.has-task::after { content:'•'; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-  color:var(--verde-mid); font-size:.6rem; line-height:1; }
-.cal-day.has-task-high { color:var(--rojo); font-weight:800; }
-.cal-day.has-task-high::after { color:var(--rojo); }
-</style>
+<link rel="stylesheet" href="<?php echo e(asset('css/calendario.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
