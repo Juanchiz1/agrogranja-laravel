@@ -39,33 +39,56 @@
     </div>
 
     <nav class="sidebar-nav">
+      {{-- Inicio (siempre visible) --}}
       <a href="{{ route('dashboard') }}"        class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
         <span class="sidebar-icon">🏠</span><span>Inicio</span>
       </a>
+
+      {{-- Cultivos: solo si tiene línea de cultivos --}}
+      @if(in_array('cultivos', $lineasActivas))
       <a href="{{ route('cultivos.index') }}"   class="sidebar-item {{ request()->routeIs('cultivos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🌱</span><span>Cultivos</span>
       </a>
+      @endif
+
+      {{-- Gastos e Ingresos: siempre (transversales) --}}
       <a href="{{ route('gastos.index') }}"     class="sidebar-item {{ request()->routeIs('gastos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">💰</span><span>Gastos</span>
       </a>
       <a href="{{ route('ingresos.index') }}"   class="sidebar-item {{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📈</span><span>Ingresos</span>
       </a>
+
+      {{-- Animales: si tiene cualquier línea animal --}}
+      @if(\App\Models\LineaProductiva::tieneAnimales())
       <a href="{{ route('animales.index') }}"   class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
+      @endif
+
+      {{-- Personas (siempre — gestión de trabajadores aplica a todos) --}}
       <a href="{{ route('personas.index') }}"   class="sidebar-item {{ request()->routeIs('personas.*') ? 'active' : '' }}">
         <span class="sidebar-icon">👥</span><span>Personas</span>
       </a>
+
+      {{-- Agenda (siempre — todos manejan tareas) --}}
       <a href="{{ route('calendario.index') }}" class="sidebar-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📅</span><span>Agenda</span>
       </a>
+
+      {{-- Cosechas: solo si tiene cultivos --}}
+      @if(in_array('cultivos', $lineasActivas))
       <a href="{{ route('cosechas.index') }}"   class="sidebar-item {{ request()->routeIs('cosechas.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🌾</span><span>Cosechas</span>
       </a>
+      @endif
+
+      {{-- Inventario (siempre — agroinsumos, alimento balanceado, medicamentos) --}}
       <a href="{{ route('inventario.index') }}" class="sidebar-item {{ request()->routeIs('inventario.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📦</span><span>Inventario</span>
       </a>
+
+      {{-- Reportes (siempre) --}}
       <a href="{{ route('reportes.index') }}"   class="sidebar-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}">
         <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
@@ -128,12 +151,38 @@
       @yield('content')
     </div>
 
-    {{-- BOTTOM NAV (modo móvil) --}}
+    {{-- BOTTOM NAV (modo móvil)
+         Tiene solo 5 slots. Priorizamos así:
+           1. Inicio (siempre)
+           2. Cultivos si tiene cultivos, si no → Animales
+           3. Gastos (siempre)
+           4. Agenda (siempre)
+           5. Reportes (siempre)
+         Si tiene CULTIVOS + ANIMALES, mostramos ambos y quitamos Gastos
+         del bottom (sigue accesible desde el menú lateral en PC y desde
+         el menú principal del dashboard).
+    --}}
     @if(session('usuario_id'))
+    @php
+      $tieneCultivos = in_array('cultivos', $lineasActivas);
+      $tieneAnimales = \App\Models\LineaProductiva::tieneAnimales();
+      $bothPrimary   = $tieneCultivos && $tieneAnimales;
+    @endphp
     <nav class="bottom-nav mobile-nav">
       <a href="{{ route('dashboard') }}"        class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><span>🏠</span><span>Inicio</span></a>
+
+      @if($tieneCultivos)
       <a href="{{ route('cultivos.index') }}"   class="nav-item {{ request()->routeIs('cultivos.*') ? 'active' : '' }}"><span>🌱</span><span>Cultivos</span></a>
+      @endif
+
+      @if($tieneAnimales)
+      <a href="{{ route('animales.index') }}"   class="nav-item {{ request()->routeIs('animales.*') ? 'active' : '' }}"><span>🐄</span><span>Animales</span></a>
+      @endif
+
+      @if(!$bothPrimary)
       <a href="{{ route('gastos.index') }}"     class="nav-item {{ request()->routeIs('gastos.*') ? 'active' : '' }}"><span>💰</span><span>Gastos</span></a>
+      @endif
+
       <a href="{{ route('calendario.index') }}" class="nav-item {{ request()->routeIs('calendario.*') ? 'active' : '' }}"><span>📅</span><span>Agenda</span></a>
       <a href="{{ route('reportes.index') }}"   class="nav-item {{ request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : '' }}"><span>📊</span><span>Reportes</span></a>
     </nav>

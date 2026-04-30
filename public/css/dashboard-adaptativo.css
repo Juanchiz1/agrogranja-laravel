@@ -1,0 +1,113 @@
+/* ════════════════════════════════════════════════════════════════
+   AGROGRANJA · DASHBOARD ADAPTATIVO (Fase 2)
+   KPIs por línea productiva: tarjetas con franja de color a la
+   izquierda y métricas en columnas.
+   ════════════════════════════════════════════════════════════════ */
+
+.kpis-lineas-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.kpi-linea-card {
+  background: var(--surface, var(--blanco));
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--verde-dark);
+  transition: transform .15s, box-shadow .15s;
+}
+
+.kpi-linea-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.kpi-linea-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gris-border, rgba(0,0,0,.06));
+}
+
+.kpi-linea-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.kpi-linea-titulo {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--negro);
+}
+
+.kpi-linea-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.kpi-linea-metrica {
+  text-align: center;
+  padding: 4px 2px;
+}
+
+.kpi-linea-valor {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--verde-dark);
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.kpi-linea-label {
+  font-size: .65rem;
+  color: var(--text-secondary, var(--gris));
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  line-height: 1.2;
+}
+
+.kpi-linea-sub {
+  font-size: .6rem;
+  color: var(--rojo);
+  font-weight: 700;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+/* ── COLORES POR LÍNEA ──────────────────────────────────────── */
+.kpi-color-verde    { border-left-color: var(--verde-dark); }
+.kpi-color-verde    .kpi-linea-valor { color: var(--verde-dark); }
+
+.kpi-color-marron   { border-left-color: var(--marron, #8b4513); }
+.kpi-color-marron   .kpi-linea-valor { color: var(--marron, #8b4513); }
+
+.kpi-color-naranja  { border-left-color: #d97706; }
+.kpi-color-naranja  .kpi-linea-valor { color: #d97706; }
+
+.kpi-color-azul     { border-left-color: #2563eb; }
+.kpi-color-azul     .kpi-linea-valor { color: #2563eb; }
+
+.kpi-color-rosa     { border-left-color: #db2777; }
+.kpi-color-rosa     .kpi-linea-valor { color: #db2777; }
+
+.kpi-color-amarillo { border-left-color: #ca8a04; }
+.kpi-color-amarillo .kpi-linea-valor { color: #ca8a04; }
+
+/* ── DESKTOP: 2 columnas ─────────────────────────────────────── */
+body[data-layout="pc"] .kpis-lineas-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Si hay 3 o más KPIs, hasta 3 columnas en pantallas grandes */
+@media (min-width: 1100px) {
+  body[data-layout="pc"] .kpis-lineas-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

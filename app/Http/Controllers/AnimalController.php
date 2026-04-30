@@ -24,12 +24,18 @@ class AnimalController extends Controller
         ];
     }
 
+    /**
+     * Devuelve la lista de especies que se muestran en los selectores
+     * de filtros, alta y edición de animales.
+     *
+     * Si el usuario tiene líneas productivas configuradas, devuelve
+     * SOLO las especies relevantes a esas líneas + 'Otro' como fallback.
+     * Si no tiene líneas configuradas (usuario antiguo), devuelve la
+     * lista completa para no romper nada.
+     */
     private function especies(): array
     {
-        return [
-            'Ganado bovino','Terneros','Cerdos','Cerdas de cría','Gallinas',
-            'Patos','Pavos','Conejos','Cabras','Ovejas','Caballos','Peces','Otro',
-        ];
+        return \App\Models\LineaProductiva::especiesSugeridas();
     }
 
     /**

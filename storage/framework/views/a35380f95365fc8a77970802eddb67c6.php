@@ -39,33 +39,56 @@
     </div>
 
     <nav class="sidebar-nav">
+      
       <a href="<?php echo e(route('dashboard')); ?>"        class="sidebar-item <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🏠</span><span>Inicio</span>
       </a>
+
+      
+      <?php if(in_array('cultivos', $lineasActivas)): ?>
       <a href="<?php echo e(route('cultivos.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('cultivos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🌱</span><span>Cultivos</span>
       </a>
+      <?php endif; ?>
+
+      
       <a href="<?php echo e(route('gastos.index')); ?>"     class="sidebar-item <?php echo e(request()->routeIs('gastos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">💰</span><span>Gastos</span>
       </a>
       <a href="<?php echo e(route('ingresos.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('ingresos.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📈</span><span>Ingresos</span>
       </a>
+
+      
+      <?php if(\App\Models\LineaProductiva::tieneAnimales()): ?>
       <a href="<?php echo e(route('animales.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
+      <?php endif; ?>
+
+      
       <a href="<?php echo e(route('personas.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('personas.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">👥</span><span>Personas</span>
       </a>
+
+      
       <a href="<?php echo e(route('calendario.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('calendario.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📅</span><span>Agenda</span>
       </a>
+
+      
+      <?php if(in_array('cultivos', $lineasActivas)): ?>
       <a href="<?php echo e(route('cosechas.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('cosechas.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🌾</span><span>Cosechas</span>
       </a>
+      <?php endif; ?>
+
+      
       <a href="<?php echo e(route('inventario.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('inventario.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📦</span><span>Inventario</span>
       </a>
+
+      
       <a href="<?php echo e(route('reportes.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">📊</span><span>Reportes</span>
       </a>
@@ -132,10 +155,26 @@
 
     
     <?php if(session('usuario_id')): ?>
+    <?php
+      $tieneCultivos = in_array('cultivos', $lineasActivas);
+      $tieneAnimales = \App\Models\LineaProductiva::tieneAnimales();
+      $bothPrimary   = $tieneCultivos && $tieneAnimales;
+    ?>
     <nav class="bottom-nav mobile-nav">
       <a href="<?php echo e(route('dashboard')); ?>"        class="nav-item <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>"><span>🏠</span><span>Inicio</span></a>
+
+      <?php if($tieneCultivos): ?>
       <a href="<?php echo e(route('cultivos.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('cultivos.*') ? 'active' : ''); ?>"><span>🌱</span><span>Cultivos</span></a>
+      <?php endif; ?>
+
+      <?php if($tieneAnimales): ?>
+      <a href="<?php echo e(route('animales.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>"><span>🐄</span><span>Animales</span></a>
+      <?php endif; ?>
+
+      <?php if(!$bothPrimary): ?>
       <a href="<?php echo e(route('gastos.index')); ?>"     class="nav-item <?php echo e(request()->routeIs('gastos.*') ? 'active' : ''); ?>"><span>💰</span><span>Gastos</span></a>
+      <?php endif; ?>
+
       <a href="<?php echo e(route('calendario.index')); ?>" class="nav-item <?php echo e(request()->routeIs('calendario.*') ? 'active' : ''); ?>"><span>📅</span><span>Agenda</span></a>
       <a href="<?php echo e(route('reportes.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('reportes.*') || request()->routeIs('rentabilidad.*') ? 'active' : ''); ?>"><span>📊</span><span>Reportes</span></a>
     </nav>
