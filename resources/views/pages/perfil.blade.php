@@ -5,6 +5,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('css/perfil.css') }}">
+<link rel="stylesheet" href="{{ asset('css/lineas-productivas.css') }}">
 @endpush
 
 @section('content')
@@ -309,6 +310,145 @@
     <button type="submit" class="btn btn-primary btn-full mt-3">Guardar preferencias</button>
   </form>
 </div>
+
+{{-- ===== LÍNEAS PRODUCTIVAS ===== --}}
+@php
+  // Configuración rápida por línea (mismas opciones que el onboarding).
+  $configCamposPerfil = [
+    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas', 'cantidad_ph'=>'Ej: 2',
+        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']], 'opciones'=>[]],
+    'bovino'        => ['cantidad_label'=>'Cabezas aprox.', 'cantidad_ph'=>'Ej: 25',
+        'opciones'=>[['name'=>'leche','label'=>'Lechería'],['name'=>'carne','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
+    'porcino'       => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 30',
+        'opciones'=>[['name'=>'engorde','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
+    'avicola'       => ['cantidad_label'=>'Aves aprox.', 'cantidad_ph'=>'Ej: 200',
+        'opciones'=>[['name'=>'postura','label'=>'Postura'],['name'=>'engorde','label'=>'Engorde']]],
+    'piscicola'     => ['cantidad_label'=>'Estanques', 'cantidad_ph'=>'Ej: 3',
+        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']], 'opciones'=>[]],
+    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 15',
+        'opciones'=>[['name'=>'leche','label'=>'Leche'],['name'=>'carne','label'=>'Carne'],['name'=>'lana','label'=>'Lana']]],
+    'apicola'       => ['cantidad_label'=>'Colmenas', 'cantidad_ph'=>'Ej: 10', 'opciones'=>[]],
+    'equino'        => ['cantidad_label'=>'Cantidad', 'cantidad_ph'=>'Ej: 4',
+        'opciones'=>[['name'=>'trabajo','label'=>'Trabajo'],['name'=>'cria','label'=>'Cría']]],
+    'cunicola'      => ['cantidad_label'=>'Jaulas / madres', 'cantidad_ph'=>'Ej: 12', 'opciones'=>[]],
+  ];
+@endphp
+
+<div class="card mt-3">
+  <p style="font-weight:700;margin-bottom:6px;">🚜 Líneas productivas</p>
+  <p style="font-size:.82rem;color:var(--gris);margin-bottom:14px;">
+    Activa o desactiva lo que manejas. La app mostrará solo los módulos que necesitas.
+  </p>
+
+  <form method="POST" action="{{ route('perfil.lineas') }}">
+    @csrf
+
+    @if($errors->has('lineas'))
+      <div class="alert alert-error mb-3">❌ {{ $errors->first('lineas') }}</div>
+    @endif
+
+    <div class="lineas-grid lineas-grid-compact">
+      @foreach($lineas as $linea)
+        @php
+          $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa;
+        @endphp
+        <label class="linea-card {{ $marcada ? 'selected' : '' }}" data-codigo="{{ $linea->codigo }}">
+          <input type="checkbox" name="lineas[]" value="{{ $linea->codigo }}"
+                 class="linea-check"
+                 onchange="this.closest('.linea-card').classList.toggle('selected', this.checked); togglePerfilConfig('{{ $linea->codigo }}', this.checked);"
+                 {{ $marcada ? 'checked' : '' }}>
+          <div class="linea-emoji">{{ $linea->emoji }}</div>
+          <div class="linea-nombre">{{ $linea->nombre }}</div>
+        </label>
+      @endforeach
+    </div>
+
+    <div id="perfilConfigContainer" style="margin-top:18px;">
+      @foreach($lineas as $linea)
+        @php
+          $codigo  = $linea->codigo;
+          $cfg     = $configCamposPerfil[$codigo] ?? null;
+          $actual  = $lineasUsuario[$codigo] ?? null;
+          $marcada = $actual && $actual->activa;
+          $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
+        @endphp
+
+        @if($cfg)
+        <div class="config-block {{ $marcada ? '' : 'hidden' }}" data-config-perfil-for="{{ $codigo }}">
+          <div class="config-block-header">
+            <span class="config-emoji">{{ $linea->emoji }}</span>
+            <span class="config-titulo">{{ $linea->nombre }}</span>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>{{ $cfg['cantidad_label'] }}</label>
+              <input type="number" min="0" step="1"
+                     name="config[{{ $codigo }}][cantidad]"
+                     class="form-control"
+                     placeholder="{{ $cfg['cantidad_ph'] }}"
+                     value="{{ $actual->cantidad_aprox ?? '' }}">
+            </div>
+            <div class="form-group">
+              <label>Escala</label>
+              <select name="config[{{ $codigo }}][escala]" class="form-control">
+                @foreach(['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande'] as $val => $lbl)
+                  <option value="{{ $val }}" {{ ($actual->escala ?? 'pequena') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          @if(!empty($cfg['extras']))
+            @foreach($cfg['extras'] as $extra)
+              <div class="form-group">
+                <label>{{ $extra['label'] }}</label>
+                <input type="text"
+                       name="config[{{ $codigo }}][{{ $extra['name'] }}]"
+                       class="form-control"
+                       placeholder="{{ $extra['ph'] }}"
+                       value="{{ $meta[$extra['name']] ?? '' }}">
+              </div>
+            @endforeach
+          @endif
+
+          @if(!empty($cfg['opciones']))
+            <div class="form-group">
+              <label>Tipo (puedes marcar varios)</label>
+              <div class="opciones-pills">
+                @foreach($cfg['opciones'] as $op)
+                  @php $opMarcada = !empty($meta[$op['name']]); @endphp
+                  <label class="opcion-pill {{ $opMarcada ? 'selected' : '' }}">
+                    <input type="checkbox"
+                           name="config[{{ $codigo }}][{{ $op['name'] }}]"
+                           value="1"
+                           {{ $opMarcada ? 'checked' : '' }}
+                           onchange="this.closest('.opcion-pill').classList.toggle('selected', this.checked);">
+                    {{ $op['label'] }}
+                  </label>
+                @endforeach
+              </div>
+            </div>
+          @endif
+        </div>
+        @endif
+      @endforeach
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full mt-3">Guardar líneas productivas</button>
+  </form>
+</div>
+
+@push('scripts')
+<script>
+  function togglePerfilConfig(codigo, mostrar) {
+    const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
+    if (!block) return;
+    if (mostrar) block.classList.remove('hidden');
+    else block.classList.add('hidden');
+  }
+</script>
+@endpush
 
 {{-- Acciones de cuenta --}}
 <div class="card mt-3">

@@ -1,0 +1,245 @@
+/* ════════════════════════════════════════════════════════════════
+   AGROGRANJA · LÍNEAS PRODUCTIVAS
+   Estilos del wizard de onboarding (5 pasos) y de la sección de
+   líneas activas en el perfil.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── WIZARD CONTAINER ─────────────────────────────────────────── */
+.wizard-form {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 18px 40px;
+  animation: wizardFadeIn .25s ease;
+}
+
+@keyframes wizardFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wizard-fields {
+  width: 100%;
+  text-align: left;
+  margin: 16px 0 12px;
+}
+
+.wizard-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 24px 0 16px;
+}
+.wizard-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--gris-border);
+  transition: all .25s;
+}
+.wizard-dot.active {
+  background: var(--verde-dark);
+  width: 22px;
+  border-radius: 4px;
+}
+
+.wizard-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+.wizard-actions .btn { flex: 1; padding: 12px 18px; }
+
+.wizard-btn-next {
+  margin-top: 28px;
+  padding: 13px 36px;
+}
+
+/* ── TARJETAS DE LÍNEAS PRODUCTIVAS (selección) ───────────────── */
+.lineas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin: 16px 0 8px;
+}
+
+.linea-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 14px 10px;
+  background: var(--blanco);
+  border: 2px solid var(--gris-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all .18s ease;
+  user-select: none;
+}
+.linea-card:hover {
+  border-color: var(--verde-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.linea-card.selected {
+  border-color: var(--verde-dark);
+  background: var(--verde-bg);
+  box-shadow: 0 0 0 3px rgba(61,139,61,.12);
+}
+.linea-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 22px; height: 22px;
+  background: var(--verde-dark);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+.linea-card .linea-check {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.linea-emoji {
+  font-size: 2rem;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.linea-nombre {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--negro);
+  margin-bottom: 4px;
+  line-height: 1.25;
+}
+.linea-desc {
+  font-size: .68rem;
+  color: var(--gris);
+  line-height: 1.35;
+}
+
+/* Variante compacta para el perfil */
+.lineas-grid-compact {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.lineas-grid-compact .linea-card {
+  padding: 10px 6px;
+}
+.lineas-grid-compact .linea-emoji { font-size: 1.6rem; margin-bottom: 4px; }
+.lineas-grid-compact .linea-nombre { font-size: .72rem; }
+.lineas-grid-compact .linea-desc   { display: none; }
+
+/* ── BLOQUE DE CONFIGURACIÓN POR LÍNEA ────────────────────────── */
+.config-block {
+  background: var(--crema);
+  border: 1px solid var(--gris-border);
+  border-radius: var(--radius);
+  padding: 14px 14px 4px;
+  margin-bottom: 12px;
+  text-align: left;
+  animation: wizardFadeIn .2s ease;
+}
+.config-block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--gris-border);
+}
+.config-emoji  { font-size: 1.5rem; }
+.config-titulo { font-weight: 700; font-size: .95rem; color: var(--negro); }
+
+/* ── PILLS (escala y opciones) ────────────────────────────────── */
+.escala-pills,
+.opciones-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.escala-pill,
+.opcion-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: var(--blanco);
+  border: 2px solid var(--gris-border);
+  border-radius: 99px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--gris);
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.escala-pill input,
+.opcion-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.escala-pill:hover,
+.opcion-pill:hover {
+  border-color: var(--verde-light);
+}
+.escala-pill.selected,
+.opcion-pill.selected {
+  background: var(--verde-bg);
+  border-color: var(--verde-dark);
+  color: var(--verde-dark);
+}
+
+/* ── RESUMEN FINAL ────────────────────────────────────────────── */
+.resumen-lineas {
+  width: 100%;
+  margin: 12px 0 4px;
+}
+.resumen-titulo {
+  font-size: .85rem;
+  color: var(--gris);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.resumen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.resumen-chip {
+  background: var(--verde-bg);
+  color: var(--verde-dark);
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+/* ── RESPONSIVE: DESKTOP ──────────────────────────────────────── */
+body[data-layout="pc"] .lineas-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+body[data-layout="pc"] .lineas-grid-compact {
+  grid-template-columns: repeat(5, 1fr);
+}
+body[data-layout="pc"] .wizard-form {
+  max-width: 620px;
+}

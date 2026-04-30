@@ -135,6 +135,7 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/perfil',               [PerfilController::class, 'update'])->name('perfil.update');
     Route::post('/perfil/password',      [PerfilController::class, 'changePassword'])->name('perfil.password');
     Route::post('/perfil/preferencias',  [PerfilController::class, 'updateNotificaciones'])->name('perfil.notificaciones');
+    Route::post('/perfil/lineas',        [PerfilController::class, 'updateLineas'])->name('perfil.lineas'); 
 
     // Personas
     Route::get('/personas',                                  [PersonaController::class, 'index'])->name('personas.index');

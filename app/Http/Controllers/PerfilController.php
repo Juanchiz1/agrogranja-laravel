@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\LineaProductiva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -26,17 +27,24 @@ class PerfilController extends Controller
         $tab  = $request->tab ?? 'datos';
 
         $stats = [
-            'cultivos'  => DB::table('cultivos')->where('usuario_id',$uid)->count(),
-            'animales'  => DB::table('animales')->where('usuario_id',$uid)->sum('cantidad'),
-            'gastos'    => DB::table('gastos')->where('usuario_id',$uid)->count(),
-            'ingresos'  => DB::table('ingresos')->where('usuario_id',$uid)->count(),
-            'tareas'    => DB::table('tareas')->where('usuario_id',$uid)->count(),
-            'cosechas'  => DB::table('cosechas')->where('usuario_id',$uid)->count(),
+            'cultivos'       => DB::table('cultivos')->where('usuario_id',$uid)->count(),
+            'animales'       => DB::table('animales')->where('usuario_id',$uid)->sum('cantidad'),
+            'gastos'         => DB::table('gastos')->where('usuario_id',$uid)->count(),
+            'ingresos'       => DB::table('ingresos')->where('usuario_id',$uid)->count(),
+            'tareas'         => DB::table('tareas')->where('usuario_id',$uid)->count(),
+            'cosechas'       => DB::table('cosechas')->where('usuario_id',$uid)->count(),
             'total_ingresos' => DB::table('ingresos')->where('usuario_id',$uid)->whereYear('fecha',now()->year)->sum('valor_total'),
             'total_gastos'   => DB::table('gastos')->where('usuario_id',$uid)->whereYear('fecha',now()->year)->sum('valor'),
         ];
 
-        return view('pages.perfil', compact('user','tab','stats'));
+        // Catálogo de líneas + las que ya tiene activas el usuario (para el tab preferencias).
+        $lineas        = LineaProductiva::activas()->get();
+        $lineasUsuario = DB::table('usuario_lineas')
+            ->where('usuario_id', $uid)
+            ->get()
+            ->keyBy('linea_codigo');
+
+        return view('pages.perfil', compact('user','tab','stats','lineas','lineasUsuario'));
     }
 
     public function update(Request $request)
@@ -46,12 +54,12 @@ class PerfilController extends Controller
         $user = DB::table('usuarios')->find($uid);
 
         $data = [
-            'nombre'            => $request->nombre,
-            'nombre_finca'      => $request->nombre_finca,
-            'departamento'      => $request->departamento,
-            'municipio'         => $request->municipio,
-            'telefono'          => $request->telefono,
-            'actualizado_en'    => now()->toDateTimeString(),
+            'nombre'         => $request->nombre,
+            'nombre_finca'   => $request->nombre_finca,
+            'departamento'   => $request->departamento,
+            'municipio'      => $request->municipio,
+            'telefono'       => $request->telefono,
+            'actualizado_en' => now()->toDateTimeString(),
         ];
 
         // Campos nuevos (try/catch por si no existen aún en la BD)
@@ -114,13 +122,79 @@ class PerfilController extends Controller
     {
         try {
             DB::table('usuarios')->where('id',session('usuario_id'))->update([
-                'notif_tareas' => $request->has('notif_tareas') ? 1 : 0,
-                'notif_stock'  => $request->has('notif_stock')  ? 1 : 0,
-                'moneda'       => $request->moneda ?? 'COP',
-                'actualizado_en'=> now()->toDateTimeString(),
+                'notif_tareas'   => $request->has('notif_tareas') ? 1 : 0,
+                'notif_stock'    => $request->has('notif_stock')  ? 1 : 0,
+                'moneda'         => $request->moneda ?? 'COP',
+                'actualizado_en' => now()->toDateTimeString(),
             ]);
         } catch (\Exception $e) {}
         return redirect()->route('perfil.index',['tab'=>'preferencias'])
             ->with('msg','Preferencias guardadas.')->with('msgType','success');
+    }
+
+    /**
+     * Actualiza las líneas productivas activas del usuario desde el
+     * tab "Preferencias" del perfil. Se hace en una transacción:
+     * borra todas las anteriores e inserta las nuevas.
+     */
+    public function updateLineas(Request $request)
+    {
+        $uid = session('usuario_id');
+        if (!$uid) return redirect()->route('login');
+
+        $request->validate([
+            'lineas' => 'required|array|min:1',
+        ], [
+            'lineas.required' => 'Debes mantener al menos una línea productiva activa.',
+            'lineas.min'      => 'Debes mantener al menos una línea productiva activa.',
+        ]);
+
+        DB::transaction(function () use ($request, $uid) {
+
+            DB::table('usuario_lineas')->where('usuario_id', $uid)->delete();
+
+            $codigosValidos = LineaProductiva::activas()->pluck('codigo')->toArray();
+            $configs        = $request->input('config', []);
+
+            foreach ((array) $request->lineas as $codigo) {
+                if (!in_array($codigo, $codigosValidos, true)) continue;
+
+                $cfg = $configs[$codigo] ?? [];
+
+                $cantidad = isset($cfg['cantidad']) && $cfg['cantidad'] !== ''
+                    ? (int) $cfg['cantidad'] : null;
+                $escala   = in_array($cfg['escala'] ?? '', ['pequena','mediana','grande'], true)
+                    ? $cfg['escala'] : 'pequena';
+
+                $meta = $cfg;
+                unset($meta['cantidad'], $meta['escala']);
+
+                DB::table('usuario_lineas')->insert([
+                    'usuario_id'     => $uid,
+                    'linea_codigo'   => $codigo,
+                    'cantidad_aprox' => $cantidad,
+                    'escala'         => $escala,
+                    'metadata'       => !empty($meta) ? json_encode($meta, JSON_UNESCAPED_UNICODE) : null,
+                    'activa'         => 1,
+                    'creado_en'      => now()->toDateTimeString(),
+                    'actualizado_en' => now()->toDateTimeString(),
+                ]);
+            }
+
+            // Refresca el campo legado tipo_produccion para coherencia visual.
+            try {
+                $resumen = LineaProductiva::resumenTexto($uid);
+                if ($resumen !== '') {
+                    DB::table('usuarios')->where('id', $uid)
+                        ->update(['tipo_produccion' => $resumen]);
+                }
+            } catch (\Exception $e) {}
+        });
+
+        LineaProductiva::limpiarCache($uid);
+
+        return redirect()->route('perfil.index',['tab'=>'preferencias'])
+            ->with('msg','Líneas productivas actualizadas. La app se adaptará a tus cambios.')
+            ->with('msgType','success');
     }
 }

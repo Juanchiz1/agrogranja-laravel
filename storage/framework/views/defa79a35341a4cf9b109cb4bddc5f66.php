@@ -4,6 +4,7 @@
 
 <?php $__env->startPush('head'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/perfil.css')); ?>">
+<link rel="stylesheet" href="<?php echo e(asset('css/lineas-productivas.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -311,6 +312,147 @@
     <button type="submit" class="btn btn-primary btn-full mt-3">Guardar preferencias</button>
   </form>
 </div>
+
+
+<?php
+  // Configuración rápida por línea (mismas opciones que el onboarding).
+  $configCamposPerfil = [
+    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas', 'cantidad_ph'=>'Ej: 2',
+        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']], 'opciones'=>[]],
+    'bovino'        => ['cantidad_label'=>'Cabezas aprox.', 'cantidad_ph'=>'Ej: 25',
+        'opciones'=>[['name'=>'leche','label'=>'Lechería'],['name'=>'carne','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
+    'porcino'       => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 30',
+        'opciones'=>[['name'=>'engorde','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
+    'avicola'       => ['cantidad_label'=>'Aves aprox.', 'cantidad_ph'=>'Ej: 200',
+        'opciones'=>[['name'=>'postura','label'=>'Postura'],['name'=>'engorde','label'=>'Engorde']]],
+    'piscicola'     => ['cantidad_label'=>'Estanques', 'cantidad_ph'=>'Ej: 3',
+        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']], 'opciones'=>[]],
+    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 15',
+        'opciones'=>[['name'=>'leche','label'=>'Leche'],['name'=>'carne','label'=>'Carne'],['name'=>'lana','label'=>'Lana']]],
+    'apicola'       => ['cantidad_label'=>'Colmenas', 'cantidad_ph'=>'Ej: 10', 'opciones'=>[]],
+    'equino'        => ['cantidad_label'=>'Cantidad', 'cantidad_ph'=>'Ej: 4',
+        'opciones'=>[['name'=>'trabajo','label'=>'Trabajo'],['name'=>'cria','label'=>'Cría']]],
+    'cunicola'      => ['cantidad_label'=>'Jaulas / madres', 'cantidad_ph'=>'Ej: 12', 'opciones'=>[]],
+  ];
+?>
+
+<div class="card mt-3">
+  <p style="font-weight:700;margin-bottom:6px;">🚜 Líneas productivas</p>
+  <p style="font-size:.82rem;color:var(--gris);margin-bottom:14px;">
+    Activa o desactiva lo que manejas. La app mostrará solo los módulos que necesitas.
+  </p>
+
+  <form method="POST" action="<?php echo e(route('perfil.lineas')); ?>">
+    <?php echo csrf_field(); ?>
+
+    <?php if($errors->has('lineas')): ?>
+      <div class="alert alert-error mb-3">❌ <?php echo e($errors->first('lineas')); ?></div>
+    <?php endif; ?>
+
+    <div class="lineas-grid lineas-grid-compact">
+      <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php
+          $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa;
+        ?>
+        <label class="linea-card <?php echo e($marcada ? 'selected' : ''); ?>" data-codigo="<?php echo e($linea->codigo); ?>">
+          <input type="checkbox" name="lineas[]" value="<?php echo e($linea->codigo); ?>"
+                 class="linea-check"
+                 onchange="this.closest('.linea-card').classList.toggle('selected', this.checked); togglePerfilConfig('<?php echo e($linea->codigo); ?>', this.checked);"
+                 <?php echo e($marcada ? 'checked' : ''); ?>>
+          <div class="linea-emoji"><?php echo e($linea->emoji); ?></div>
+          <div class="linea-nombre"><?php echo e($linea->nombre); ?></div>
+        </label>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+
+    <div id="perfilConfigContainer" style="margin-top:18px;">
+      <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php
+          $codigo  = $linea->codigo;
+          $cfg     = $configCamposPerfil[$codigo] ?? null;
+          $actual  = $lineasUsuario[$codigo] ?? null;
+          $marcada = $actual && $actual->activa;
+          $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
+        ?>
+
+        <?php if($cfg): ?>
+        <div class="config-block <?php echo e($marcada ? '' : 'hidden'); ?>" data-config-perfil-for="<?php echo e($codigo); ?>">
+          <div class="config-block-header">
+            <span class="config-emoji"><?php echo e($linea->emoji); ?></span>
+            <span class="config-titulo"><?php echo e($linea->nombre); ?></span>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label><?php echo e($cfg['cantidad_label']); ?></label>
+              <input type="number" min="0" step="1"
+                     name="config[<?php echo e($codigo); ?>][cantidad]"
+                     class="form-control"
+                     placeholder="<?php echo e($cfg['cantidad_ph']); ?>"
+                     value="<?php echo e($actual->cantidad_aprox ?? ''); ?>">
+            </div>
+            <div class="form-group">
+              <label>Escala</label>
+              <select name="config[<?php echo e($codigo); ?>][escala]" class="form-control">
+                <?php $__currentLoopData = ['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $val => $lbl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                  <option value="<?php echo e($val); ?>" <?php echo e(($actual->escala ?? 'pequena') === $val ? 'selected' : ''); ?>><?php echo e($lbl); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              </select>
+            </div>
+          </div>
+
+          <?php if(!empty($cfg['extras'])): ?>
+            <?php $__currentLoopData = $cfg['extras']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extra): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <div class="form-group">
+                <label><?php echo e($extra['label']); ?></label>
+                <input type="text"
+                       name="config[<?php echo e($codigo); ?>][<?php echo e($extra['name']); ?>]"
+                       class="form-control"
+                       placeholder="<?php echo e($extra['ph']); ?>"
+                       value="<?php echo e($meta[$extra['name']] ?? ''); ?>">
+              </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          <?php endif; ?>
+
+          <?php if(!empty($cfg['opciones'])): ?>
+            <div class="form-group">
+              <label>Tipo (puedes marcar varios)</label>
+              <div class="opciones-pills">
+                <?php $__currentLoopData = $cfg['opciones']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $op): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                  <?php $opMarcada = !empty($meta[$op['name']]); ?>
+                  <label class="opcion-pill <?php echo e($opMarcada ? 'selected' : ''); ?>">
+                    <input type="checkbox"
+                           name="config[<?php echo e($codigo); ?>][<?php echo e($op['name']); ?>]"
+                           value="1"
+                           <?php echo e($opMarcada ? 'checked' : ''); ?>
+
+                           onchange="this.closest('.opcion-pill').classList.toggle('selected', this.checked);">
+                    <?php echo e($op['label']); ?>
+
+                  </label>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              </div>
+            </div>
+          <?php endif; ?>
+        </div>
+        <?php endif; ?>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full mt-3">Guardar líneas productivas</button>
+  </form>
+</div>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+  function togglePerfilConfig(codigo, mostrar) {
+    const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
+    if (!block) return;
+    if (mostrar) block.classList.remove('hidden');
+    else block.classList.add('hidden');
+  }
+</script>
+<?php $__env->stopPush(); ?>
 
 
 <div class="card mt-3">

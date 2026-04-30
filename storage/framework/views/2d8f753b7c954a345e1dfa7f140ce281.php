@@ -1,12 +1,11 @@
-@extends('layouts.app')
-@section('title','Configuración inicial')
+<?php $__env->startSection('title','Configuración inicial'); ?>
 
-@push('head')
-<link rel="stylesheet" href="{{ asset('css/lineas-productivas.css') }}">
-@endpush
+<?php $__env->startPush('head'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/lineas-productivas.css')); ?>">
+<?php $__env->stopPush(); ?>
 
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
   // Etiquetas y campos de configuración rápida por línea (paso 4).
   // Se generan en PHP para que la vista quede limpia.
   $configCampos = [
@@ -79,13 +78,13 @@
       'opciones' => [],
     ],
   ];
-@endphp
+?>
 
-{{-- ══════════ WIZARD CONTAINER ══════════ --}}
-<form id="onboardForm" method="POST" action="{{ route('onboarding.complete') }}" class="wizard-form">
-  @csrf
 
-  {{-- ─────── PASO 0: BIENVENIDA ─────── --}}
+<form id="onboardForm" method="POST" action="<?php echo e(route('onboarding.complete')); ?>" class="wizard-form">
+  <?php echo csrf_field(); ?>
+
+  
   <div class="wizard-step" data-step="0">
     <div class="onboard-emoji">🌾</div>
     <h2 class="onboard-title">¡Bienvenido a<br>Agrogranja!</h2>
@@ -102,7 +101,7 @@
     <button type="button" class="btn btn-primary wizard-btn-next" onclick="wizardNext()">Empecemos →</button>
   </div>
 
-  {{-- ─────── PASO 1: DATOS DE LA FINCA ─────── --}}
+  
   <div class="wizard-step hidden" data-step="1">
     <div class="onboard-emoji">🏡</div>
     <h2 class="onboard-title">Cuéntanos de tu finca</h2>
@@ -113,7 +112,7 @@
         <label>Nombre de la finca</label>
         <input type="text" name="nombre_finca" class="form-control"
                placeholder="Ej: Finca La Esperanza"
-               value="{{ $user->nombre_finca ?? '' }}">
+               value="<?php echo e($user->nombre_finca ?? ''); ?>">
       </div>
 
       <div class="grid-2">
@@ -121,13 +120,13 @@
           <label>Hectáreas (opcional)</label>
           <input type="number" step="0.1" min="0" name="hectareas_total" class="form-control"
                  placeholder="0.0"
-                 value="{{ $user->hectareas_total ?? '' }}">
+                 value="<?php echo e($user->hectareas_total ?? ''); ?>">
         </div>
         <div class="form-group">
           <label>Departamento</label>
           <input type="text" name="departamento" class="form-control"
                  placeholder="Ej: Antioquia"
-                 value="{{ $user->departamento ?? '' }}">
+                 value="<?php echo e($user->departamento ?? ''); ?>">
         </div>
       </div>
 
@@ -135,13 +134,13 @@
         <label>Municipio</label>
         <input type="text" name="municipio" class="form-control"
                placeholder="Ej: Medellín"
-               value="{{ $user->municipio ?? '' }}">
+               value="<?php echo e($user->municipio ?? ''); ?>">
       </div>
 
       <div class="form-group">
         <label>Descripción (opcional)</label>
         <textarea name="descripcion_finca" class="form-control" rows="2"
-                  placeholder="Cualquier nota: clima, historia, condiciones especiales...">{{ $user->descripcion_finca ?? '' }}</textarea>
+                  placeholder="Cualquier nota: clima, historia, condiciones especiales..."><?php echo e($user->descripcion_finca ?? ''); ?></textarea>
       </div>
     </div>
 
@@ -158,7 +157,7 @@
     </div>
   </div>
 
-  {{-- ─────── PASO 2: SELECCIÓN DE LÍNEAS PRODUCTIVAS ─────── --}}
+  
   <div class="wizard-step hidden" data-step="2">
     <div class="onboard-emoji">🚜</div>
     <h2 class="onboard-title">¿Qué manejas en tu finca?</h2>
@@ -169,20 +168,20 @@
     </div>
 
     <div class="lineas-grid">
-      @foreach($lineas as $linea)
-        @php
+      <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php
           $marcada = isset($lineasUsuario[$linea->codigo]);
-        @endphp
-        <label class="linea-card {{ $marcada ? 'selected' : '' }}" data-codigo="{{ $linea->codigo }}">
-          <input type="checkbox" name="lineas[]" value="{{ $linea->codigo }}"
+        ?>
+        <label class="linea-card <?php echo e($marcada ? 'selected' : ''); ?>" data-codigo="<?php echo e($linea->codigo); ?>">
+          <input type="checkbox" name="lineas[]" value="<?php echo e($linea->codigo); ?>"
                  class="linea-check"
                  onchange="toggleLineaCard(this)"
-                 {{ $marcada ? 'checked' : '' }}>
-          <div class="linea-emoji">{{ $linea->emoji }}</div>
-          <div class="linea-nombre">{{ $linea->nombre }}</div>
-          <div class="linea-desc">{{ $linea->descripcion }}</div>
+                 <?php echo e($marcada ? 'checked' : ''); ?>>
+          <div class="linea-emoji"><?php echo e($linea->emoji); ?></div>
+          <div class="linea-nombre"><?php echo e($linea->nombre); ?></div>
+          <div class="linea-desc"><?php echo e($linea->descripcion); ?></div>
         </label>
-      @endforeach
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
     <div class="wizard-dots">
@@ -198,88 +197,92 @@
     </div>
   </div>
 
-  {{-- ─────── PASO 3: CONFIGURACIÓN POR LÍNEA ─────── --}}
+  
   <div class="wizard-step hidden" data-step="3">
     <div class="onboard-emoji">⚙️</div>
     <h2 class="onboard-title">Configura cada actividad</h2>
     <p class="onboard-desc">Datos rápidos. Si no estás seguro, deja vacío y los completas después.</p>
 
     <div id="configContainer">
-      @foreach($lineas as $linea)
-        @php
+      <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php
           $codigo  = $linea->codigo;
           $cfg     = $configCampos[$codigo] ?? null;
           $actual  = $lineasUsuario[$codigo] ?? null;
           $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
-        @endphp
+        ?>
 
-        @if($cfg)
-        <div class="config-block hidden" data-config-for="{{ $codigo }}">
+        <?php if($cfg): ?>
+        <div class="config-block hidden" data-config-for="<?php echo e($codigo); ?>">
           <div class="config-block-header">
-            <span class="config-emoji">{{ $linea->emoji }}</span>
-            <span class="config-titulo">{{ $linea->nombre }}</span>
+            <span class="config-emoji"><?php echo e($linea->emoji); ?></span>
+            <span class="config-titulo"><?php echo e($linea->nombre); ?></span>
           </div>
 
           <div class="form-group">
-            <label>{{ $cfg['cantidad_label'] }}</label>
+            <label><?php echo e($cfg['cantidad_label']); ?></label>
             <input type="number" min="0" step="1"
-                   name="config[{{ $codigo }}][cantidad]"
+                   name="config[<?php echo e($codigo); ?>][cantidad]"
                    class="form-control"
-                   placeholder="{{ $cfg['cantidad_ph'] }}"
-                   value="{{ $actual->cantidad_aprox ?? '' }}">
+                   placeholder="<?php echo e($cfg['cantidad_ph']); ?>"
+                   value="<?php echo e($actual->cantidad_aprox ?? ''); ?>">
           </div>
 
           <div class="form-group">
             <label>Escala</label>
             <div class="escala-pills">
-              @foreach(['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande'] as $val => $lbl)
-                @php $checked = ($actual->escala ?? 'pequena') === $val; @endphp
-                <label class="escala-pill {{ $checked ? 'selected' : '' }}">
+              <?php $__currentLoopData = ['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $val => $lbl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php $checked = ($actual->escala ?? 'pequena') === $val; ?>
+                <label class="escala-pill <?php echo e($checked ? 'selected' : ''); ?>">
                   <input type="radio"
-                         name="config[{{ $codigo }}][escala]"
-                         value="{{ $val }}"
-                         {{ $checked ? 'checked' : '' }}
+                         name="config[<?php echo e($codigo); ?>][escala]"
+                         value="<?php echo e($val); ?>"
+                         <?php echo e($checked ? 'checked' : ''); ?>
+
                          onchange="syncEscalaPill(this)">
-                  {{ $lbl }}
+                  <?php echo e($lbl); ?>
+
                 </label>
-              @endforeach
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
           </div>
 
-          @if(!empty($cfg['extras']))
-            @foreach($cfg['extras'] as $extra)
+          <?php if(!empty($cfg['extras'])): ?>
+            <?php $__currentLoopData = $cfg['extras']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extra): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
               <div class="form-group">
-                <label>{{ $extra['label'] }}</label>
+                <label><?php echo e($extra['label']); ?></label>
                 <input type="text"
-                       name="config[{{ $codigo }}][{{ $extra['name'] }}]"
+                       name="config[<?php echo e($codigo); ?>][<?php echo e($extra['name']); ?>]"
                        class="form-control"
-                       placeholder="{{ $extra['ph'] }}"
-                       value="{{ $meta[$extra['name']] ?? '' }}">
+                       placeholder="<?php echo e($extra['ph']); ?>"
+                       value="<?php echo e($meta[$extra['name']] ?? ''); ?>">
               </div>
-            @endforeach
-          @endif
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          <?php endif; ?>
 
-          @if(!empty($cfg['opciones']))
+          <?php if(!empty($cfg['opciones'])): ?>
             <div class="form-group">
               <label>¿Qué tipo? (puedes marcar varios)</label>
               <div class="opciones-pills">
-                @foreach($cfg['opciones'] as $op)
-                  @php $marcada = !empty($meta[$op['name']]); @endphp
-                  <label class="opcion-pill {{ $marcada ? 'selected' : '' }}">
+                <?php $__currentLoopData = $cfg['opciones']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $op): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                  <?php $marcada = !empty($meta[$op['name']]); ?>
+                  <label class="opcion-pill <?php echo e($marcada ? 'selected' : ''); ?>">
                     <input type="checkbox"
-                           name="config[{{ $codigo }}][{{ $op['name'] }}]"
+                           name="config[<?php echo e($codigo); ?>][<?php echo e($op['name']); ?>]"
                            value="1"
-                           {{ $marcada ? 'checked' : '' }}
+                           <?php echo e($marcada ? 'checked' : ''); ?>
+
                            onchange="syncOpcionPill(this)">
-                    {{ $op['label'] }}
+                    <?php echo e($op['label']); ?>
+
                   </label>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
               </div>
             </div>
-          @endif
+          <?php endif; ?>
         </div>
-        @endif
-      @endforeach
+        <?php endif; ?>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
       <div id="configVacio" class="hidden" style="text-align:center;padding:24px;color:var(--gris);">
         Vuelve al paso anterior y selecciona al menos una línea productiva.
@@ -299,7 +302,7 @@
     </div>
   </div>
 
-  {{-- ─────── PASO 4: RESUMEN Y FIN ─────── --}}
+  
   <div class="wizard-step hidden" data-step="4">
     <div class="onboard-emoji">🎉</div>
     <h2 class="onboard-title">¡Todo listo!</h2>
@@ -324,7 +327,7 @@
 
 </form>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
   let wizardCurrentStep = 0;
   const totalSteps = 5;
@@ -416,5 +419,6 @@
     cont.innerHTML = html;
   }
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/auth/onboarding.blade.php ENDPATH**/ ?>
