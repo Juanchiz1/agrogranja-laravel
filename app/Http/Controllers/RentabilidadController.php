@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 class RentabilidadController extends Controller
 {
     public function index(Request $request)
@@ -69,12 +70,13 @@ class RentabilidadController extends Controller
         });
 
         // ── Ordenar ───────────────────────────────────────────────
-        $datos = match($orden) {
-            'ingresos'     => $datos->sortByDesc('ingresos'),
-            'gastos'       => $datos->sortByDesc('costo_total'),
-            'nombre'       => $datos->sortBy('nombre'),
-            default        => $datos->sortByDesc('rentabilidad'),
-        }->values();
+      $datos = match($orden) {
+    'ingresos' => $datos->sortByDesc('ingresos'),
+    'gastos'   => $datos->sortByDesc('costo_total'),
+    'nombre'   => $datos->sortBy('nombre'),
+    default    => $datos->sortByDesc('rentabilidad'),
+};
+$datos = $datos->values();
 
         // ── Totales globales ──────────────────────────────────────
         $totalIngresos = $datos->sum('ingresos');

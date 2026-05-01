@@ -5,6 +5,48 @@
 
 <?php $__env->startPush('head'); ?>
 <link rel="stylesheet" href="<?php echo e(asset('css/cultivos.css')); ?>">
+<style>
+/* ── Estilos Fase 3 para cultivo-detalle ──────────────────── */
+.modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;overflow-y:auto;padding:20px; }
+.modal-overlay.open { display:flex !important;align-items:flex-start;justify-content:center; }
+.modal-box { background:#ffffff;border-radius:16px;padding:20px;width:100%;max-width:500px;margin:auto; }
+.modal-title { font-weight:800;font-size:1.05rem;margin-bottom:16px; }
+
+/* ── Tabs del modal evento avanzado ──────────────────────────
+   Se usan colores explícitos (no variables) para garantizar
+   visibilidad independientemente del tema o herencias de app.css.
+   Inactivo: fondo gris claro + borde gris + texto oscuro.
+   Activo:   fondo verde oscuro + texto blanco.
+   ────────────────────────────────────────────────────────── */
+.tab-group { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px; }
+.tab-btn {
+  padding: 7px 13px;
+  border-radius: 20px;
+  border: 1.5px solid #c0ccd8;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+  transition: all .15s;
+}
+.tab-btn:hover {
+  border-color: #3d8b3d;
+  color: #2d6a2d;
+  background: #edf7ed;
+}
+.tab-btn.active {
+  background: #2d6a2d;
+  color: #ffffff;
+  border-color: #2d6a2d;
+}
+
+.fields-group { display:none; }
+.fields-group.active { display:block; }
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+</style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -49,6 +91,76 @@
 </div>
 
 
+<?php if($cultivo->faseActual): ?>
+<?php
+  $faseActual      = $cultivo->faseActual;
+  $porcentajeFenol = $cultivo->porcentajeFenologico();
+?>
+<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;
+     padding:14px 16px;margin-bottom:12px;border-left:4px solid <?php echo e($faseActual->color_hex); ?>;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:.75rem;color:#64748b;font-weight:600;margin-bottom:2px;">FASE ACTUAL</div>
+      <div style="font-weight:800;font-size:1rem;"><?php echo e($faseActual->icono); ?> <?php echo e($faseActual->nombre); ?></div>
+      <?php if($cultivo->fecha_cambio_fase): ?>
+      <div style="font-size:.75rem;color:#64748b;">
+        desde <?php echo e(\Carbon\Carbon::parse($cultivo->fecha_cambio_fase)->format('d/m/Y')); ?>
+
+        · <?php echo e(\Carbon\Carbon::parse($cultivo->fecha_cambio_fase)->diffInDays(now())); ?> días en esta fase
+      </div>
+      <?php endif; ?>
+    </div>
+    <a href="<?php echo e(route('cultivos.fenologia', $cultivo->id)); ?>"
+       class="btn btn-sm btn-secondary" style="white-space:nowrap;">
+       📅 Ver Fenología
+    </a>
+  </div>
+  <div style="margin-top:10px;">
+    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:#64748b;margin-bottom:3px;">
+      <span>Progreso fenológico</span><span><?php echo e($porcentajeFenol); ?>%</span>
+    </div>
+    <div style="background:#e2e8f0;border-radius:50px;height:8px;overflow:hidden;">
+      <div style="height:100%;background:linear-gradient(90deg,<?php echo e($faseActual->color_hex); ?>,<?php echo e($faseActual->color_hex); ?>CC);
+           border-radius:50px;width:<?php echo e($porcentajeFenol); ?>%;transition:width .6s;"></div>
+    </div>
+  </div>
+</div>
+
+
+<?php
+  $alertasCarencia = \App\Models\CultivoEventoAvanzado::where('cultivo_id', $cultivo->id)
+      ->where('alerta_cosecha_activa', true)
+      ->where('fecha_minima_cosecha', '>=', now()->toDateString())
+      ->get();
+?>
+<?php if($alertasCarencia->count()): ?>
+<div style="background:#fde8e8;border:1px solid #f5c6cb;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+  <div style="font-weight:700;color:#c0392b;font-size:.85rem;margin-bottom:4px;">⚠️ Período de carencia activo</div>
+  <?php $__currentLoopData = $alertasCarencia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $alerta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+  <div style="font-size:.8rem;color:#721c24;">
+    🧪 <strong><?php echo e($alerta->producto_nombre); ?></strong>
+    — No cosechar antes del <strong><?php echo e(\Carbon\Carbon::parse($alerta->fecha_minima_cosecha)->format('d/m/Y')); ?></strong>
+  </div>
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+</div>
+<?php endif; ?>
+
+<?php else: ?>
+
+<div style="background:#edf7ed;border:1px dashed #3d8b3d;border-radius:12px;
+     padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+  <div style="font-size:.85rem;color:#2d6a2d;">
+    🌱 <strong>Sin fase fenológica asignada</strong><br>
+    <span style="font-size:.78rem;">Asigna una fase para activar el plan de manejo automático.</span>
+  </div>
+  <a href="<?php echo e(route('cultivos.fenologia', $cultivo->id)); ?>" class="btn btn-sm btn-primary" style="white-space:nowrap;">
+    Asignar fase
+  </a>
+</div>
+<?php endif; ?>
+
+
+
 <div class="section-card">
   <div class="section-header">
     <div class="section-title">📋 Información</div>
@@ -59,7 +171,7 @@
   <div class="info-row"><span class="info-label">Fecha siembra</span><span class="info-value"><?php echo e(\Carbon\Carbon::parse($cultivo->fecha_siembra)->format('d/m/Y')); ?></span></div>
   <div class="info-row"><span class="info-label">Estado</span><span class="info-value"><span class="badge <?php echo e($badgeClass); ?>"><?php echo e($cultivo->estado); ?></span></span></div>
   <?php if($cultivo->notas): ?>
-  <div style="margin-top:10px;padding:10px;background:var(--verde-bg);border-radius:8px;font-size:.85rem;color:var(--verde-dark);">
+  <div style="margin-top:10px;padding:10px;background:#edf7ed;border-radius:8px;font-size:.85rem;color:#2d6a2d;">
     📝 <?php echo e($cultivo->notas); ?>
 
   </div>
@@ -73,18 +185,18 @@
     <a href="<?php echo e(route('rentabilidad.detalle', $cultivo->id)); ?>" class="btn btn-sm btn-ghost">Ver más →</a>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-    <div style="background:var(--verde-bg);border-radius:10px;padding:12px;text-align:center;">
-      <div style="font-size:.75rem;color:var(--text-secondary);">Ingresos</div>
-      <div style="font-weight:800;color:var(--verde-dark);">$<?php echo e(number_format($totalIngresos,0,',','.')); ?></div>
+    <div style="background:#edf7ed;border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-size:.75rem;color:#64748b;">Ingresos</div>
+      <div style="font-weight:800;color:#2d6a2d;">$<?php echo e(number_format($totalIngresos,0,',','.')); ?></div>
     </div>
     <div style="background:#fef2f2;border-radius:10px;padding:12px;text-align:center;">
-      <div style="font-size:.75rem;color:var(--text-secondary);">Gastos</div>
+      <div style="font-size:.75rem;color:#64748b;">Gastos</div>
       <div style="font-weight:800;color:var(--rojo);">$<?php echo e(number_format($totalGastos,0,',','.')); ?></div>
     </div>
   </div>
   <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;">
     <span>Balance</span>
-    <strong style="<?php echo e($balance >= 0 ? 'color:var(--verde-dark)' : 'color:var(--rojo)'); ?>">
+    <strong style="<?php echo e($balance >= 0 ? 'color:#2d6a2d' : 'color:var(--rojo)'); ?>">
       <?php echo e($balance >= 0 ? '+' : '-'); ?>$<?php echo e(number_format(abs($balance),0,',','.')); ?>
 
     </strong>
@@ -93,7 +205,7 @@
   <div class="rent-bar-wrap">
     <div class="rent-bar-fill" style="width:<?php echo e(min(100, ($totalIngresos/$totalGastos)*100)); ?>%; <?php echo e($balance < 0 ? 'background:var(--rojo)' : ''); ?>"></div>
   </div>
-  <div style="font-size:.72rem;color:var(--text-secondary);margin-top:4px;"><?php echo e($totalGastos > 0 ? round(($totalIngresos/$totalGastos)*100) : 0); ?>% de gastos recuperados</div>
+  <div style="font-size:.72rem;color:#64748b;margin-top:4px;"><?php echo e($totalGastos > 0 ? round(($totalIngresos/$totalGastos)*100) : 0); ?>% de gastos recuperados</div>
   <?php endif; ?>
 </div>
 
@@ -112,15 +224,14 @@
       </form>
     </div>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    
     <label class="foto-upload-btn" for="fotoUploadInput">
       <span style="font-size:1.5rem;">📷</span>
       <span>Agregar foto</span>
     </label>
   </div>
-  <form method="POST" action="<?php echo e(route('cultivos.fotos.upload',$cultivo->id)); ?>" enctype="multipart/form-data" id="fotoUploadForm" style="margin-top:12px;display:none;" id="fotoUploadFormWrapper">
+  <form method="POST" action="<?php echo e(route('cultivos.fotos.upload',$cultivo->id)); ?>" enctype="multipart/form-data" id="fotoUploadForm" style="margin-top:12px;display:none;">
     <?php echo csrf_field(); ?>
-    <input type="file" id="fotoUploadInput" name="foto" accept="image/*" style="display:none;" onchange="handleFotoSelect(this)">
+    <input type="file" id="fotoUploadInput" name="foto" accept="image/*" style="display:none;">
     <div id="fotoPreviewWrap" style="display:none;">
       <img id="fotoPreview" style="width:100%;border-radius:10px;margin-bottom:10px;max-height:200px;object-fit:cover;">
       <div class="form-group"><label>Título (opcional)</label><input type="text" name="titulo" class="form-control" placeholder="Ej: Semana 3 de crecimiento"></div>
@@ -140,13 +251,13 @@
     <a href="<?php echo e(route('gastos.index')); ?>?cultivo=<?php echo e($cultivo->id); ?>" class="btn btn-sm btn-ghost">Ver todos →</a>
   </div>
   <?php if($gastos->isEmpty()): ?>
-    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:12px 0;">Sin gastos registrados para este cultivo.</p>
+    <p style="text-align:center;color:#64748b;font-size:.85rem;padding:12px 0;">Sin gastos registrados para este cultivo.</p>
   <?php else: ?>
     <?php $__currentLoopData = $gastos->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $g): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;">
       <div>
         <div style="font-size:.88rem;font-weight:600;"><?php echo e($g->descripcion); ?></div>
-        <div style="font-size:.75rem;color:var(--text-secondary);"><?php echo e($g->categoria); ?> · <?php echo e(\Carbon\Carbon::parse($g->fecha)->format('d/m/Y')); ?></div>
+        <div style="font-size:.75rem;color:#64748b;"><?php echo e($g->categoria); ?> · <?php echo e(\Carbon\Carbon::parse($g->fecha)->format('d/m/Y')); ?></div>
       </div>
       <div style="font-weight:700;color:var(--rojo);">-$<?php echo e(number_format($g->valor,0,',','.')); ?></div>
     </div>
@@ -164,15 +275,15 @@
     <a href="<?php echo e(route('calendario.index')); ?>" class="btn btn-sm btn-ghost">Agenda →</a>
   </div>
   <?php if($tareas->isEmpty()): ?>
-    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:12px 0;">Sin tareas programadas para este cultivo.</p>
+    <p style="text-align:center;color:#64748b;font-size:.85rem;padding:12px 0;">Sin tareas programadas para este cultivo.</p>
   <?php else: ?>
     <?php $__currentLoopData = $tareas->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <?php $pendiente = !$t->completada; ?>
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e2e8f0;">
       <span style="font-size:1.1rem;"><?php echo e($pendiente ? '⏳' : '✅'); ?></span>
       <div style="flex:1;">
-        <div style="font-size:.88rem;font-weight:<?php echo e($pendiente ? '600' : '400'); ?>;<?php echo e($pendiente ? '' : 'text-decoration:line-through;color:var(--text-secondary)'); ?>"><?php echo e($t->titulo); ?></div>
-        <div style="font-size:.75rem;color:var(--text-secondary);"><?php echo e(ucfirst($t->tipo)); ?> · <?php echo e(\Carbon\Carbon::parse($t->fecha)->format('d/m/Y')); ?></div>
+        <div style="font-size:.88rem;font-weight:<?php echo e($pendiente ? '600' : '400'); ?>;<?php echo e($pendiente ? '' : 'text-decoration:line-through;color:#94a3b8'); ?>"><?php echo e($t->titulo); ?></div>
+        <div style="font-size:.75rem;color:#64748b;"><?php echo e(ucfirst($t->tipo)); ?> · <?php echo e(\Carbon\Carbon::parse($t->fecha)->format('d/m/Y')); ?></div>
       </div>
       <span class="badge <?php echo e(['alta'=>'badge-red','media'=>'badge-orange','baja'=>'badge-blue'][$t->prioridad] ?? 'badge-blue'); ?>"><?php echo e($t->prioridad); ?></span>
     </div>
@@ -187,7 +298,7 @@
     <a href="<?php echo e(route('cosechas.index')); ?>" class="btn btn-sm btn-ghost">Ver todas →</a>
   </div>
   <?php if($cosechas->isEmpty()): ?>
-    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:12px 0;">
+    <p style="text-align:center;color:#64748b;font-size:.85rem;padding:12px 0;">
       Aún no hay cosechas registradas.
       <?php if($cultivo->estado === 'activo'): ?>
         <br><span style="font-size:.75rem;">Cuando coseches, cambia el estado a "cosechado" y regístrala.</span>
@@ -195,14 +306,14 @@
     </p>
   <?php else: ?>
     <?php $__currentLoopData = $cosechas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $co): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;">
       <div>
         <div style="font-size:.88rem;font-weight:600;"><?php echo e($co->producto); ?></div>
-        <div style="font-size:.75rem;color:var(--text-secondary);"><?php echo e(\Carbon\Carbon::parse($co->fecha_cosecha)->format('d/m/Y')); ?> · <?php echo e(ucfirst($co->calidad)); ?></div>
+        <div style="font-size:.75rem;color:#64748b;"><?php echo e(\Carbon\Carbon::parse($co->fecha_cosecha)->format('d/m/Y')); ?> · <?php echo e(ucfirst($co->calidad)); ?></div>
       </div>
       <div style="text-align:right;">
-        <div style="font-weight:700;color:var(--verde-dark);"><?php echo e($co->cantidad); ?> <?php echo e($co->unidad); ?></div>
-        <?php if($co->valor_estimado): ?><div style="font-size:.75rem;color:var(--text-secondary);">$<?php echo e(number_format($co->valor_estimado,0,',','.')); ?></div><?php endif; ?>
+        <div style="font-weight:700;color:#2d6a2d;"><?php echo e($co->cantidad); ?> <?php echo e($co->unidad); ?></div>
+        <?php if($co->valor_estimado): ?><div style="font-size:.75rem;color:#64748b;">$<?php echo e(number_format($co->valor_estimado,0,',','.')); ?></div><?php endif; ?>
       </div>
     </div>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -217,10 +328,10 @@
     <a href="<?php echo e(route('inventario.index')); ?>" class="btn btn-sm btn-ghost">Inventario →</a>
   </div>
   <?php $__currentLoopData = $movimientos->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;">
     <div>
       <div style="font-size:.88rem;font-weight:600;"><?php echo e($m->insumo_nombre); ?></div>
-      <div style="font-size:.75rem;color:var(--text-secondary);"><?php echo e($m->motivo ?? 'Sin descripción'); ?> · <?php echo e(\Carbon\Carbon::parse($m->fecha)->format('d/m/Y')); ?></div>
+      <div style="font-size:.75rem;color:#64748b;"><?php echo e($m->motivo ?? 'Sin descripción'); ?> · <?php echo e(\Carbon\Carbon::parse($m->fecha)->format('d/m/Y')); ?></div>
     </div>
     <div style="font-weight:600;color:var(--rojo);">-<?php echo e($m->cantidad); ?> <?php echo e($m->insumo_unidad); ?></div>
   </div>
@@ -232,17 +343,18 @@
 <div class="section-card">
   <div class="section-header">
     <div class="section-title">📜 Línea de tiempo</div>
-    <button onclick="openModal('modalEvento')" class="btn btn-sm btn-primary">+ Evento</button>
+    <div style="display:flex;gap:6px;">
+      <button onclick="openModal('modalEventoAvanzadoDetalle')" class="btn btn-sm btn-secondary">🧪 Aplicación</button>
+      <button onclick="openModal('modalEvento')" class="btn btn-sm btn-primary">+ Evento</button>
+    </div>
   </div>
 
   <?php if($timeline->isEmpty()): ?>
-    <p style="text-align:center;color:var(--text-secondary);font-size:.85rem;padding:12px 0;">La línea de tiempo se irá llenando con tus gastos, tareas y eventos.</p>
+    <p style="text-align:center;color:#64748b;font-size:.85rem;padding:12px 0;">La línea de tiempo se irá llenando con tus gastos, tareas y eventos.</p>
   <?php else: ?>
   <div class="timeline">
     <?php $__currentLoopData = $timeline; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <?php
-      $dotClass = 'tipo-'.str_replace('_','-',$item['tipo'] ?? 'nota');
-    ?>
+    <?php $dotClass = 'tipo-'.str_replace('_','-',$item['tipo'] ?? 'nota'); ?>
     <div class="tl-item">
       <div class="tl-dot <?php echo e($dotClass); ?>"></div>
       <div class="tl-body">
@@ -253,7 +365,7 @@
         <?php if($item['origen'] === 'evento'): ?>
         <form method="POST" action="<?php echo e(route('cultivos.eventos.delete',[$cultivo->id,$item['id']])); ?>" onsubmit="return confirm('¿Eliminar evento?')" style="margin-top:6px;">
           <?php echo csrf_field(); ?>
-          <button class="btn btn-sm btn-ghost" style="font-size:.72rem;padding:2px 8px;color:var(--text-muted);">✕ Eliminar</button>
+          <button class="btn btn-sm btn-ghost" style="font-size:.72rem;padding:2px 8px;color:#94a3b8;">✕ Eliminar</button>
         </form>
         <?php endif; ?>
       </div>
@@ -263,8 +375,9 @@
   <?php endif; ?>
 </div>
 
-
 <div style="margin-bottom:80px;"></div>
+
+
 
 
 
@@ -351,13 +464,201 @@
 </div>
 
 
+<div id="modalEventoAvanzadoDetalle" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title">🧪 Registrar Aplicación / Manejo</div>
+    <form method="POST" action="<?php echo e(route('cultivos.eventos-avanzados.store', $cultivo->id)); ?>" enctype="multipart/form-data">
+      <?php echo csrf_field(); ?>
+
+      
+      <div class="form-group">
+        <label style="display:block;margin-bottom:8px;">Tipo de evento</label>
+        <div class="tab-group" id="tabGroupDetalle">
+          <button type="button" class="tab-btn active"
+                  onclick="selectTipoDetalle('aplicacion_agroquimico',this)">🧪 Agroquímico</button>
+          <button type="button" class="tab-btn"
+                  onclick="selectTipoDetalle('riego',this)">💧 Riego</button>
+          <button type="button" class="tab-btn"
+                  onclick="selectTipoDetalle('fertilizacion',this)">🌿 Fertilización</button>
+          <button type="button" class="tab-btn"
+                  onclick="selectTipoDetalle('control_fitosanitario',this)">🐛 Fitosanitario</button>
+          <button type="button" class="tab-btn"
+                  onclick="selectTipoDetalle('deshierbe',this)">🪚 Deshierbe</button>
+        </div>
+        <input type="hidden" name="tipo" id="tipo_hidden_detalle" value="aplicacion_agroquimico">
+      </div>
+
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Título *</label>
+          <input type="text" name="titulo" class="form-control" required placeholder="Ej: Aplicación Roundup">
+        </div>
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" name="fecha" class="form-control" value="<?php echo e(now()->toDateString()); ?>" required>
+        </div>
+      </div>
+
+      
+      <div id="det_fields_aplicacion_agroquimico" class="fields-group active">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Producto *</label>
+            <input type="text" name="producto_nombre" class="form-control" placeholder="Nombre comercial">
+          </div>
+          <div class="form-group">
+            <label>Registro ICA</label>
+            <input type="text" name="producto_registro_ica" class="form-control" placeholder="ICA-XXXXXX">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dosis</label>
+            <input type="number" name="dosis" class="form-control" step="0.0001" min="0" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Unidad</label>
+            <select name="dosis_unidad" class="form-control">
+              <option value="cc/L">cc/L</option>
+              <option value="g/L">g/L</option>
+              <option value="L/ha">L/ha</option>
+              <option value="kg/ha">kg/ha</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>⏱ Período de carencia (días)</label>
+          <input type="number" name="periodo_carencia_dias" class="form-control" min="0" placeholder="Ej: 14">
+          <div style="font-size:.73rem;color:#64748b;margin-top:3px;">La fecha mínima de cosecha se calcula automáticamente.</div>
+        </div>
+      </div>
+
+      
+      <div id="det_fields_riego" class="fields-group">
+        <div class="form-row">
+          <div class="form-group"><label>Volumen (L)</label><input type="number" name="volumen_agua_litros" class="form-control" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-group"><label>Duración (min)</label><input type="number" name="duracion_minutos" class="form-control" min="0" placeholder="0"></div>
+        </div>
+        <div class="form-group">
+          <label>Método</label>
+          <select name="metodo_riego" class="form-control">
+            <option value="manual">Manual</option>
+            <option value="goteo">Goteo</option>
+            <option value="aspersion">Aspersión</option>
+            <option value="surco">Surco</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      
+      <div id="det_fields_fertilizacion" class="fields-group">
+        <div class="form-row">
+          <div class="form-group"><label>Fuente / Producto</label><input type="text" name="fuente_fertilizante" class="form-control" placeholder="Urea 46%"></div>
+          <div class="form-group">
+            <label>Método</label>
+            <select name="metodo_aplicacion_fertilizante" class="form-control">
+              <option value="edafico">Edáfico (suelo)</option>
+              <option value="foliar">Foliar</option>
+              <option value="fertiriego">Fertiriego</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="form-group"><label>N (kg/ha)</label><input type="number" name="nitrogeno_n" class="form-control" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-group"><label>P (kg/ha)</label><input type="number" name="fosforo_p" class="form-control" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-group"><label>K (kg/ha)</label><input type="number" name="potasio_k" class="form-control" step="0.01" min="0" placeholder="0"></div>
+        </div>
+      </div>
+
+      
+      <div id="det_fields_control_fitosanitario" class="fields-group">
+        <div class="form-row">
+          <div class="form-group"><label>Plaga / Enfermedad</label><input type="text" name="plaga_enfermedad" class="form-control" placeholder="Ej: Trips"></div>
+          <div class="form-group">
+            <label>Severidad</label>
+            <select name="nivel_severidad" class="form-control">
+              <option value="bajo">Bajo</option>
+              <option value="medio" selected>Medio</option>
+              <option value="alto">Alto</option>
+              <option value="critico">Crítico</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Producto</label><input type="text" name="producto_nombre" class="form-control" placeholder="Nombre del producto"></div>
+          <div class="form-group"><label>Dosis</label><input type="number" name="dosis" class="form-control" step="0.001" min="0" placeholder="0"></div>
+        </div>
+      </div>
+
+      
+      <div id="det_fields_deshierbe" class="fields-group">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Método</label>
+            <select name="metodo_deshierbe" class="form-control">
+              <option value="manual">Manual</option>
+              <option value="mecanico">Mecánico</option>
+              <option value="quimico">Químico</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Área (ha)</label><input type="number" name="area_deshierbada_ha" class="form-control" step="0.0001" min="0" placeholder="0.00"></div>
+        </div>
+      </div>
+
+      
+      <div class="form-group">
+        <label>Descripción / Observaciones</label>
+        <textarea name="descripcion" class="form-control" rows="2" placeholder="Observaciones adicionales…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Foto (opcional)</label>
+        <input type="file" name="foto" class="form-control" accept="image/*">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" onclick="closeModal('modalEventoAvanzadoDetalle')"
+                class="btn btn-secondary" style="flex:1;">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="flex:1;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightboxImg" src="" alt="">
 </div>
 
+
+
+
 <?php $__env->startPush('scripts'); ?>
 <script>
+// ── Modales ────────────────────────────────────────────────────────
+function openModal(id) {
+  var m = document.getElementById(id);
+  if (!m) return;
+  m.style.display = 'flex';
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  var m = document.getElementById(id);
+  if (!m) return;
+  m.style.display = 'none';
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+  m.addEventListener('click', function(e) {
+    if (e.target === this) closeModal(this.id);
+  });
+});
+
+// ── Lightbox ───────────────────────────────────────────────────────
 function openLightbox(src) {
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -368,14 +669,14 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
-// Foto upload preview
+// ── Foto upload preview ────────────────────────────────────────────
 document.getElementById('fotoUploadInput').addEventListener('change', function() {
   handleFotoSelect(this);
 });
 function handleFotoSelect(input) {
   if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => {
+    var reader = new FileReader();
+    reader.onload = function(e) {
       document.getElementById('fotoPreview').src = e.target.result;
       document.getElementById('fotoPreviewWrap').style.display = 'block';
       document.getElementById('fotoUploadForm').style.display = 'block';
@@ -388,7 +689,25 @@ function cancelFoto() {
   document.getElementById('fotoPreviewWrap').style.display = 'none';
   document.getElementById('fotoUploadForm').style.display = 'none';
 }
+
+// ── FASE 3: Selector de tipo en modal evento avanzado ─────────────
+function selectTipoDetalle(tipo, btn) {
+  // Actualizar hidden input
+  document.getElementById('tipo_hidden_detalle').value = tipo;
+  // Tabs: quitar active de todos, poner en el clickeado
+  document.querySelectorAll('#tabGroupDetalle .tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  // Campos: ocultar todos, mostrar el del tipo seleccionado
+  document.querySelectorAll('[id^="det_fields_"]').forEach(function(fg) {
+    fg.classList.remove('active');
+  });
+  var el = document.getElementById('det_fields_' + tipo);
+  if (el) el.classList.add('active');
+}
 </script>
 <?php $__env->stopPush(); ?>
+
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/cultivo-detalle.blade.php ENDPATH**/ ?>

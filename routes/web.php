@@ -17,6 +17,7 @@ use App\Http\Controllers\RentabilidadController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProduccionAnimalController;
+use App\Http\Controllers\CultivoFaseController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -72,6 +73,14 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/cultivos/{cultivoId}/fotos/{fotoId}/delete',       [CultivoController::class, 'deleteFoto'])->name('cultivos.fotos.delete');
     Route::post('/cultivos/{id}/eventos',                            [CultivoController::class, 'storeEvento'])->name('cultivos.eventos.store');
     Route::post('/cultivos/{cultivoId}/eventos/{eventoId}/delete',   [CultivoController::class, 'destroyEvento'])->name('cultivos.eventos.delete');
+
+    Route::post('/cultivos/{id}/fase',                                         [CultivoFaseController::class, 'cambiarFase'])->name('cultivos.fase.cambiar');
+    Route::get('/cultivos/{id}/fenologia',                                     [CultivoFaseController::class, 'fenologia'])->name('cultivos.fenologia');
+    Route::get('/cultivos/{id}/fenologia/data',                                [CultivoFaseController::class, 'fenologiaData'])->name('cultivos.fenologia.data');
+    Route::post('/cultivos/{id}/rendimiento',                                  [CultivoFaseController::class, 'actualizarRendimiento'])->name('cultivos.rendimiento.update');
+    Route::post('/cultivos/{id}/eventos-avanzados',                            [CultivoFaseController::class, 'storeEventoAvanzado'])->name('cultivos.eventos-avanzados.store');
+    Route::post('/cultivos/{cultivoId}/eventos-avanzados/{eventoId}/delete',   [CultivoFaseController::class, 'destroyEventoAvanzado'])->name('cultivos.eventos-avanzados.delete');
+
 
     // Cosechas
     Route::get('/cosechas',              [CosechaController::class, 'index'])->name('cosechas.index');
