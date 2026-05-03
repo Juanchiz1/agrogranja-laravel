@@ -64,6 +64,16 @@
       <a href="{{ route('animales.index') }}"   class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
+
+      {{-- Hato Bovino: solo si la línea bovina está activa --}}
+      @if(\App\Models\LineaProductiva::activa('bovino'))
+      <a href="{{ route('bovino.hato') }}"
+         class="sidebar-item {{ request()->routeIs('bovino.*') ? 'active' : '' }}"
+         style="padding-left:2.2rem;">
+        <span class="sidebar-icon">🐮</span><span>Hato Bovino</span>
+      </a>
+      @endif
+
       @endif
 
       {{-- Personas (siempre — gestión de trabajadores aplica a todos) --}}
@@ -176,7 +186,7 @@
       @endif
 
       @if($tieneAnimales)
-      <a href="{{ route('animales.index') }}"   class="nav-item {{ request()->routeIs('animales.*') ? 'active' : '' }}"><span>🐄</span><span>Animales</span></a>
+      <a href="{{ route('animales.index') }}"   class="nav-item {{ request()->routeIs('animales.*') || request()->routeIs('bovino.*') ? 'active' : '' }}"><span>🐄</span><span>Animales</span></a>
       @endif
 
       @if(!$bothPrimary)

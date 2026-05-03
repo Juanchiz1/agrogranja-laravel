@@ -179,6 +179,41 @@
         </div>
         <div class="form-group"><label>Propietario</label><input type="text" name="propietario" class="form-control" value="{{ $a->propietario }}" placeholder="Dueño del animal"></div>
         <div class="form-group"><label>Produce</label><input type="text" name="produccion" class="form-control" value="{{ $a->produccion }}" placeholder="Leche, Huevos, Cría..."></div>
+
+        {{-- ── CAMPOS BOVINOS (Fase 4) ──────────────────────────── --}}
+        @if(in_array($a->especie, ['Ganado bovino','Terneros']))
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza" class="form-control"
+                   value="{{ $a->raza ?? '' }}"
+                   placeholder="Ej: Brahman, Holstein, Normando">
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select name="categoria_bovina" class="form-control">
+              <option value="">— Sin categoría —</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'vaca_lechera' ? 'selected' : '' }} value="vaca_lechera">Vaca lechera</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'vaca_carne'   ? 'selected' : '' }} value="vaca_carne">Vaca de carne</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'novilla'      ? 'selected' : '' }} value="novilla">Novilla</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'ternero'      ? 'selected' : '' }} value="ternero">Ternero</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'toro'         ? 'selected' : '' }} value="toro">Toro</option>
+              <option {{ ($a->categoria_bovina ?? '') === 'buey'         ? 'selected' : '' }} value="buey">Buey</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Meta de peso al sacrificio (kg)</label>
+          <input type="number" name="peso_meta_kg" step="1" min="0"
+                 class="form-control"
+                 value="{{ $a->peso_meta_kg ?? '' }}"
+                 placeholder="Ej: 450">
+          <div style="font-size:.73rem;color:#64748b;margin-top:2px;">
+            Se usa en el módulo de Pesaje para calcular el avance hacia la meta.
+          </div>
+        </div>
+        @endif
+        {{-- ── FIN CAMPOS BOVINOS ─────────────────────────────────── --}}
         <div class="form-group"><label>Notas</label><textarea name="notas" class="form-control" rows="2">{{ $a->notas }}</textarea></div>
         <div class="flex gap-2 mt-2">
           <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('editAnimal{{ $a->id }}')">Cancelar</button>

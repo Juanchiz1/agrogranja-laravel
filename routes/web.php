@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CultivoFaseController;
 use App\Http\Controllers\CultivoController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\IngresoController;
@@ -17,7 +18,7 @@ use App\Http\Controllers\RentabilidadController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProduccionAnimalController;
-use App\Http\Controllers\CultivoFaseController;
+use App\Http\Controllers\BovinoController;          // ← Fase 4
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -73,14 +74,13 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/cultivos/{cultivoId}/fotos/{fotoId}/delete',       [CultivoController::class, 'deleteFoto'])->name('cultivos.fotos.delete');
     Route::post('/cultivos/{id}/eventos',                            [CultivoController::class, 'storeEvento'])->name('cultivos.eventos.store');
     Route::post('/cultivos/{cultivoId}/eventos/{eventoId}/delete',   [CultivoController::class, 'destroyEvento'])->name('cultivos.eventos.delete');
-
+    // ── Fase 3: Cultivos Avanzados ─────────────────────────────────────────────
     Route::post('/cultivos/{id}/fase',                                         [CultivoFaseController::class, 'cambiarFase'])->name('cultivos.fase.cambiar');
     Route::get('/cultivos/{id}/fenologia',                                     [CultivoFaseController::class, 'fenologia'])->name('cultivos.fenologia');
     Route::get('/cultivos/{id}/fenologia/data',                                [CultivoFaseController::class, 'fenologiaData'])->name('cultivos.fenologia.data');
     Route::post('/cultivos/{id}/rendimiento',                                  [CultivoFaseController::class, 'actualizarRendimiento'])->name('cultivos.rendimiento.update');
     Route::post('/cultivos/{id}/eventos-avanzados',                            [CultivoFaseController::class, 'storeEventoAvanzado'])->name('cultivos.eventos-avanzados.store');
     Route::post('/cultivos/{cultivoId}/eventos-avanzados/{eventoId}/delete',   [CultivoFaseController::class, 'destroyEventoAvanzado'])->name('cultivos.eventos-avanzados.delete');
-
 
     // Cosechas
     Route::get('/cosechas',              [CosechaController::class, 'index'])->name('cosechas.index');
@@ -144,7 +144,7 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/perfil',               [PerfilController::class, 'update'])->name('perfil.update');
     Route::post('/perfil/password',      [PerfilController::class, 'changePassword'])->name('perfil.password');
     Route::post('/perfil/preferencias',  [PerfilController::class, 'updateNotificaciones'])->name('perfil.notificaciones');
-    Route::post('/perfil/lineas',        [PerfilController::class, 'updateLineas'])->name('perfil.lineas'); 
+    Route::post('/perfil/lineas',        [PerfilController::class, 'updateLineas'])->name('perfil.lineas');
 
     // Personas
     Route::get('/personas',                                  [PersonaController::class, 'index'])->name('personas.index');
@@ -162,4 +162,41 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/encuesta',          [EncuestaController::class, 'show'])->name('encuesta.show');
     Route::post('/encuesta',         [EncuestaController::class, 'store'])->name('encuesta.store');
     Route::post('/encuesta/ignorar', [EncuestaController::class, 'ignorar'])->name('encuesta.ignorar');
+
+    // ── FASE 4: BOVINO ESPECIALIZADO ──────────────────────────────────
+
+    // Hato — Dashboard bovino
+    Route::get('/bovino', [BovinoController::class, 'hato'])->name('bovino.hato');
+
+    // Ordeños
+    Route::get( '/bovino/ordenos',              [BovinoController::class, 'ordenos'])->name('bovino.ordenos');
+    Route::post('/bovino/ordenos',              [BovinoController::class, 'storeOrdeno'])->name('bovino.ordenos.store');
+    Route::post('/bovino/ordenos/{id}/delete',  [BovinoController::class, 'destroyOrdeno'])->name('bovino.ordenos.delete');
+
+    // Lactancias
+    Route::post('/bovino/ordenos/lactancia',    [BovinoController::class, 'storeLactancia'])->name('bovino.ordenos.lactancia');
+    Route::post('/bovino/ordenos/secar/{id}',   [BovinoController::class, 'secarVaca'])->name('bovino.ordenos.secar');
+
+    // Reproducción
+    Route::get( '/bovino/reproduccion',                    [BovinoController::class, 'reproduccion'])->name('bovino.reproduccion');
+    Route::post('/bovino/reproduccion/servicio',           [BovinoController::class, 'storeServicio'])->name('bovino.reproduccion.servicio');
+    Route::post('/bovino/reproduccion/{id}/prenez',        [BovinoController::class, 'confirmarPrenez'])->name('bovino.reproduccion.prenez');
+    Route::post('/bovino/reproduccion/parto',              [BovinoController::class, 'storeParto'])->name('bovino.reproduccion.parto');
+
+    // Sanidad
+    Route::get( '/bovino/sanidad',                         [BovinoController::class, 'sanidad'])->name('bovino.sanidad');
+    Route::post('/bovino/sanidad/{id}/aplicar',            [BovinoController::class, 'aplicarSanidad'])->name('bovino.sanidad.aplicar');
+    Route::post('/bovino/sanidad/personalizado',           [BovinoController::class, 'storeSanidadPersonalizado'])->name('bovino.sanidad.personalizado');
+
+    // Pesaje
+    Route::get( '/bovino/pesaje',                          [BovinoController::class, 'pesaje'])->name('bovino.pesaje');
+    Route::post('/bovino/pesaje',                          [BovinoController::class, 'storePeso'])->name('bovino.pesaje.store');
+
+    // Reportes bovinos
+    // ── Venta de producción de leche
+    Route::post('/bovino/produccion/vender',
+        [BovinoController::class, 'venderProduccion'])->name('bovino.produccion.vender');
+
+    Route::get('/bovino/reportes',                         [BovinoController::class, 'reportes'])->name('bovino.reportes');
+
 });

@@ -64,6 +64,16 @@
       <a href="<?php echo e(route('animales.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>">
         <span class="sidebar-icon">🐄</span><span>Animales</span>
       </a>
+
+      
+      <?php if(\App\Models\LineaProductiva::activa('bovino')): ?>
+      <a href="<?php echo e(route('bovino.hato')); ?>"
+         class="sidebar-item <?php echo e(request()->routeIs('bovino.*') ? 'active' : ''); ?>"
+         style="padding-left:2.2rem;">
+        <span class="sidebar-icon">🐮</span><span>Hato Bovino</span>
+      </a>
+      <?php endif; ?>
+
       <?php endif; ?>
 
       
@@ -168,7 +178,7 @@
       <?php endif; ?>
 
       <?php if($tieneAnimales): ?>
-      <a href="<?php echo e(route('animales.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>"><span>🐄</span><span>Animales</span></a>
+      <a href="<?php echo e(route('animales.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('animales.*') || request()->routeIs('bovino.*') ? 'active' : ''); ?>"><span>🐄</span><span>Animales</span></a>
       <?php endif; ?>
 
       <?php if(!$bothPrimary): ?>

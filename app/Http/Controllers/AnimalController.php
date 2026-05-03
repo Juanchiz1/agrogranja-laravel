@@ -24,23 +24,11 @@ class AnimalController extends Controller
         ];
     }
 
-    /**
-     * Devuelve la lista de especies que se muestran en los selectores
-     * de filtros, alta y edición de animales.
-     *
-     * Si el usuario tiene líneas productivas configuradas, devuelve
-     * SOLO las especies relevantes a esas líneas + 'Otro' como fallback.
-     * Si no tiene líneas configuradas (usuario antiguo), devuelve la
-     * lista completa para no romper nada.
-     */
     private function especies(): array
     {
         return \App\Models\LineaProductiva::especiesSugeridas();
     }
 
-    /**
-     * Muestra el listado de animales con filtros, alertas y estadísticas por especie.
-     */
     public function index(Request $request)
     {
         $uid   = session('usuario_id');
@@ -87,9 +75,6 @@ class AnimalController extends Controller
         ));
     }
 
-    /**
-     * Muestra el detalle de un animal con timeline unificado.
-     */
     public function show($id)
     {
         $uid    = session('usuario_id');
@@ -105,7 +90,6 @@ class AnimalController extends Controller
         try { $eventos      = DB::table('animal_eventos')->where('animal_id',$id)->where('usuario_id',$uid)->orderBy('fecha','desc')->get(); } catch (\Exception $e) { $eventos = collect(); }
         try { $propietarios = DB::table('animal_propietarios')->where('animal_id',$id)->where('usuario_id',$uid)->get(); } catch (\Exception $e) { $propietarios = collect(); }
 
-        // Timeline unificado — eventos, gastos e ingresos, pesajes
         $timeline = collect();
         foreach ($eventos as $ev) {
             $timeline->push(['tipo'=>$ev->tipo, 'titulo'=>$ev->titulo, 'descripcion'=>$ev->descripcion,
@@ -135,16 +119,43 @@ class AnimalController extends Controller
         $especies = $this->especies();
         $personas = Persona::delUsuario($uid)->activos()->orderBy('nombre')->get();
 
+        // ── GENEALOGÍA ─────────────────────────────────────────────
+        // Madre del animal
+        $madre = $animal->madre_id
+            ? DB::table('animales')->find($animal->madre_id)
+            : null;
+
+        // Hermanos: mismo madre_id, solo si tiene madre
+        $hermanos = $animal->madre_id
+            ? DB::table('animales')
+                ->where('madre_id', $animal->madre_id)
+                ->where('id', '!=', $animal->id)
+                ->where('usuario_id', $uid)
+                ->orderBy('fecha_nacimiento')->get()
+            : collect();
+
+        // Crías que tienen a este animal como madre
+        $crias = DB::table('animales')
+            ->where('madre_id', $animal->id)
+            ->where('usuario_id', $uid)
+            ->orderBy('fecha_nacimiento', 'desc')->get();
+
+        // Historial de partos bovinos
+        $partosBovinos = DB::table('animal_reproduccion')
+            ->where('animal_id', $animal->id)
+            ->whereNotNull('fecha_parto_real')
+            ->orderBy('fecha_parto_real', 'desc')->get();
+
+        $genealogia = compact('madre', 'hermanos', 'crias', 'partosBovinos');
+        // ── FIN GENEALOGÍA ─────────────────────────────────────────
+
         return view('pages.animal-detalle', compact(
             'animal', 'gastos', 'ingresos', 'totalGastos', 'totalIngresos',
             'fotos', 'pesos', 'eventos', 'propietarios', 'timeline',
-            'valorVentaEst', 'emojis', 'especies'
+            'valorVentaEst', 'emojis', 'especies', 'personas', 'genealogia'
         ));
     }
 
-    /**
-     * Registra un nuevo animal o lote con su evento inicial.
-     */
     public function store(AnimalRequest $request)
     {
         $uid  = session('usuario_id');
@@ -193,9 +204,6 @@ class AnimalController extends Controller
             ->with('msg', 'Animal registrado.')->with('msgType', 'success');
     }
 
-    /**
-     * Actualiza los datos del animal. Crea ingreso automático si pasa a "vendido".
-     */
     public function update(AnimalRequest $request, $id)
     {
         $uid    = session('usuario_id');
@@ -221,6 +229,10 @@ class AnimalController extends Controller
             'precio_unidad'    => $request->precio_unidad ?: null,
             'atencion_motivo'  => $request->atencion_motivo,
             'notas'            => $request->notas,
+            // ── Campos bovinos (Fase 4) ─────────────────────────────
+            'raza'             => $request->raza ?: null,
+            'categoria_bovina' => $request->categoria_bovina ?: null,
+            'peso_meta_kg'     => $request->peso_meta_kg ?: null,
         ];
 
         if ($request->hasFile('foto')) {
@@ -230,7 +242,6 @@ class AnimalController extends Controller
 
         $animal->update($data);
 
-        // Ingreso automático cuando pasa a "vendido" por primera vez
         if ($estadoAnterior === 'activo' && $request->estado === 'vendido') {
             $valorVenta = $request->valor_venta;
             if (!$valorVenta) {
@@ -272,9 +283,6 @@ class AnimalController extends Controller
             ->with('msg', 'Animal actualizado.')->with('msgType', 'success');
     }
 
-    /**
-     * Elimina un animal y su foto principal.
-     */
     public function destroy($id)
     {
         $uid    = session('usuario_id');
@@ -286,9 +294,6 @@ class AnimalController extends Controller
             ->with('msg', 'Animal eliminado.')->with('msgType', 'warning');
     }
 
-    /**
-     * Alterna el estado de favorito de un animal.
-     */
     public function toggleFavorito($id)
     {
         $uid    = session('usuario_id');
@@ -299,9 +304,6 @@ class AnimalController extends Controller
         return back()->with('msg', $msg)->with('msgType', 'success');
     }
 
-    /**
-     * Alterna la bandera de atención especial.
-     */
     public function toggleAtencion(Request $request, $id)
     {
         $uid    = session('usuario_id');
@@ -314,9 +316,6 @@ class AnimalController extends Controller
         return back()->with('msg', 'Estado de atención actualizado.')->with('msgType', 'success');
     }
 
-    /**
-     * Sube una foto al log fotográfico del animal.
-     */
     public function uploadFoto(Request $request, $id)
     {
         $request->validate(['foto' => 'required|image|max:5120']);
@@ -337,9 +336,6 @@ class AnimalController extends Controller
             ->with('msg', 'Foto agregada.')->with('msgType', 'success');
     }
 
-    /**
-     * Elimina una foto del log fotográfico.
-     */
     public function deleteFoto($animalId, $fotoId)
     {
         $uid  = session('usuario_id');
@@ -356,9 +352,6 @@ class AnimalController extends Controller
             ->with('msg', 'Foto eliminada.')->with('msgType', 'warning');
     }
 
-    /**
-     * Registra un pesaje y actualiza el peso promedio del animal.
-     */
     public function storePeso(Request $request, $id)
     {
         $request->validate(['peso' => 'required|numeric', 'fecha' => 'required|date']);
@@ -383,9 +376,6 @@ class AnimalController extends Controller
             ->with('msg', 'Peso registrado.')->with('msgType', 'success');
     }
 
-    /**
-     * Registra un evento en el timeline (vacuna, visita vet, nota, etc.).
-     */
     public function storeEvento(Request $request, $id)
     {
         $request->validate(['tipo' => 'required', 'titulo' => 'required', 'fecha' => 'required|date']);
@@ -414,9 +404,6 @@ class AnimalController extends Controller
             ->with('msg', 'Evento registrado.')->with('msgType', 'success');
     }
 
-    /**
-     * Elimina un evento del timeline y su foto si existe.
-     */
     public function destroyEvento($animalId, $eventoId)
     {
         $uid    = session('usuario_id');
@@ -431,9 +418,6 @@ class AnimalController extends Controller
             ->with('msg', 'Evento eliminado.')->with('msgType', 'warning');
     }
 
-    /**
-     * Registra un copropietario del animal.
-     */
     public function storePropietario(Request $request, $id)
     {
         $request->validate(['nombre' => 'required']);
@@ -453,9 +437,6 @@ class AnimalController extends Controller
             ->with('msg', 'Propietario agregado.')->with('msgType', 'success');
     }
 
-    /**
-     * Elimina un copropietario del animal.
-     */
     public function destroyPropietario($animalId, $propId)
     {
         DB::table('animal_propietarios')
@@ -466,9 +447,6 @@ class AnimalController extends Controller
             ->with('msg', 'Propietario eliminado.')->with('msgType', 'warning');
     }
 
-    /**
-     * Registra la salida definitiva (venta o sacrificio) y crea el ingreso automático si aplica.
-     */
     public function registrarSalida(Request $request, $id)
     {
         $request->validate(['tipo_salida' => 'required', 'fecha' => 'required']);

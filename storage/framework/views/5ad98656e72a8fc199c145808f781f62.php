@@ -449,7 +449,7 @@
       <div style="background:#fff3e0;border-radius:10px;padding:12px;text-align:center;">
         <div style="font-size:.75rem;color:var(--text-secondary);">Regional promedio</div>
         <div style="font-weight:800;color:#e65100;font-size:1.1rem;">
-          <?php echo e($comparativa['regional_promedio'] ? number_format($comparativa['regional_promedio'],2) : 'N/D'); ?>
+          <?php echo e(($comparativa['regional_promedio'] ?? null) ? number_format($comparativa['regional_promedio'],2) : 'N/D'); ?>
 
         </div>
         <div style="font-size:.72rem;color:var(--text-secondary);"><?php echo e($comparativa['unidad'] ?? 'ton/ha'); ?></div>
@@ -466,9 +466,9 @@
           ? 'Tu rendimiento está ' . abs($comparativa['porcentaje']) . '% por debajo del promedio regional'
           : 'Tu rendimiento es similar al promedio regional');
       $colorCmp = $tipoCmp === 'superior' ? 'var(--verde-dark)' : ($tipoCmp === 'inferior' ? 'var(--rojo)' : '#e65100');
-      $maxVal   = max($comparativa['valor'], $comparativa['regional_max'] ?? $comparativa['regional_promedio'], 0.01);
+      $maxVal   = max($comparativa['valor'] ?? 0, $comparativa['regional_max'] ?? $comparativa['regional_promedio'] ?? 0, 0.01);
       $pctReal  = min(100, round(($comparativa['valor'] / $maxVal) * 100));
-      $pctRegMark = min(100, round(($comparativa['regional_promedio'] / $maxVal) * 100));
+      $pctRegMark = min(100, round((($comparativa['regional_promedio'] ?? 0) / $maxVal) * 100));
     ?>
     <div class="rendimiento-compare-bar">
       <span class="rbar-label">Tu cultivo</span>
@@ -1001,6 +1001,5 @@ openModal('modalEventoAvanzado');
 </script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
-
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/cultivo-fenologia.blade.php ENDPATH**/ ?>

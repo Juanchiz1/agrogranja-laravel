@@ -13,6 +13,7 @@
   $badgeClass = ['activo'=>'badge-green','vendido'=>'badge-brown','muerte'=>'badge-red'][$animal->estado] ?? 'badge-green';
   $balance = $totalIngresos - $totalGastos;
   $tieneProduccion = $animal->produccion && !in_array(strtolower(trim($animal->produccion)), ['carne','','null']);
+  $esBovino = in_array($animal->especie, ['Ganado bovino','Terneros']);
 ?>
 
 
@@ -78,6 +79,48 @@
   <?php if($animal->notas): ?><div style="margin-top:10px;padding:8px 10px;background:var(--verde-bg);border-radius:8px;font-size:.83rem;color:var(--verde-dark);">📝 <?php echo e($animal->notas); ?></div><?php endif; ?>
 
   
+  <?php if($esBovino): ?>
+  <?php if($animal->raza ?? false): ?>
+  <div class="info-row"><span class="info-label">🐄 Raza</span><span class="info-value"><?php echo e($animal->raza); ?></span></div>
+  <?php endif; ?>
+  <?php if($animal->categoria_bovina ?? false): ?>
+  <div class="info-row"><span class="info-label">Categoría</span><span class="info-value"><?php echo e(str_replace('_',' ',$animal->categoria_bovina)); ?></span></div>
+  <?php endif; ?>
+  <?php if($animal->madre_id ?? false): ?>
+  <?php $madreInfo = DB::table('animales')->find($animal->madre_id); ?>
+  <?php if($madreInfo): ?>
+  <div class="info-row">
+    <span class="info-label">🐄 Madre</span>
+    <span class="info-value">
+      <a href="<?php echo e(route('animales.show',$madreInfo->id)); ?>" style="color:var(--verde-dark);font-weight:600;">
+        <?php echo e($madreInfo->nombre_lote); ?>
+
+      </a>
+    </span>
+  </div>
+  <?php endif; ?>
+  <?php endif; ?>
+  <?php if($animal->padre_descripcion ?? false): ?>
+  <div class="info-row"><span class="info-label">🐂 Padre</span><span class="info-value"><?php echo e($animal->padre_descripcion); ?></span></div>
+  <?php endif; ?>
+  <?php if($animal->peso_meta_kg ?? false): ?>
+  <div class="info-row">
+    <span class="info-label">⚖️ Meta peso</span>
+    <span class="info-value">
+      <?php echo e($animal->peso_meta_kg); ?> kg
+      <?php if($animal->peso_promedio): ?>
+        <?php $pct = round(($animal->peso_promedio/$animal->peso_meta_kg)*100); ?>
+        <span style="font-size:.72rem;color:<?php echo e($pct>=90?'#15803d':($pct>=60?'#1d4ed8':'#b45309')); ?>;">
+          (<?php echo e($pct); ?>% del objetivo)
+        </span>
+      <?php endif; ?>
+    </span>
+  </div>
+  <?php endif; ?>
+  <?php endif; ?>
+  
+
+  
   <div class="flex gap-2 mt-3" style="flex-wrap:wrap;">
     <form method="POST" action="<?php echo e(route('animales.favorito',$animal->id)); ?>"><?php echo csrf_field(); ?>
       <button class="btn btn-sm btn-ghost"><?php echo e($animal->favorito?'⭐ Quitar favorito':'⭐ Marcar favorito'); ?></button>
@@ -93,15 +136,17 @@
       💰 Venta/Sacrificio
     </button>
     <?php endif; ?>
-
-    
     <?php if($tieneProduccion): ?>
     <button onclick="openModal('modalProduccion')" class="btn btn-sm btn-ghost" style="color:var(--verde-dark);">
       🥛 Registrar producción
     </button>
-    <a href="<?php echo e(route('produccion-animal.index')); ?>?animal_id=<?php echo e($animal->id); ?>"
-       class="btn btn-sm btn-ghost">
+    <a href="<?php echo e(route('produccion-animal.index')); ?>?animal_id=<?php echo e($animal->id); ?>" class="btn btn-sm btn-ghost">
       📊 Ver historial
+    </a>
+    <?php endif; ?>
+    <?php if($esBovino): ?>
+    <a href="<?php echo e(route('bovino.hato')); ?>" class="btn btn-sm btn-ghost" style="color:#15803d;">
+      🐄 Ir a Hato Bovino
     </a>
     <?php endif; ?>
   </div>
@@ -159,6 +204,181 @@
     </div>
 </div>
 <?php endif; ?>
+
+
+<?php if($esBovino && ($animal->madre_id || $animal->padre_descripcion || $genealogia['crias']->count() || $genealogia['partosBovinos']->count() || $genealogia['hermanos']->count())): ?>
+<div class="section-card">
+  <div class="section-title" style="margin-bottom:14px;">🧬 Genealogía</div>
+
+  
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+
+    
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                background:#fffbeb;border-radius:10px;border-left:3px solid #f59e0b;">
+      <span style="font-size:1.3rem;">🐂</span>
+      <div>
+        <div style="font-size:.72rem;color:#b45309;font-weight:700;text-transform:uppercase;">Padre</div>
+        <div style="font-weight:600;font-size:.88rem;">
+          <?php echo e($animal->padre_descripcion ?? 'No registrado'); ?>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="width:2px;height:12px;background:#e2e8f0;margin-left:24px;"></div>
+
+    
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;
+                background:#f0fdf4;border-radius:10px;border:2px solid #22c55e;">
+      <span style="font-size:1.4rem;"><?php echo e($em); ?></span>
+      <div style="flex:1;">
+        <div style="font-size:.72rem;color:#15803d;font-weight:700;text-transform:uppercase;">Este animal</div>
+        <div style="font-weight:800;font-size:.95rem;"><?php echo e($animal->nombre_lote ?? $animal->especie); ?></div>
+        <?php if($animal->raza): ?><div style="font-size:.75rem;color:#64748b;"><?php echo e($animal->raza); ?></div><?php endif; ?>
+        <?php if($animal->fecha_nacimiento): ?>
+        <div style="font-size:.72rem;color:#94a3b8;">
+          🎂 <?php echo e(\Carbon\Carbon::parse($animal->fecha_nacimiento)->format('d/m/Y')); ?>
+
+        </div>
+        <?php endif; ?>
+      </div>
+      <?php if($animal->categoria_bovina): ?>
+      <span style="background:#e2e8f0;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap;">
+        <?php echo e(str_replace('_',' ',$animal->categoria_bovina)); ?>
+
+      </span>
+      <?php endif; ?>
+    </div>
+
+    <div style="width:2px;height:12px;background:#e2e8f0;margin-left:24px;"></div>
+
+    
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                background:#eff6ff;border-radius:10px;border-left:3px solid #3b82f6;">
+      <span style="font-size:1.3rem;">🐄</span>
+      <div>
+        <div style="font-size:.72rem;color:#1d4ed8;font-weight:700;text-transform:uppercase;">Madre</div>
+        <?php if($genealogia['madre']): ?>
+          <a href="<?php echo e(route('animales.show', $genealogia['madre']->id)); ?>"
+             style="font-weight:600;font-size:.88rem;color:#1d4ed8;text-decoration:none;">
+            <?php echo e($genealogia['madre']->nombre_lote); ?>
+
+            <?php if($genealogia['madre']->raza): ?>
+              <span style="color:#94a3b8;font-weight:400;"> · <?php echo e($genealogia['madre']->raza); ?></span>
+            <?php endif; ?>
+          </a>
+          <div style="font-size:.72rem;color:#64748b;">Toca para ver su ficha</div>
+        <?php else: ?>
+          <div style="font-weight:600;font-size:.88rem;color:#64748b;">No registrada</div>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  
+  <?php if($genealogia['hermanos']->count()): ?>
+  <div style="margin-bottom:12px;">
+    <div style="font-size:.78rem;font-weight:700;color:#64748b;margin-bottom:6px;">
+      👥 Hermanos (<?php echo e($genealogia['hermanos']->count()); ?>)
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <?php $__currentLoopData = $genealogia['hermanos']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $h): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+      <a href="<?php echo e(route('animales.show', $h->id)); ?>"
+         style="background:#f1f5f9;border-radius:20px;padding:4px 10px;
+                font-size:.78rem;font-weight:600;text-decoration:none;color:#334155;">
+        🐄 <?php echo e($h->nombre_lote); ?>
+
+        <?php if($h->fecha_nacimiento): ?>
+          <span style="color:#94a3b8;font-weight:400;">· <?php echo e(\Carbon\Carbon::parse($h->fecha_nacimiento)->format('d/m/Y')); ?></span>
+        <?php endif; ?>
+      </a>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  
+  <?php if($genealogia['crias']->count()): ?>
+  <div style="margin-bottom:12px;">
+    <div style="font-size:.78rem;font-weight:700;color:#64748b;margin-bottom:6px;">
+      🍼 Crías registradas (<?php echo e($genealogia['crias']->count()); ?>)
+    </div>
+    <?php $__currentLoopData = $genealogia['crias']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:.83rem;">
+      <div>
+        <a href="<?php echo e(route('animales.show', $cr->id)); ?>"
+           style="font-weight:600;text-decoration:none;color:#1e293b;">
+          🐄 <?php echo e($cr->nombre_lote); ?>
+
+        </a>
+        <?php if($cr->raza): ?><span style="color:#94a3b8;"> · <?php echo e($cr->raza); ?></span><?php endif; ?>
+        <?php if($cr->padre_descripcion): ?>
+          <div style="font-size:.72rem;color:#b45309;">🐂 <?php echo e($cr->padre_descripcion); ?></div>
+        <?php endif; ?>
+      </div>
+      <div style="text-align:right;color:#64748b;">
+        <?php if($cr->fecha_nacimiento): ?><?php echo e(\Carbon\Carbon::parse($cr->fecha_nacimiento)->format('d/m/Y')); ?><?php endif; ?>
+        <?php if($cr->categoria_bovina): ?>
+          <span style="background:#e2e8f0;padding:1px 7px;border-radius:10px;font-size:.7rem;margin-left:4px;">
+            <?php echo e(str_replace('_',' ',$cr->categoria_bovina)); ?>
+
+          </span>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+  </div>
+  <?php endif; ?>
+
+  
+  <?php if($genealogia['partosBovinos']->count()): ?>
+  <div>
+    <div style="font-size:.78rem;font-weight:700;color:#64748b;margin-bottom:6px;">
+      📋 Historial de partos (<?php echo e($genealogia['partosBovinos']->count()); ?>)
+    </div>
+    <?php $__currentLoopData = $genealogia['partosBovinos']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php
+      $sigServicio = DB::table('animal_reproduccion')
+          ->where('animal_id', $animal->id)
+          ->where('fecha_servicio', '>', $p->fecha_parto_real)
+          ->orderBy('fecha_servicio')->first();
+      $diasAbiertos = $sigServicio
+          ? \Carbon\Carbon::parse($p->fecha_parto_real)->diffInDays($sigServicio->fecha_servicio)
+          : null;
+    ?>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;
+                padding:8px 10px;border-radius:8px;background:#f8fafc;margin-bottom:5px;font-size:.82rem;">
+      <div>
+        <div style="font-weight:700;">
+          🍼 Parto <?php echo e(\Carbon\Carbon::parse($p->fecha_parto_real)->format('d/m/Y')); ?>
+
+        </div>
+        <div style="color:#64748b;">
+          <?php echo e($p->num_crias_vivas ?? 0); ?>/<?php echo e($p->num_crias_nacidas ?? 0); ?> vivas
+          <?php if($p->sexo_cria): ?> · <?php echo e($p->sexo_cria); ?> <?php endif; ?>
+          <?php if($p->peso_cria_kg): ?> · <?php echo e($p->peso_cria_kg); ?> kg <?php endif; ?>
+          <?php if($p->macho_descripcion): ?>
+            <div>🐂 <?php echo e($p->macho_descripcion); ?></div>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php if($diasAbiertos !== null): ?>
+      <div style="text-align:right;font-size:.75rem;color:#64748b;">
+        Días abiertos<br>
+        <strong style="color:<?php echo e($diasAbiertos <= 85 ? '#15803d' : ($diasAbiertos <= 120 ? '#b45309' : '#dc2626')); ?>;">
+          <?php echo e($diasAbiertos); ?> días
+        </strong>
+      </div>
+      <?php endif; ?>
+    </div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+  </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
+
 
 
 <div class="section-card">
@@ -297,13 +517,9 @@
 
       <?php if($animal->produccion): ?> · <strong><?php echo e($animal->produccion); ?></strong><?php endif; ?>
     </p>
-
     <form method="POST" action="<?php echo e(route('produccion-animal.store')); ?>">
       <?php echo csrf_field(); ?>
-      
       <input type="hidden" name="animal_id" value="<?php echo e($animal->id); ?>">
-
-      
       <div class="form-group">
         <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">¿Para qué período?</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="chips-m">
@@ -313,13 +529,10 @@
         </div>
         <input type="hidden" name="periodo" id="m-periodo" value="dia">
       </div>
-
-      
       <div class="grid-2">
         <div class="form-group">
           <label>Fecha</label>
-          <input type="date" name="fecha" id="m-fecha" class="form-control"
-                 value="<?php echo e(now()->toDateString()); ?>" required>
+          <input type="date" name="fecha" id="m-fecha" class="form-control" value="<?php echo e(now()->toDateString()); ?>" required>
         </div>
         <div class="form-group">
           <label>Tipo</label>
@@ -339,13 +552,10 @@
           </select>
         </div>
       </div>
-
-      
       <div class="grid-2">
         <div class="form-group">
           <label>Cantidad *</label>
-          <input type="number" name="cantidad" class="form-control"
-                 placeholder="0" step="0.1" min="0" required>
+          <input type="number" name="cantidad" class="form-control" placeholder="0" step="0.1" min="0" required>
         </div>
         <div class="form-group">
           <label>Unidad</label>
@@ -362,31 +572,24 @@
           </select>
         </div>
       </div>
-
-      
       <div class="grid-2">
         <div class="form-group">
           <label>Precio unitario</label>
-          <input type="number" name="precio_unitario" class="form-control"
-                 placeholder="Opcional" step="100">
+          <input type="number" name="precio_unitario" class="form-control" placeholder="Opcional" step="100">
         </div>
         <div class="form-group">
           <label>Comprador</label>
           <input type="text" name="comprador" class="form-control" placeholder="Opcional">
         </div>
       </div>
-
-      
       <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;margin-bottom:10px;">
         <input type="checkbox" name="vendido" value="1">
         Marcar como vendido (crea ingreso automáticamente)
       </label>
-
       <div class="form-group">
         <label>Notas</label>
         <input type="text" name="notas" id="m-notas" class="form-control" placeholder="Opcional">
       </div>
-
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalProduccion')">Cancelar</button>
         <button type="submit" class="btn btn-primary btn-full">Registrar</button>
@@ -443,6 +646,39 @@
         <div class="form-group"><label>Precio/cabeza (COP)</label><input type="number" step="100" name="precio_unidad" class="form-control" value="<?php echo e($animal->precio_unidad); ?>"></div>
       </div>
       <div class="form-group"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="vende_por_kilo" <?php echo e(($animal->vende_por_kilo??1)?'checked':''); ?>> Se vende por kg</label></div>
+      
+      <?php if($esBovino): ?>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;">🐄 Datos bovinos</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza" class="form-control"
+                   value="<?php echo e($animal->raza ?? ''); ?>"
+                   placeholder="Brahman, Holstein...">
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select name="categoria_bovina" class="form-control">
+              <option value="">— Sin categoría —</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'vaca_lechera' ? 'selected' : ''); ?> value="vaca_lechera">Vaca lechera</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'vaca_carne'   ? 'selected' : ''); ?> value="vaca_carne">Vaca de carne</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'novilla'      ? 'selected' : ''); ?> value="novilla">Novilla</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'ternero'      ? 'selected' : ''); ?> value="ternero">Ternero</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'toro'         ? 'selected' : ''); ?> value="toro">Toro</option>
+              <option <?php echo e(($animal->categoria_bovina ?? '') === 'buey'         ? 'selected' : ''); ?> value="buey">Buey</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Meta de peso al sacrificio (kg)</label>
+          <input type="number" name="peso_meta_kg" step="1" min="0"
+                 class="form-control" value="<?php echo e($animal->peso_meta_kg ?? ''); ?>"
+                 placeholder="Ej: 450 kg">
+        </div>
+      </div>
+      <?php endif; ?>
+      
       <div class="form-group"><label>Motivo atención especial</label><input type="text" name="atencion_motivo" class="form-control" value="<?php echo e($animal->atencion_motivo); ?>" placeholder="Ej: Lesión en pata derecha"></div>
       <div class="form-group"><label>Foto principal</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
       <div class="form-group"><label>Notas</label><textarea name="notas" class="form-control" rows="2"><?php echo e($animal->notas); ?></textarea></div>
@@ -581,6 +817,10 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
+function openModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='flex'; m.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='none'; m.classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(function(m){ m.addEventListener('click',function(e){ if(e.target===this) closeModal(this.id); }); });
+
 function openLightbox(src) {
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -614,20 +854,16 @@ function toggleVentaFields() {
   const tipo = document.getElementById('tipoSalida').value;
   document.getElementById('ventaFields').style.display = tipo === 'venta' ? 'block' : 'none';
 }
-
-// ── Funciones para modal de producción ─────────────────────────────
 const mesesEs = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
 function setPm(periodo, btn) {
   document.querySelectorAll('.chip-p').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('m-periodo').value = periodo;
-  const hoy  = new Date();
+  const hoy = new Date();
   const yyyy = hoy.getFullYear();
-  const mm   = String(hoy.getMonth()+1).padStart(2,'0');
-  const dd   = String(hoy.getDate()).padStart(2,'0');
+  const mm = String(hoy.getMonth()+1).padStart(2,'0');
+  const dd = String(hoy.getDate()).padStart(2,'0');
   const notas = document.getElementById('m-notas');
-
   if (periodo === 'dia') {
     document.getElementById('m-fecha').value = `${yyyy}-${mm}-${dd}`;
     if (notas.value.startsWith('Producción semana') || notas.value.startsWith('Producción mes')) notas.value = '';
@@ -643,7 +879,6 @@ function setPm(periodo, btn) {
     notas.value = `Producción mes de ${mesesEs[hoy.getMonth()]} ${yyyy}`;
   }
 }
-
 function mActUnidad(sel) {
   const u = document.getElementById('m-unidad');
   const mapa = { leche:['litros','ml'], huevos:['unidades','docenas'], lana:['kg','lb'], miel:['kg','litros'], otro:['unidades','kg','litros'] };
