@@ -115,24 +115,50 @@ class Cultivo extends Model
      * CORRECCIÓN BUG #5: Cuando tipo='sin_referencia', ahora se incluye
      * la clave 'unidad' para evitar el ?? 'ton/ha' como única defensa.
      */
+    // Mapeo de cultivos a categoría regional cuando no hay dato exacto
+    private static array $FALLBACK_REGIONAL = [
+        'Cebolla'      => 'Hortalizas',
+        'Tomate'       => 'Hortalizas',
+        'Pimentón'     => 'Hortalizas',
+        'Habichuela'   => 'Hortalizas',
+        'Lechuga'      => 'Hortalizas',
+        'Zanahoria'    => 'Hortalizas',
+        'Ahuyama'      => 'Hortalizas',
+        'Pepino'       => 'Hortalizas',
+        'Berenjena'    => 'Hortalizas',
+        'Ají'          => 'Hortalizas',
+    ];
+
     public function comparativaRendimiento(string $departamento = 'Córdoba'): array
     {
         if (!$this->rendimiento_real_ha) {
             return ['valor' => null, 'porcentaje' => null, 'tipo' => 'sin_datos', 'unidad' => 'ton/ha'];
         }
 
+        // Buscar primero por tipo exacto, luego por fallback (ej: Cebolla → Hortalizas)
+        $tipoBusqueda = $this->tipo;
         $regional = DB::table('rendimiento_regional')
-            ->where('tipo_cultivo', $this->tipo)
+            ->where('tipo_cultivo', $tipoBusqueda)
             ->where('departamento', $departamento)
             ->orderBy('anio', 'desc')
             ->first();
+
+        if (!$regional && isset(self::$FALLBACK_REGIONAL[$this->tipo])) {
+            $tipoBusqueda = self::$FALLBACK_REGIONAL[$this->tipo];
+            $regional = DB::table('rendimiento_regional')
+                ->where('tipo_cultivo', $tipoBusqueda)
+                ->where('departamento', $departamento)
+                ->orderBy('anio', 'desc')
+                ->first();
+        }
 
         if (!$regional) {
             return [
                 'valor'      => $this->rendimiento_real_ha,
                 'porcentaje' => null,
                 'tipo'       => 'sin_referencia',
-                'unidad'     => 'ton/ha',    // clave añadida para evitar Undefined index
+                'unidad'     => 'ton/ha',
+                'regional_promedio' => null,
             ];
         }
 

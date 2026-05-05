@@ -18,19 +18,19 @@ class CosechaController extends Controller
     private function destinos(): array
     {
         return [
-            'venta'         => ['label' => '💵 Venta directa',    'crea_ingreso' => true],
-            'intermediario' => ['label' => '🤝 Intermediario',    'crea_ingreso' => true],
-            'plaza_mercado' => ['label' => '🏪 Plaza de mercado', 'crea_ingreso' => true],
-            'exportacion'   => ['label' => '🌎 Exportación',      'crea_ingreso' => true],
-            'autoconsumo'   => ['label' => '🏠 Autoconsumo',      'crea_ingreso' => false],
-            'almacenaje'    => ['label' => '📦 Almacenaje',       'crea_ingreso' => false],
-            'semilla'       => ['label' => '🌱 Reserva semilla',  'crea_ingreso' => false],
-            'donacion'      => ['label' => '🤲 Donación',         'crea_ingreso' => false],
+            'venta'         => ['label' => 'ðŸ’µ Venta directa',    'crea_ingreso' => true],
+            'intermediario' => ['label' => 'ðŸ¤� Intermediario',    'crea_ingreso' => true],
+            'plaza_mercado' => ['label' => 'ðŸ�ª Plaza de mercado', 'crea_ingreso' => true],
+            'exportacion'   => ['label' => 'ðŸŒŽ ExportaciÃ³n',      'crea_ingreso' => true],
+            'autoconsumo'   => ['label' => 'ðŸ�  Autoconsumo',      'crea_ingreso' => false],
+            'almacenaje'    => ['label' => 'ðŸ“¦ Almacenaje',       'crea_ingreso' => false],
+            'semilla'       => ['label' => 'ðŸŒ± Reserva semilla',  'crea_ingreso' => false],
+            'donacion'      => ['label' => 'ðŸ¤² DonaciÃ³n',         'crea_ingreso' => false],
         ];
     }
 
     /**
-     * Muestra el listado de cosechas con estadísticas del período.
+     * Muestra el listado de cosechas con estadÃ­sticas del perÃ­odo.
      */
     public function index(Request $request)
     {
@@ -77,7 +77,7 @@ class CosechaController extends Controller
     }
 
     /**
-     * Registra una nueva cosecha y opcionalmente crea un ingreso automático.
+     * Registra una nueva cosecha y opcionalmente crea un ingreso automÃ¡tico.
      */
     public function store(CosechaRequest $request)
     {
@@ -127,6 +127,15 @@ class CosechaController extends Controller
                 ->update(['estado' => 'cosechado']);
         }
 
+        // Recalcular rendimiento real por ha al registrar cosecha
+        if ($request->cultivo_id) {
+            $cultivoObj = Cultivo::where('id', $request->cultivo_id)
+                ->where('usuario_id', $uid)->first();
+            if ($cultivoObj) {
+                $cultivoObj->recalcularRendimientoReal();
+            }
+        }
+
         $destinoInfo = $this->destinos()[$request->destino] ?? null;
         if ($valor && $destinoInfo && $destinoInfo['crea_ingreso'] && $request->crear_ingreso) {
             Ingreso::create([
@@ -142,7 +151,7 @@ class CosechaController extends Controller
                 'tipo'           => 'cosecha_propia',
                 'cultivo_id'     => $request->cultivo_id ?: null,
                 'cosecha_id'     => $cosecha->id,
-                'notas'          => 'Ingreso generado automáticamente desde cosecha #'.$cosecha->id,
+                'notas'          => 'Ingreso generado automÃ¡ticamente desde cosecha #'.$cosecha->id,
             ]);
             $cosecha->update(['ingreso_creado' => 1]);
         }

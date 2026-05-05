@@ -428,6 +428,11 @@
       <div style="font-size:2rem;">📊</div>
       <div style="font-size:.88rem;">Sin cosechas registradas en kg o toneladas aún.</div>
       <div style="font-size:.8rem;margin-top:4px;">Registra cosechas con unidad <strong>kg</strong> o <strong>toneladas</strong> para ver tu rendimiento.</div>
+      @if($cultivo->area && in_array($cultivo->unidad, ['metros2']))
+      <div style="margin-top:8px;background:#fffbeb;border-radius:8px;padding:8px;font-size:.78rem;color:#b45309;">
+        💡 Tu cultivo tiene área en m² ({{ $cultivo->area }} m² = {{ round($cultivo->area/10000,4) }} ha). El rendimiento se calcula dividiendo la producción en toneladas por la superficie en hectáreas.
+      </div>
+      @endif
     </div>
     @else
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
@@ -444,8 +449,32 @@
           {{ ($comparativa['regional_promedio'] ?? null) ? number_format($comparativa['regional_promedio'],2) : 'N/D' }}
         </div>
         <div style="font-size:.72rem;color:var(--text-secondary);">{{ $comparativa['unidad'] ?? 'ton/ha' }}</div>
+        @if(!($comparativa['regional_promedio'] ?? null))
+        <div style="font-size:.68rem;color:#b45309;margin-top:2px;">Sin referencia regional para este cultivo</div>
+        @endif
       </div>
     </div>
+    {{-- Desglose del cálculo --}}
+    @if($cultivo->area > 0)
+    @php
+      $areaHaCalc = $cultivo->unidad === 'metros2' ? round($cultivo->area/10000,4) : $cultivo->area;
+      $valorCalc  = $comparativa['valor'] ?? 0;
+      $totalTon   = round($valorCalc * $areaHaCalc, 2);
+      $esAlto     = $valorCalc > ($comparativa['regional_promedio'] ?? 999) * 3;
+    @endphp
+    <div style="background:#f8fafc;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.78rem;color:#475569;">
+      🧮 <strong>Cálculo:</strong> {{ $totalTon }} ton ÷ {{ $areaHaCalc }} ha = <strong>{{ number_format($valorCalc,2) }} ton/ha</strong>
+      @if($cultivo->unidad === 'metros2')
+        <span style="color:#b45309;"> · Área original: {{ $cultivo->area }} m²</span>
+      @endif
+    </div>
+    @if($esAlto && ($comparativa['regional_promedio'] ?? null))
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.78rem;color:#dc2626;">
+      ⚠️ <strong>Rendimiento inusualmente alto</strong> — El promedio regional es {{ number_format($comparativa['regional_promedio'],2) }} ton/ha. Verifica que la cosecha esté registrada en <strong>kg</strong> (no bultos ni unidades) y que el área del cultivo sea correcta.
+      <div style="margin-top:4px;">💡 Si la cosecha fue en bultos, convierte: 1 bulto de cebolla ≈ 25-30 kg.</div>
+    </div>
+    @endif
+    @endif
 
     @if($comparativa['porcentaje'] !== null)
     @php
