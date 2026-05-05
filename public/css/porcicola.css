@@ -1,0 +1,185 @@
+/* ════════════════════════════════════════════════════════════════════
+   AGROGRANJA · MÓDULO PORCÍCOLA — Fase 6
+   Destino: public/css/porcicola.css
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --porc-rosa:    #ec4899;
+  --porc-naranja: #f97316;
+  --porc-rojo:    #dc2626;
+  --porc-verde:   #16a34a;
+  --porc-azul:    #2563eb;
+  --porc-morado:  #7c3aed;
+  --porc-gris:    #64748b;
+  --porc-bg:      #fdf2f8;
+  --porc-card:    #ffffff;
+}
+
+/* ── STATS PIARA ─────────────────────────────────────────────────── */
+.piara-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.piara-stat {
+  background: var(--porc-card);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  border-left: 4px solid var(--porc-rosa);
+}
+.piara-stat.naranja { border-left-color: var(--porc-naranja); }
+.piara-stat.verde   { border-left-color: var(--porc-verde);   }
+.piara-stat.azul    { border-left-color: var(--porc-azul);    }
+.piara-stat-ico { font-size: 1.4rem; margin-bottom: 4px; line-height: 1; }
+.piara-stat-val { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+.piara-stat-lbl {
+  font-size: .65rem; color: var(--porc-gris);
+  font-weight: 600; margin-top: 2px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* ── MENÚ DEL MÓDULO ────────────────────────────────────────────── */
+.porcicola-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.porcicola-menu-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 14px 8px 10px;
+  background: var(--porc-card); border-radius: 14px;
+  border-top: 3px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  text-decoration: none; color: #1e293b;
+  transition: transform .15s, box-shadow .15s;
+}
+.porcicola-menu-card:hover {
+  transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.10); color: #1e293b;
+}
+.porcicola-menu-ico { font-size: 1.8rem; margin-bottom: 4px; }
+.porcicola-menu-lbl { font-size: .82rem; font-weight: 700; }
+.porcicola-menu-sub { font-size: .66rem; color: #94a3b8; margin-top: 2px; }
+
+/* ── INVENTARIO POR CATEGORÍA ───────────────────────────────────── */
+.inventario-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.inv-cat-card {
+  border-radius: 12px; padding: 10px; text-align: center;
+  border: 1.5px solid #e2e8f0;
+}
+.inv-cat-ico  { font-size: 1.4rem; margin-bottom: 3px; }
+.inv-cat-val  { font-size: 1.1rem; font-weight: 800; color: #1e293b; }
+.inv-cat-lbl  { font-size: .67rem; color: var(--porc-gris); margin-top: 2px; }
+
+/* ── CERDA CARD ─────────────────────────────────────────────────── */
+.cerda-card {
+  background: var(--porc-card); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  border-left: 4px solid var(--porc-rosa);
+}
+.cerda-card.prenada    { border-left-color: var(--porc-naranja); }
+.cerda-card.parida     { border-left-color: var(--porc-azul); }
+.cerda-card.disponible { border-left-color: var(--porc-verde); }
+.cerda-nombre { font-weight: 800; font-size: .93rem; color: #1e293b; }
+.cerda-sub    { font-size: .74rem; color: var(--porc-gris); margin-top: 2px; }
+
+/* ── CICLO REPRODUCTIVO TIMELINE ────────────────────────────────── */
+.ciclo-timeline {
+  display: flex; gap: 0; overflow-x: auto;
+  padding-bottom: 6px; margin-bottom: 12px;
+}
+.ciclo-fase {
+  flex: 0 0 auto;
+  text-align: center; padding: 6px 10px;
+  border-top: 3px solid #e2e8f0;
+  min-width: 80px; font-size: .7rem;
+  position: relative;
+}
+.ciclo-fase.activa   { border-top-color: var(--porc-naranja); background: #fff7ed; }
+.ciclo-fase.completa { border-top-color: var(--porc-verde); background: #f0fdf4; }
+.ciclo-fase-ico  { font-size: 1.1rem; margin-bottom: 2px; }
+.ciclo-fase-lbl  { font-weight: 600; color: #475569; font-size: .68rem; }
+.ciclo-fase-dias { font-size: .62rem; color: #94a3b8; }
+
+/* ── CAMADA ROW ─────────────────────────────────────────────────── */
+.camada-row {
+  border: 1.5px solid #e2e8f0; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px;
+  background: var(--porc-card);
+}
+.camada-estado {
+  display: inline-block; padding: 2px 10px;
+  border-radius: 20px; font-size: .72rem; font-weight: 700;
+  border: 1.5px solid currentColor;
+}
+
+/* ── PESO CEBA ──────────────────────────────────────────────────── */
+.ceba-card {
+  background: var(--porc-card); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  border-left: 4px solid var(--porc-naranja);
+}
+.ceba-avance-wrap {
+  background: #e2e8f0; border-radius: 8px; height: 10px;
+  margin: 8px 0; overflow: hidden;
+}
+.ceba-avance-fill {
+  height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, var(--porc-naranja), var(--porc-rosa));
+  transition: width .4s;
+}
+
+/* ── PESO ROW ───────────────────────────────────────────────────── */
+.peso-row-porc {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid #e2e8f0; font-size: .83rem;
+}
+.peso-semana-porc { font-weight: 800; min-width: 55px; }
+.peso-ok-porc  { color: var(--porc-verde); }
+.peso-bajo-porc{ color: var(--porc-rojo);  }
+
+/* ── SANIDAD ────────────────────────────────────────────────────── */
+.sanidad-porc-card {
+  border-left: 4px solid #e2e8f0; background: #fafafa;
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+}
+.sanidad-porc-card.vencida { border-left-color: var(--porc-rojo);  background: #fef2f2; }
+.sanidad-porc-card.proxima { border-left-color: var(--porc-naranja); background: #fffbeb; }
+.sanidad-porc-card.ok      { border-left-color: var(--porc-verde); background: #f0fdf4; opacity:.85; }
+
+/* ── ALERTAS ────────────────────────────────────────────────────── */
+.alerta-porc {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; margin-bottom: 6px;
+  font-size: .82rem; line-height: 1.4;
+}
+.alerta-porc.urgente { background: #fef2f2; color: #991b1b; }
+.alerta-porc.aviso   { background: #fffbeb; color: #92400e; }
+.alerta-porc.info    { background: #eff6ff; color: #1d4ed8; }
+
+/* ── BADGE CATEGORÍA ────────────────────────────────────────────── */
+.cat-badge {
+  display: inline-block; padding: 1px 8px; border-radius: 10px;
+  font-size: .7rem; font-weight: 700;
+}
+.cat-lechon    { background: #fdf4ff; color: #7e22ce; }
+.cat-levante   { background: #eff6ff; color: #1d4ed8; }
+.cat-ceba      { background: #fff7ed; color: #9a3412; }
+.cat-hembra    { background: #fdf2f8; color: #be185d; }
+.cat-verraco   { background: #f0fdf4; color: #15803d; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 430px) {
+  .piara-stats         { grid-template-columns: repeat(2, 1fr); }
+  .porcicola-menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .inventario-grid     { grid-template-columns: repeat(2, 1fr); }
+}

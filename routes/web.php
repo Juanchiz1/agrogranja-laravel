@@ -18,7 +18,9 @@ use App\Http\Controllers\RentabilidadController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProduccionAnimalController;
-use App\Http\Controllers\BovinoController;          // ← Fase 4
+use App\Http\Controllers\BovinoController;                 // ← Fase 4
+use App\Http\Controllers\AvicolaController;
+use App\Http\Controllers\PorcicolaController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -198,5 +200,36 @@ Route::middleware('auth.session')->group(function () {
         [BovinoController::class, 'venderProduccion'])->name('bovino.produccion.vender');
 
     Route::get('/bovino/reportes',                         [BovinoController::class, 'reportes'])->name('bovino.reportes');
+
+    // ── AVÍCOLA (Fase 5) ──────────────────────────────────────────────
+Route::get('/avicola', [AvicolaController::class, 'galpon'])->name('avicola.galpon');
+Route::get('/avicola/postura', [AvicolaController::class, 'postura'])->name('avicola.postura');
+Route::post('/avicola/postura', [AvicolaController::class, 'storePostura'])->name('avicola.postura.store');
+Route::post('/avicola/postura/{id}/delete', [AvicolaController::class, 'destroyPostura'])->name('avicola.postura.delete');
+Route::get('/avicola/engorde', [AvicolaController::class, 'engorde'])->name('avicola.engorde');
+Route::post('/avicola/engorde/peso', [AvicolaController::class, 'storePesoEngorde'])->name('avicola.engorde.peso');
+Route::get('/avicola/mortalidad', [AvicolaController::class, 'mortalidad'])->name('avicola.mortalidad');
+Route::post('/avicola/mortalidad', [AvicolaController::class, 'storeMortalidad'])->name('avicola.mortalidad.store');
+Route::get('/avicola/vacunacion', [AvicolaController::class, 'vacunacion'])->name('avicola.vacunacion');
+Route::post('/avicola/vacunacion/{id}/aplicar', [AvicolaController::class, 'aplicarVacuna'])->name('avicola.vacunacion.aplicar');
+Route::post('/avicola/vacunacion/personalizada', [AvicolaController::class, 'storeVacunaPersonalizada'])->name('avicola.vacunacion.personalizada');
+Route::get('/avicola/conversion', [AvicolaController::class, 'conversion'])->name('avicola.conversion');
+Route::post('/avicola/conversion', [AvicolaController::class, 'storeConversion'])->name('avicola.conversion.store');
+Route::get('/avicola/reportes', [AvicolaController::class, 'reportes'])->name('avicola.reportes');
+
+// ── PORCÍCOLA (Fase 6) ────────────────────────────────────────────
+Route::get('/porcicola', [PorcicolaController::class, 'piara'])->name('porcicola.piara');
+Route::get('/porcicola/reproductivo', [PorcicolaController::class, 'reproductivo'])->name('porcicola.reproductivo');
+Route::post('/porcicola/reproductivo/servicio', [PorcicolaController::class, 'storeServicio'])->name('porcicola.reproductivo.servicio');
+Route::post('/porcicola/reproductivo/{id}/diagnostico', [PorcicolaController::class, 'confirmarPrenez'])->name('porcicola.reproductivo.diagnostico');
+Route::post('/porcicola/reproductivo/parto', [PorcicolaController::class, 'storeParto'])->name('porcicola.reproductivo.parto');
+Route::post('/porcicola/reproductivo/destete', [PorcicolaController::class, 'storeDestete'])->name('porcicola.reproductivo.destete');
+Route::get('/porcicola/ceba', [PorcicolaController::class, 'ceba'])->name('porcicola.ceba');
+Route::post('/porcicola/ceba/peso', [PorcicolaController::class, 'storePesoCeba'])->name('porcicola.ceba.peso');
+Route::post('/porcicola/ceba/conversion', [PorcicolaController::class, 'storeConversion'])->name('porcicola.ceba.conversion');
+Route::get('/porcicola/sanidad', [PorcicolaController::class, 'sanidad'])->name('porcicola.sanidad');
+Route::post('/porcicola/sanidad/{id}/aplicar', [PorcicolaController::class, 'aplicarSanidad'])->name('porcicola.sanidad.aplicar');
+Route::post('/porcicola/sanidad/personalizado', [PorcicolaController::class, 'storeSanidadPersonalizada'])->name('porcicola.sanidad.personalizado');
+Route::get('/porcicola/reportes', [PorcicolaController::class, 'reportes'])->name('porcicola.reportes');
 
 });

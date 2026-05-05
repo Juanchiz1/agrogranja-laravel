@@ -671,6 +671,54 @@
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalEditar')">Cancelar</button>
         <button type="submit" class="btn btn-primary btn-full">Guardar cambios</button>
       </div>
+
+      @if(in_array($animal->especie, ['Gallinas','Patos','Pavos','Codornices','Aves de corral']))
+<div style="background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:8px;">
+  <div style="font-size:.75rem;font-weight:700;color:#b45309;margin-bottom:8px;">
+    🐔 DATOS AVÍCOLAS
+  </div>
+
+  <div class="grid-2">
+    <div class="form-group">
+      <label>Tipo de ave</label>
+      <select name="tipo_ave" class="form-control">
+        <option value="">— Sin tipo —</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'ponedora'         ? 'selected' : '' }} value="ponedora">🥚 Ponedora</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'engorde'          ? 'selected' : '' }} value="engorde">🍗 Engorde</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'doble_proposito'  ? 'selected' : '' }} value="doble_proposito">Doble propósito</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'reproductora'     ? 'selected' : '' }} value="reproductora">Reproductora</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'pato'             ? 'selected' : '' }} value="pato">Pato</option>
+        <option {{ ($animal->tipo_ave ?? '') === 'pavo'             ? 'selected' : '' }} value="pavo">Pavo</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Línea genética</label>
+      <input type="text" name="linea_ave" class="form-control"
+             value="{{ $animal->linea_ave ?? '' }}"
+             placeholder="Isa Brown, Ross 308...">
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-group">
+      <label>Fecha nacimiento del lote</label>
+      <input type="date" name="fecha_nacimiento_lote" class="form-control"
+             value="{{ $animal->fecha_nacimiento_lote ?? '' }}">
+      <div style="font-size:.68rem;color:#b45309;margin-top:2px;">
+        Necesaria para el calendario de vacunación automático
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Capacidad del galpón</label>
+      <input type="number" name="capacidad_galpon" class="form-control"
+             value="{{ $animal->capacidad_galpon ?? '' }}"
+             placeholder="Máximo de aves">
+    </div>
+  </div>
+</div>
+@endif
     </form>
   </div>
 </div>

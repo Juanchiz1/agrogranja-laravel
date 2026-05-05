@@ -66,13 +66,36 @@
       </a>
 
       {{-- Hato Bovino: solo si la línea bovina está activa --}}
-      @if(\App\Models\LineaProductiva::activa('bovino'))
-      <a href="{{ route('bovino.hato') }}"
-         class="sidebar-item {{ request()->routeIs('bovino.*') ? 'active' : '' }}"
-         style="padding-left:2.2rem;">
-        <span class="sidebar-icon">🐮</span><span>Hato Bovino</span>
-      </a>
-      @endif
+      {{-- Hato Bovino: solo si la línea bovina está activa --}}
+@if(\App\Models\LineaProductiva::activa('bovino'))
+  <a href="{{ route('bovino.hato') }}"
+     class="sidebar-item {{ request()->routeIs('bovino.*') ? 'active' : '' }}"
+     style="padding-left:2.2rem;">
+    <span class="sidebar-icon">🐮</span>
+    <span>Hato Bovino</span>
+  </a>
+@endif
+
+{{-- Avícola: solo si la línea avícola está activa --}}
+@if(\App\Models\LineaProductiva::activa('avicola'))
+  <a href="{{ route('avicola.galpon') }}"
+     class="sidebar-item {{ request()->routeIs('avicola.*') ? 'active' : '' }}"
+     style="padding-left:2.2rem;">
+    <span class="sidebar-icon">🐔</span>
+    <span>Avícola</span>
+  </a>
+@endif
+
+@if(\App\Models\LineaProductiva::activa('porcino'))
+  <a href="{{ route('porcicola.piara') }}"
+   class="sidebar-item {{ request()->routeIs('porcicola.*') ? 'active' : '' }}"
+   style="padding-left:2.2rem;">
+  <span class="sidebar-icon">🐷</span>
+  <span class="sidebar-label">Porcícola</span>
+</a>
+@endif
+
+      
 
       @endif
 

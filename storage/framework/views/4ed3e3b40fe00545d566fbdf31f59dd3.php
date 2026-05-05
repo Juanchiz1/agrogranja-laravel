@@ -1,123 +1,127 @@
-@extends('layouts.app')
-@section('title','Vacunación')
-@section('page_title','💉 Vacunación Avícola')
-@section('back_url', route('avicola.galpon'))
 
-@push('head')
-<link rel="stylesheet" href="{{ asset('css/avicola.css') }}">
-@endpush
+<?php $__env->startSection('title','Vacunación'); ?>
+<?php $__env->startSection('page_title','💉 Vacunación Avícola'); ?>
+<?php $__env->startSection('back_url', route('avicola.galpon')); ?>
 
-@section('content')
+<?php $__env->startPush('head'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/avicola.css')); ?>">
+<?php $__env->stopPush(); ?>
 
-{{-- ALERTAS VENCIDAS --}}
-@if($vacunasVencidas->count())
+<?php $__env->startSection('content'); ?>
+
+
+<?php if($vacunasVencidas->count()): ?>
 <div class="section-card" style="border-left:4px solid #dc2626;">
   <div class="section-title" style="color:#dc2626;margin-bottom:8px;">
-    ❌ Vacunas vencidas ({{ $vacunasVencidas->count() }})
+    ❌ Vacunas vencidas (<?php echo e($vacunasVencidas->count()); ?>)
   </div>
-  @foreach($vacunasVencidas as $v)
+  <?php $__currentLoopData = $vacunasVencidas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
   <div class="vacuna-card vencida">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
-        <div class="vacuna-nombre">{{ $v->nombre_vacuna }}</div>
+        <div class="vacuna-nombre"><?php echo e($v->nombre_vacuna); ?></div>
         <div class="vacuna-fecha">
-          @if($v->nombre_lote)🐔 {{ $v->nombre_lote }} · @endif
-          Debía aplicarse: {{ \Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y') }}
-          ({{ now()->diffInDays($v->fecha_programada) }} días atrás)
+          <?php if($v->nombre_lote): ?>🐔 <?php echo e($v->nombre_lote); ?> · <?php endif; ?>
+          Debía aplicarse: <?php echo e(\Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y')); ?>
+
+          (<?php echo e(now()->diffInDays($v->fecha_programada)); ?> días atrás)
         </div>
-        <span class="vacuna-via">{{ str_replace('_',' ',$v->via_administracion) }}</span>
+        <span class="vacuna-via"><?php echo e(str_replace('_',' ',$v->via_administracion)); ?></span>
       </div>
-      <button onclick="openAplicar({{ $v->id }},'{{ addslashes($v->nombre_vacuna) }}')"
+      <button onclick="openAplicar(<?php echo e($v->id); ?>,'<?php echo e(addslashes($v->nombre_vacuna)); ?>')"
               class="btn btn-sm btn-primary" style="white-space:nowrap;margin-left:10px;">
         💉 Aplicar
       </button>
     </div>
   </div>
-  @endforeach
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- PRÓXIMAS 15 DÍAS --}}
-@if($vacunasProximas->count())
+
+<?php if($vacunasProximas->count()): ?>
 <div class="section-card">
   <div class="section-title" style="color:#b45309;margin-bottom:8px;">
-    ⚠️ Próximas vacunas — 15 días ({{ $vacunasProximas->count() }})
+    ⚠️ Próximas vacunas — 15 días (<?php echo e($vacunasProximas->count()); ?>)
   </div>
-  @foreach($vacunasProximas as $v)
+  <?php $__currentLoopData = $vacunasProximas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
   <div class="vacuna-card proxima">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
-        <div class="vacuna-nombre">{{ $v->nombre_vacuna }}</div>
+        <div class="vacuna-nombre"><?php echo e($v->nombre_vacuna); ?></div>
         <div class="vacuna-fecha">
-          @if($v->nombre_lote)🐔 {{ $v->nombre_lote }} · @endif
-          {{ \Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y') }}
-          (en {{ now()->diffInDays($v->fecha_programada) }} días)
+          <?php if($v->nombre_lote): ?>🐔 <?php echo e($v->nombre_lote); ?> · <?php endif; ?>
+          <?php echo e(\Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y')); ?>
+
+          (en <?php echo e(now()->diffInDays($v->fecha_programada)); ?> días)
         </div>
-        <span class="vacuna-via">{{ str_replace('_',' ',$v->via_administracion) }}</span>
-        @if($v->dosis)<span style="font-size:.72rem;color:#64748b;margin-left:6px;">· {{ $v->dosis }}</span>@endif
+        <span class="vacuna-via"><?php echo e(str_replace('_',' ',$v->via_administracion)); ?></span>
+        <?php if($v->dosis): ?><span style="font-size:.72rem;color:#64748b;margin-left:6px;">· <?php echo e($v->dosis); ?></span><?php endif; ?>
       </div>
-      <button onclick="openAplicar({{ $v->id }},'{{ addslashes($v->nombre_vacuna) }}')"
+      <button onclick="openAplicar(<?php echo e($v->id); ?>,'<?php echo e(addslashes($v->nombre_vacuna)); ?>')"
               class="btn btn-sm btn-secondary" style="white-space:nowrap;margin-left:10px;">
         💉 Aplicar
       </button>
     </div>
   </div>
-  @endforeach
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- PENDIENTES A FUTURO --}}
-@if($vacunasPendientes->count())
+
+<?php if($vacunasPendientes->count()): ?>
 <div class="section-card">
   <div class="section-header">
     <div class="section-title">📅 Pendientes</div>
     <button onclick="openModal('modalVacunaPersonal')" class="btn btn-sm btn-ghost">+ Personalizada</button>
   </div>
-  @foreach($vacunasPendientes as $v)
+  <?php $__currentLoopData = $vacunasPendientes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
   <div class="vacuna-card" style="margin-bottom:6px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div class="vacuna-nombre">{{ $v->nombre_vacuna }}</div>
+        <div class="vacuna-nombre"><?php echo e($v->nombre_vacuna); ?></div>
         <div class="vacuna-fecha">
-          @if($v->nombre_lote)🐔 {{ $v->nombre_lote }} · @endif
-          {{ \Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y') }}
-          @if($v->dia_vida)(día {{ $v->dia_vida }} de vida)@endif
+          <?php if($v->nombre_lote): ?>🐔 <?php echo e($v->nombre_lote); ?> · <?php endif; ?>
+          <?php echo e(\Carbon\Carbon::parse($v->fecha_programada)->format('d/m/Y')); ?>
+
+          <?php if($v->dia_vida): ?>(día <?php echo e($v->dia_vida); ?> de vida)<?php endif; ?>
         </div>
-        <span class="vacuna-via">{{ str_replace('_',' ',$v->via_administracion) }}</span>
+        <span class="vacuna-via"><?php echo e(str_replace('_',' ',$v->via_administracion)); ?></span>
       </div>
-      <button onclick="openAplicar({{ $v->id }},'{{ addslashes($v->nombre_vacuna) }}')"
+      <button onclick="openAplicar(<?php echo e($v->id); ?>,'<?php echo e(addslashes($v->nombre_vacuna)); ?>')"
               class="btn btn-sm btn-ghost" style="font-size:.75rem;">Aplicar</button>
     </div>
   </div>
-  @endforeach
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- APLICADAS --}}
-@if($vacunasAplicadas->count())
+
+<?php if($vacunasAplicadas->count()): ?>
 <div class="section-card">
-  <div class="section-title" style="margin-bottom:8px;">✅ Aplicadas ({{ $vacunasAplicadas->count() }})</div>
-  @foreach($vacunasAplicadas->take(8) as $v)
+  <div class="section-title" style="margin-bottom:8px;">✅ Aplicadas (<?php echo e($vacunasAplicadas->count()); ?>)</div>
+  <?php $__currentLoopData = $vacunasAplicadas->take(8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
   <div class="vacuna-card aplicada" style="margin-bottom:4px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div class="vacuna-nombre" style="font-size:.85rem;">✅ {{ $v->nombre_vacuna }}</div>
+        <div class="vacuna-nombre" style="font-size:.85rem;">✅ <?php echo e($v->nombre_vacuna); ?></div>
         <div class="vacuna-fecha">
-          @if($v->nombre_lote)🐔 {{ $v->nombre_lote }} · @endif
-          Aplicada: {{ \Carbon\Carbon::parse($v->fecha_aplicada)->format('d/m/Y') }}
+          <?php if($v->nombre_lote): ?>🐔 <?php echo e($v->nombre_lote); ?> · <?php endif; ?>
+          Aplicada: <?php echo e(\Carbon\Carbon::parse($v->fecha_aplicada)->format('d/m/Y')); ?>
+
         </div>
-        @if($v->producto_comercial)
-        <div style="font-size:.72rem;color:#64748b;">📦 {{ $v->producto_comercial }}</div>
-        @endif
+        <?php if($v->producto_comercial): ?>
+        <div style="font-size:.72rem;color:#64748b;">📦 <?php echo e($v->producto_comercial); ?></div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
-  @endforeach
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- SIN PROTOCOLOS --}}
-@if($vacunas->isEmpty())
+
+<?php if($vacunas->isEmpty()): ?>
 <div class="section-card" style="text-align:center;padding:24px;">
   <div style="font-size:2.5rem;">💉</div>
   <p style="color:#64748b;margin-bottom:8px;">Sin protocolos de vacunación configurados.</p>
@@ -129,20 +133,20 @@
     + Agregar vacuna manualmente
   </button>
 </div>
-@endif
+<?php endif; ?>
 
 <div style="margin-bottom:80px;"></div>
 
-{{-- MODAL APLICAR VACUNA --}}
+
 <div id="modalAplicar" class="modal-overlay" style="display:none;">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">💉 Aplicar vacuna — <span id="nombreVacunaAplic"></span></div>
     <form id="formAplicar" method="POST" action="">
-      @csrf
+      <?php echo csrf_field(); ?>
       <div class="form-group">
         <label>Fecha de aplicación *</label>
-        <input type="date" name="fecha_aplicada" class="form-control" value="{{ now()->toDateString() }}" required>
+        <input type="date" name="fecha_aplicada" class="form-control" value="<?php echo e(now()->toDateString()); ?>" required>
       </div>
       <div class="form-group">
         <label>Producto comercial</label>
@@ -165,20 +169,20 @@
   </div>
 </div>
 
-{{-- MODAL VACUNA PERSONALIZADA --}}
+
 <div id="modalVacunaPersonal" class="modal-overlay" style="display:none;">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">➕ Nueva vacuna personalizada</div>
-    <form method="POST" action="{{ route('avicola.vacunacion.personalizada') }}">
-      @csrf
+    <form method="POST" action="<?php echo e(route('avicola.vacunacion.personalizada')); ?>">
+      <?php echo csrf_field(); ?>
       <div class="form-group">
         <label>Lote (opcional — vacía = todos)</label>
         <select name="animal_id" class="form-control">
           <option value="">Todos los lotes</option>
-          @foreach($lotes as $l)
-          <option value="{{ $l->id }}">{{ $l->nombre_lote }}</option>
-          @endforeach
+          <?php $__currentLoopData = $lotes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <option value="<?php echo e($l->id); ?>"><?php echo e($l->nombre_lote); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
       </div>
       <div class="form-group">
@@ -224,9 +228,9 @@
   </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 function openModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='flex'; document.body.style.overflow='hidden'; }
 function closeModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='none'; document.body.style.overflow=''; }
@@ -238,4 +242,5 @@ function openAplicar(id, nombre) {
   openModal('modalAplicar');
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/avicola/vacunacion.blade.php ENDPATH**/ ?>

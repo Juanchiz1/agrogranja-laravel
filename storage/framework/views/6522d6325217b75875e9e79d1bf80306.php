@@ -1,15 +1,15 @@
-@extends('layouts.app')
-@section('title','Conversión Alimenticia')
-@section('page_title','🌾 Conversión Alimenticia')
-@section('back_url', route('avicola.galpon'))
 
-@push('head')
-<link rel="stylesheet" href="{{ asset('css/avicola.css') }}">
-@endpush
+<?php $__env->startSection('title','Conversión Alimenticia'); ?>
+<?php $__env->startSection('page_title','🌾 Conversión Alimenticia'); ?>
+<?php $__env->startSection('back_url', route('avicola.galpon')); ?>
 
-@section('content')
+<?php $__env->startPush('head'); ?>
+<link rel="stylesheet" href="<?php echo e(asset('css/avicola.css')); ?>">
+<?php $__env->stopPush(); ?>
 
-{{-- INFO SOBRE CA --}}
+<?php $__env->startSection('content'); ?>
+
+
 <div class="alerta-avi info" style="margin-bottom:10px;">
   <span>💡</span>
   <div style="font-size:.8rem;">
@@ -19,92 +19,95 @@
   </div>
 </div>
 
-{{-- RESUMEN POR LOTE --}}
-@if($caPromLote)
+
+<?php if($caPromLote): ?>
 <div class="section-card">
   <div class="section-header">
     <div class="section-title">📊 CA promedio por lote (últimas 4 semanas)</div>
     <button onclick="openModal('modalConversion')" class="btn btn-sm btn-primary">+ Registrar</button>
   </div>
-  @foreach($lotes as $l)
-  @php $ca = $caPromLote[$l->id] ?? 0; @endphp
-  @if($ca > 0)
+  <?php $__currentLoopData = $lotes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+  <?php $ca = $caPromLote[$l->id] ?? 0; ?>
+  <?php if($ca > 0): ?>
   <div class="ca-card">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div style="font-weight:700;font-size:.88rem;">{{ $l->nombre_lote }}</div>
-        <div style="font-size:.75rem;color:#64748b;">{{ $l->cantidad }} aves · {{ $l->especie }}</div>
+        <div style="font-weight:700;font-size:.88rem;"><?php echo e($l->nombre_lote); ?></div>
+        <div style="font-size:.75rem;color:#64748b;"><?php echo e($l->cantidad); ?> aves · <?php echo e($l->especie); ?></div>
       </div>
-      <div class="{{ $ca <= 2.0 ? 'ca-val-ok' : ($ca <= 2.5 ? 'ca-val-med' : 'ca-val-bad') }}">
-        {{ $ca }}
+      <div class="<?php echo e($ca <= 2.0 ? 'ca-val-ok' : ($ca <= 2.5 ? 'ca-val-med' : 'ca-val-bad')); ?>">
+        <?php echo e($ca); ?>
+
       </div>
     </div>
     <div style="font-size:.72rem;color:#94a3b8;margin-top:4px;">
-      @if($ca <= 2.0) ✅ Excelente eficiencia
-      @elseif($ca <= 2.5) ⚠️ Normal
-      @else ❌ Alta — revisar alimento y salud
-      @endif
+      <?php if($ca <= 2.0): ?> ✅ Excelente eficiencia
+      <?php elseif($ca <= 2.5): ?> ⚠️ Normal
+      <?php else: ?> ❌ Alta — revisar alimento y salud
+      <?php endif; ?>
     </div>
   </div>
-  @endif
-  @endforeach
+  <?php endif; ?>
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- HISTORIAL --}}
+
 <div class="section-card">
   <div class="section-header">
     <div class="section-title">📋 Historial de conversiones</div>
-    @if($lotes->count() && !$caPromLote)
+    <?php if($lotes->count() && !$caPromLote): ?>
     <button onclick="openModal('modalConversion')" class="btn btn-sm btn-primary">+ Registrar</button>
-    @endif
+    <?php endif; ?>
   </div>
-  @forelse($conversiones as $conv)
+  <?php $__empty_1 = true; $__currentLoopData = $conversiones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
   <div class="ca-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
-        <div style="font-weight:700;font-size:.87rem;">{{ $conv->nombre_lote }}</div>
+        <div style="font-weight:700;font-size:.87rem;"><?php echo e($conv->nombre_lote); ?></div>
         <div style="font-size:.75rem;color:#64748b;">
-          Sem {{ $conv->semana }} · {{ $conv->tipo }} ·
-          {{ \Carbon\Carbon::parse($conv->fecha_inicio)->format('d/m') }} al
-          {{ \Carbon\Carbon::parse($conv->fecha_fin)->format('d/m/Y') }}
+          Sem <?php echo e($conv->semana); ?> · <?php echo e($conv->tipo); ?> ·
+          <?php echo e(\Carbon\Carbon::parse($conv->fecha_inicio)->format('d/m')); ?> al
+          <?php echo e(\Carbon\Carbon::parse($conv->fecha_fin)->format('d/m/Y')); ?>
+
         </div>
         <div style="font-size:.75rem;color:#94a3b8;margin-top:2px;">
-          Alimento: {{ $conv->alimento_consumido_kg }} kg ·
-          Producción: {{ $conv->produccion_kg }} kg
+          Alimento: <?php echo e($conv->alimento_consumido_kg); ?> kg ·
+          Producción: <?php echo e($conv->produccion_kg); ?> kg
         </div>
       </div>
-      @if($conv->conversion_alimenticia)
-      <div class="{{ $conv->conversion_alimenticia <= 2.0 ? 'ca-val-ok' : ($conv->conversion_alimenticia <= 2.5 ? 'ca-val-med' : 'ca-val-bad') }}">
-        {{ $conv->conversion_alimenticia }}
+      <?php if($conv->conversion_alimenticia): ?>
+      <div class="<?php echo e($conv->conversion_alimenticia <= 2.0 ? 'ca-val-ok' : ($conv->conversion_alimenticia <= 2.5 ? 'ca-val-med' : 'ca-val-bad')); ?>">
+        <?php echo e($conv->conversion_alimenticia); ?>
+
       </div>
-      @endif
+      <?php endif; ?>
     </div>
   </div>
-  @empty
+  <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
   <div style="text-align:center;padding:24px;color:#94a3b8;font-size:.85rem;">
     Sin registros de conversión alimenticia.
     <br><button onclick="openModal('modalConversion')" class="btn btn-sm btn-primary" style="margin-top:10px;">+ Primer registro</button>
   </div>
-  @endforelse
+  <?php endif; ?>
 </div>
 
 <div style="margin-bottom:80px;"></div>
 
-{{-- MODAL --}}
+
 <div id="modalConversion" class="modal-overlay" style="display:none;">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">🌾 Registrar conversión alimenticia</div>
-    <form method="POST" action="{{ route('avicola.conversion.store') }}">
-      @csrf
+    <form method="POST" action="<?php echo e(route('avicola.conversion.store')); ?>">
+      <?php echo csrf_field(); ?>
       <div class="form-group">
         <label>Lote *</label>
         <select name="animal_id" class="form-control" required>
           <option value="">Seleccionar...</option>
-          @foreach($lotes as $l)
-          <option value="{{ $l->id }}">{{ $l->nombre_lote }}</option>
-          @endforeach
+          <?php $__currentLoopData = $lotes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <option value="<?php echo e($l->id); ?>"><?php echo e($l->nombre_lote); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -165,9 +168,9 @@
   </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 function openModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='flex'; document.body.style.overflow='hidden'; }
 function closeModal(id) { var m=document.getElementById(id); if(!m)return; m.style.display='none'; document.body.style.overflow=''; }
@@ -190,4 +193,5 @@ function calcCA() {
   }
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/avicola/conversion.blade.php ENDPATH**/ ?>

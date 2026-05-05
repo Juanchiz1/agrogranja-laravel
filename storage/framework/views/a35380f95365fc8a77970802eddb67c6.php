@@ -66,13 +66,36 @@
       </a>
 
       
-      <?php if(\App\Models\LineaProductiva::activa('bovino')): ?>
-      <a href="<?php echo e(route('bovino.hato')); ?>"
-         class="sidebar-item <?php echo e(request()->routeIs('bovino.*') ? 'active' : ''); ?>"
-         style="padding-left:2.2rem;">
-        <span class="sidebar-icon">🐮</span><span>Hato Bovino</span>
-      </a>
-      <?php endif; ?>
+      
+<?php if(\App\Models\LineaProductiva::activa('bovino')): ?>
+  <a href="<?php echo e(route('bovino.hato')); ?>"
+     class="sidebar-item <?php echo e(request()->routeIs('bovino.*') ? 'active' : ''); ?>"
+     style="padding-left:2.2rem;">
+    <span class="sidebar-icon">🐮</span>
+    <span>Hato Bovino</span>
+  </a>
+<?php endif; ?>
+
+
+<?php if(\App\Models\LineaProductiva::activa('avicola')): ?>
+  <a href="<?php echo e(route('avicola.galpon')); ?>"
+     class="sidebar-item <?php echo e(request()->routeIs('avicola.*') ? 'active' : ''); ?>"
+     style="padding-left:2.2rem;">
+    <span class="sidebar-icon">🐔</span>
+    <span>Avícola</span>
+  </a>
+<?php endif; ?>
+
+<?php if(\App\Models\LineaProductiva::activa('porcino')): ?>
+  <a href="<?php echo e(route('porcicola.piara')); ?>"
+   class="sidebar-item <?php echo e(request()->routeIs('porcicola.*') ? 'active' : ''); ?>"
+   style="padding-left:2.2rem;">
+  <span class="sidebar-icon">🐷</span>
+  <span class="sidebar-label">Porcícola</span>
+</a>
+<?php endif; ?>
+
+      
 
       <?php endif; ?>
 

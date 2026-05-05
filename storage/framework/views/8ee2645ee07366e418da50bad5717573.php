@@ -138,50 +138,88 @@
   </div>
 
   
-  <div class="modal-overlay" id="editAnimal<?php echo e($a->id); ?>" style="display:none;">
-    <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">✏️ Editar animal</h3>
-      <form method="POST" action="<?php echo e(route('animales.update',$a->id)); ?>" enctype="multipart/form-data"><?php echo csrf_field(); ?>
-        <input type="hidden" name="back" value="list">
-        <div class="form-group"><label>Especie *</label>
-          <select name="especie" class="form-control" required>
-            <?php $__currentLoopData = $especies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option <?php echo e($a->especie===$e?'selected':''); ?>><?php echo e($e); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+<div class="modal-overlay" id="editAnimal<?php echo e($a->id); ?>" style="display:none;">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">✏️ Editar animal</h3>
+
+    <form method="POST" action="<?php echo e(route('animales.update', $a->id)); ?>" enctype="multipart/form-data">
+      <?php echo csrf_field(); ?>
+      <input type="hidden" name="back" value="list">
+
+      <div class="form-group">
+        <label>Especie *</label>
+        <select name="especie" class="form-control" required>
+          <?php $__currentLoopData = $especies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <option value="<?php echo e($e); ?>" <?php echo e($a->especie === $e ? 'selected' : ''); ?>><?php echo e($e); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Nombre del lote</label>
+        <input type="text" name="nombre_lote" class="form-control" value="<?php echo e($a->nombre_lote); ?>">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" name="cantidad" class="form-control" value="<?php echo e($a->cantidad); ?>" min="1">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select name="estado" class="form-control">
+            <option value="activo" <?php echo e($a->estado === 'activo' ? 'selected' : ''); ?>>Activo</option>
+            <option value="vendido" <?php echo e($a->estado === 'vendido' ? 'selected' : ''); ?>>Vendido</option>
+            <option value="muerte" <?php echo e($a->estado === 'muerte' ? 'selected' : ''); ?>>Baja</option>
           </select>
         </div>
-        <div class="form-group"><label>Nombre del lote</label><input type="text" name="nombre_lote" class="form-control" value="<?php echo e($a->nombre_lote); ?>"></div>
-        <div class="grid-2">
-          <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" class="form-control" value="<?php echo e($a->cantidad); ?>" min="1"></div>
-          <div class="form-group"><label>Estado</label>
-            <select name="estado" class="form-control">
-              <option <?php echo e($a->estado==='activo'?'selected':''); ?> value="activo">Activo</option>
-              <option <?php echo e($a->estado==='vendido'?'selected':''); ?> value="vendido">Vendido</option>
-              <option <?php echo e($a->estado==='muerte'?'selected':''); ?> value="muerte">Baja</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid-2">
-          <div class="form-group"><label>Peso promedio</label><input type="number" step="0.1" name="peso_promedio" class="form-control" value="<?php echo e($a->peso_promedio); ?>"></div>
-          <div class="form-group"><label>Unidad</label>
-            <select name="unidad_peso" class="form-control">
-              <option <?php echo e(($a->unidad_peso??'kg')==='kg'?'selected':''); ?> value="kg">kg</option>
-              <option <?php echo e(($a->unidad_peso??'kg')==='lb'?'selected':''); ?> value="lb">lb</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid-2">
-          <div class="form-group"><label>Ubicación</label><input type="text" name="ubicacion" class="form-control" value="<?php echo e($a->ubicacion); ?>" placeholder="Corral, potrero..."></div>
-          <div class="form-group"><label>Etapa de vida</label>
-            <select name="etapa_vida" class="form-control">
-              <option <?php echo e(($a->etapa_vida??'adulto')==='cria'?'selected':''); ?> value="cria">🐣 Cría</option>
-              <option <?php echo e(($a->etapa_vida??'adulto')==='juvenil'?'selected':''); ?> value="juvenil">🐥 Juvenil</option>
-              <option <?php echo e(($a->etapa_vida??'adulto')==='adulto'?'selected':''); ?> value="adulto">✅ Adulto</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group"><label>Propietario</label><input type="text" name="propietario" class="form-control" value="<?php echo e($a->propietario); ?>" placeholder="Dueño del animal"></div>
-        <div class="form-group"><label>Produce</label><input type="text" name="produccion" class="form-control" value="<?php echo e($a->produccion); ?>" placeholder="Leche, Huevos, Cría..."></div>
+      </div>
 
-        
-        <?php if(in_array($a->especie, ['Ganado bovino','Terneros'])): ?>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Peso promedio</label>
+          <input type="number" step="0.1" name="peso_promedio" class="form-control" value="<?php echo e($a->peso_promedio); ?>">
+        </div>
+        <div class="form-group">
+          <label>Unidad</label>
+          <select name="unidad_peso" class="form-control">
+            <option value="kg" <?php echo e(($a->unidad_peso ?? 'kg') === 'kg' ? 'selected' : ''); ?>>kg</option>
+            <option value="lb" <?php echo e(($a->unidad_peso ?? 'kg') === 'lb' ? 'selected' : ''); ?>>lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Ubicación</label>
+          <input type="text" name="ubicacion" class="form-control" value="<?php echo e($a->ubicacion); ?>" placeholder="Corral, potrero...">
+        </div>
+        <div class="form-group">
+          <label>Etapa de vida</label>
+          <select name="etapa_vida" class="form-control">
+            <option value="cria" <?php echo e(($a->etapa_vida ?? 'adulto') === 'cria' ? 'selected' : ''); ?>>🐣 Cría</option>
+            <option value="juvenil" <?php echo e(($a->etapa_vida ?? 'adulto') === 'juvenil' ? 'selected' : ''); ?>>🐥 Juvenil</option>
+            <option value="adulto" <?php echo e(($a->etapa_vida ?? 'adulto') === 'adulto' ? 'selected' : ''); ?>>✅ Adulto</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Propietario</label>
+        <input type="text" name="propietario" class="form-control" value="<?php echo e($a->propietario); ?>" placeholder="Dueño del animal">
+      </div>
+
+      <div class="form-group">
+        <label>Produce</label>
+        <input type="text" name="produccion" class="form-control" value="<?php echo e($a->produccion); ?>" placeholder="Leche, Huevos, Cría...">
+      </div>
+
+      
+      <?php if(in_array($a->especie, ['Ganado bovino','Terneros'])): ?>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;">🐄 Datos bovinos</div>
+
         <div class="grid-2">
           <div class="form-group">
             <label>Raza</label>
@@ -193,15 +231,16 @@
             <label>Categoría</label>
             <select name="categoria_bovina" class="form-control">
               <option value="">— Sin categoría —</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'vaca_lechera' ? 'selected' : ''); ?> value="vaca_lechera">Vaca lechera</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'vaca_carne'   ? 'selected' : ''); ?> value="vaca_carne">Vaca de carne</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'novilla'      ? 'selected' : ''); ?> value="novilla">Novilla</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'ternero'      ? 'selected' : ''); ?> value="ternero">Ternero</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'toro'         ? 'selected' : ''); ?> value="toro">Toro</option>
-              <option <?php echo e(($a->categoria_bovina ?? '') === 'buey'         ? 'selected' : ''); ?> value="buey">Buey</option>
+              <option value="vaca_lechera" <?php echo e(($a->categoria_bovina ?? '') === 'vaca_lechera' ? 'selected' : ''); ?>>Vaca lechera</option>
+              <option value="vaca_carne" <?php echo e(($a->categoria_bovina ?? '') === 'vaca_carne' ? 'selected' : ''); ?>>Vaca de carne</option>
+              <option value="novilla" <?php echo e(($a->categoria_bovina ?? '') === 'novilla' ? 'selected' : ''); ?>>Novilla</option>
+              <option value="ternero" <?php echo e(($a->categoria_bovina ?? '') === 'ternero' ? 'selected' : ''); ?>>Ternero</option>
+              <option value="toro" <?php echo e(($a->categoria_bovina ?? '') === 'toro' ? 'selected' : ''); ?>>Toro</option>
+              <option value="buey" <?php echo e(($a->categoria_bovina ?? '') === 'buey' ? 'selected' : ''); ?>>Buey</option>
             </select>
           </div>
         </div>
+
         <div class="form-group">
           <label>Meta de peso al sacrificio (kg)</label>
           <input type="number" name="peso_meta_kg" step="1" min="0"
@@ -212,16 +251,66 @@
             Se usa en el módulo de Pesaje para calcular el avance hacia la meta.
           </div>
         </div>
-        <?php endif; ?>
-        
-        <div class="form-group"><label>Notas</label><textarea name="notas" class="form-control" rows="2"><?php echo e($a->notas); ?></textarea></div>
-        <div class="flex gap-2 mt-2">
-          <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('editAnimal<?php echo e($a->id); ?>')">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-full">Actualizar</button>
+      </div>
+      <?php endif; ?>
+
+      
+      <?php if(in_array($a->especie, ['Gallinas','Patos','Pavos','Codornices','Aves de corral'])): ?>
+      <div style="background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:8px;">🐔 Datos avícolas</div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Tipo de ave</label>
+            <select name="tipo_ave" class="form-control">
+              <option value="">— Sin tipo —</option>
+              <option value="ponedora" <?php echo e(($a->tipo_ave ?? '') === 'ponedora' ? 'selected' : ''); ?>>🥚 Ponedora</option>
+              <option value="engorde" <?php echo e(($a->tipo_ave ?? '') === 'engorde' ? 'selected' : ''); ?>>🍗 Engorde</option>
+              <option value="doble_proposito" <?php echo e(($a->tipo_ave ?? '') === 'doble_proposito' ? 'selected' : ''); ?>>🐔 Doble propósito</option>
+              <option value="reproductora" <?php echo e(($a->tipo_ave ?? '') === 'reproductora' ? 'selected' : ''); ?>>🐣 Reproductora</option>
+              <option value="pato" <?php echo e(($a->tipo_ave ?? '') === 'pato' ? 'selected' : ''); ?>>🦆 Pato</option>
+              <option value="pavo" <?php echo e(($a->tipo_ave ?? '') === 'pavo' ? 'selected' : ''); ?>>🦃 Pavo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Línea genética</label>
+            <input type="text" name="linea_ave" class="form-control"
+                   value="<?php echo e($a->linea_ave ?? ''); ?>"
+                   placeholder="Ej: Isa Brown, Ross 308, Hy-Line...">
+          </div>
         </div>
-      </form>
-    </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Fecha nacimiento del lote</label>
+            <input type="date" name="fecha_nacimiento_lote" class="form-control"
+                   value="<?php echo e($a->fecha_nacimiento_lote ?? ''); ?>">
+          </div>
+
+          <div class="form-group">
+            <label>Capacidad del galpón</label>
+            <input type="number" name="capacidad_galpon" class="form-control"
+                   value="<?php echo e($a->capacidad_galpon ?? ''); ?>"
+                   min="1"
+                   placeholder="Máximo de aves">
+          </div>
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea name="notas" class="form-control" rows="2"><?php echo e($a->notas); ?></textarea>
+      </div>
+
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('editAnimal<?php echo e($a->id); ?>')">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-full">Actualizar</button>
+      </div>
+    </form>
   </div>
+</div>
   <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -229,18 +318,35 @@
 
 
 <div class="modal-overlay" id="modalNuevoAnimal" style="display:none;">
-  <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">🐾 Nuevo animal</h3>
-    <form method="POST" action="<?php echo e(route('animales.store')); ?>" enctype="multipart/form-data"><?php echo csrf_field(); ?>
-      <div class="form-group"><label>Especie *</label>
-        <select name="especie" class="form-control" required id="especieNuevo" onchange="updateVentaMode()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">🐾 Nuevo animal</h3>
+
+    <form method="POST" action="<?php echo e(route('animales.store')); ?>" enctype="multipart/form-data">
+      <?php echo csrf_field(); ?>
+
+      <div class="form-group">
+        <label>Especie *</label>
+        <select name="especie" class="form-control" required id="especieNuevo" onchange="updateVentaMode(); toggleAvicolaNuevo();">
           <option value="">Seleccionar...</option>
-          <?php $__currentLoopData = $especies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option><?php echo e($e); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          <?php $__currentLoopData = $especies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <option value="<?php echo e($e); ?>"><?php echo e($e); ?></option>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
       </div>
-      <div class="form-group"><label>Nombre del lote / identificación</label><input type="text" name="nombre_lote" class="form-control" placeholder="Ej: Lote bovino norte, Flor, Gallinero 1"></div>
+
+      <div class="form-group">
+        <label>Nombre del lote / identificación</label>
+        <input type="text" name="nombre_lote" class="form-control" placeholder="Ej: Lote bovino norte, Flor, Gallinero 1">
+      </div>
+
       <div class="grid-2">
-        <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" class="form-control" value="1" min="1"></div>
-        <div class="form-group"><label>Etapa de vida</label>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" name="cantidad" class="form-control" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Etapa de vida</label>
           <select name="etapa_vida" class="form-control">
             <option value="cria">🐣 Cría</option>
             <option value="juvenil">🐥 Juvenil</option>
@@ -248,34 +354,109 @@
           </select>
         </div>
       </div>
+
       <div class="grid-2">
-        <div class="form-group"><label>Peso promedio</label><input type="number" step="0.1" name="peso_promedio" class="form-control" placeholder="0"></div>
-        <div class="form-group"><label>Unidad</label>
+        <div class="form-group">
+          <label>Peso promedio</label>
+          <input type="number" step="0.1" name="peso_promedio" class="form-control" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Unidad</label>
           <select name="unidad_peso" class="form-control">
-            <option value="kg">kg</option><option value="lb">lb</option>
+            <option value="kg">kg</option>
+            <option value="lb">lb</option>
           </select>
         </div>
       </div>
+
       <div class="grid-2">
-        <div class="form-group"><label>Fecha ingreso</label><input type="date" name="fecha_ingreso" class="form-control" value="<?php echo e(date('Y-m-d')); ?>"></div>
-        <div class="form-group"><label>Fecha nacimiento</label><input type="date" name="fecha_nacimiento" class="form-control"></div>
+        <div class="form-group">
+          <label>Fecha ingreso</label>
+          <input type="date" name="fecha_ingreso" class="form-control" value="<?php echo e(date('Y-m-d')); ?>">
+        </div>
+        <div class="form-group">
+          <label>Fecha nacimiento</label>
+          <input type="date" name="fecha_nacimiento" class="form-control">
+        </div>
       </div>
+
       <div class="grid-2">
-        <div class="form-group"><label>Ubicación</label><input type="text" name="ubicacion" class="form-control" placeholder="Corral, potrero..."></div>
-        <div class="form-group"><label>Propietario</label><input type="text" name="propietario" class="form-control" placeholder="Nombre del dueño"></div>
+        <div class="form-group">
+          <label>Ubicación</label>
+          <input type="text" name="ubicacion" class="form-control" placeholder="Corral, potrero...">
+        </div>
+        <div class="form-group">
+          <label>Propietario</label>
+          <input type="text" name="propietario" class="form-control" placeholder="Nombre del dueño">
+        </div>
       </div>
-      <div class="form-group"><label>¿Qué produce?</label><input type="text" name="produccion" class="form-control" placeholder="Leche, Huevos, Lana, Cría..."></div>
+
+      <div class="form-group">
+        <label>¿Qué produce?</label>
+        <input type="text" name="produccion" class="form-control" placeholder="Leche, Huevos, Lana, Cría...">
+      </div>
+
       <div id="precioKiloWrap" class="form-group" style="display:none;">
         <label>Precio de venta por kg (COP)</label>
         <input type="number" step="100" name="precio_kilo" class="form-control" placeholder="Ej: 8000">
         <input type="hidden" name="vende_por_kilo" value="1">
       </div>
+
       <div id="precioUniWrap" class="form-group" style="display:none;">
         <label>Precio de venta por cabeza (COP)</label>
         <input type="number" step="100" name="precio_unidad" class="form-control" placeholder="Ej: 25000">
       </div>
-      <div class="form-group"><label>📷 Foto del animal (opcional)</label><input type="file" name="foto" class="form-control" accept="image/*"></div>
-      <div class="form-group"><label>Notas</label><textarea name="notas" class="form-control" rows="2" placeholder="Observaciones..."></textarea></div>
+
+      
+      <div id="camposAvicolaNuevo" style="display:none;background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:8px;">🐔 Datos avícolas</div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Tipo de ave</label>
+            <select name="tipo_ave" class="form-control">
+              <option value="">— Sin tipo —</option>
+              <option value="ponedora">🥚 Ponedora</option>
+              <option value="engorde">🍗 Engorde</option>
+              <option value="doble_proposito">🐔 Doble propósito</option>
+              <option value="reproductora">🐣 Reproductora</option>
+              <option value="pato">🦆 Pato</option>
+              <option value="pavo">🦃 Pavo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Línea genética</label>
+            <input type="text" name="linea_ave" class="form-control" placeholder="Ej: Isa Brown, Ross 308, Hy-Line...">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Fecha nacimiento del lote</label>
+            <input type="date" name="fecha_nacimiento_lote" class="form-control">
+            <div style="font-size:.68rem;color:#b45309;margin-top:2px;">
+              Se usa para vacunación automática y cálculo de semanas.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Capacidad del galpón</label>
+            <input type="number" name="capacidad_galpon" class="form-control" min="1" placeholder="Máximo de aves">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>📷 Foto del animal (opcional)</label>
+        <input type="file" name="foto" class="form-control" accept="image/*">
+      </div>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea name="notas" class="form-control" rows="2" placeholder="Observaciones..."></textarea>
+      </div>
+
       <div class="flex gap-2 mt-2">
         <button type="button" class="btn btn-ghost btn-full" onclick="closeModal('modalNuevoAnimal')">Cancelar</button>
         <button type="submit" class="btn btn-primary btn-full">Guardar</button>
