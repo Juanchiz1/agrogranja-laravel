@@ -299,6 +299,48 @@
       </div>
       @endif
 
+      {{-- CAMPOS PORCÍCOLAS (Fase 6) --}}
+      @if(in_array($a->especie, ['Cerdos','Cerdas de cría','Porcinos']))
+      <div style="background:#fdf2f8;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#be185d;text-transform:uppercase;margin-bottom:8px;">Datos porcicolas</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select name="categoria_porcina" class="form-control">
+              <option value="">Sin categoria</option>
+              <option value="lechon"           {{ ($a->categoria_porcina ?? '') === 'lechon'           ? 'selected' : '' }}>Lechon</option>
+              <option value="levante"          {{ ($a->categoria_porcina ?? '') === 'levante'          ? 'selected' : '' }}>Levante</option>
+              <option value="ceba"             {{ ($a->categoria_porcina ?? '') === 'ceba'             ? 'selected' : '' }}>Ceba</option>
+              <option value="hembra_cria"      {{ ($a->categoria_porcina ?? '') === 'hembra_cria'      ? 'selected' : '' }}>Hembra de cria</option>
+              <option value="verraco"          {{ ($a->categoria_porcina ?? '') === 'verraco'          ? 'selected' : '' }}>Verraco</option>
+              <option value="vientre_descarte" {{ ($a->categoria_porcina ?? '') === 'vientre_descarte' ? 'selected' : '' }}>Descarte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza_porcina" class="form-control"
+                   value="{{ $a->raza_porcina ?? '' }}"
+                   placeholder="Landrace, Duroc, Yorkshire...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Peso entrada ceba (kg)</label>
+            <input type="number" name="peso_entrada_kg" step="0.1" min="0"
+                   class="form-control" value="{{ $a->peso_entrada_kg ?? '' }}"
+                   placeholder="Ej: 20">
+          </div>
+          <div class="form-group">
+            <label>Meta sacrificio (kg)</label>
+            <input type="number" name="peso_meta_sacrificio_kg" step="0.1" min="0"
+                   class="form-control" value="{{ $a->peso_meta_sacrificio_kg ?? 100 }}"
+                   placeholder="Ej: 100">
+          </div>
+        </div>
+      </div>
+      @endif
+      {{-- FIN CAMPOS PORCÍCOLAS --}}
+
       <div class="form-group">
         <label>Notas</label>
         <textarea name="notas" class="form-control" rows="2">{{ $a->notas }}</textarea>
@@ -447,6 +489,43 @@
         </div>
       </div>
 
+      {{-- CAMPOS PORCÍCOLAS NUEVO (Fase 6) --}}
+      <div id="camposPorcicolaNuevo" style="display:none;background:#fdf2f8;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#be185d;text-transform:uppercase;margin-bottom:8px;">Datos porcicolas</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select name="categoria_porcina" class="form-control">
+              <option value="">Sin categoria</option>
+              <option value="lechon">Lechon</option>
+              <option value="levante">Levante</option>
+              <option value="ceba">Ceba</option>
+              <option value="hembra_cria">Hembra de cria</option>
+              <option value="verraco">Verraco</option>
+              <option value="vientre_descarte">Descarte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza_porcina" class="form-control"
+                   placeholder="Landrace, Duroc, Yorkshire...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Peso entrada ceba (kg)</label>
+            <input type="number" name="peso_entrada_kg" step="0.1" min="0"
+                   class="form-control" placeholder="Ej: 20">
+          </div>
+          <div class="form-group">
+            <label>Meta sacrificio (kg)</label>
+            <input type="number" name="peso_meta_sacrificio_kg" step="0.1" min="0"
+                   class="form-control" value="100" placeholder="Ej: 100">
+          </div>
+        </div>
+      </div>
+      {{-- FIN CAMPOS PORCÍCOLAS NUEVO --}}
+
       <div class="form-group">
         <label>📷 Foto del animal (opcional)</label>
         <input type="file" name="foto" class="form-control" accept="image/*">
@@ -492,11 +571,23 @@
 
 @push('scripts')
 <script>
+// REEMPLAZA tu función updateVentaMode() y añade la nueva:
 const porKilo = ['Ganado bovino','Terneros','Cerdos','Cerdas de cría','Cabras','Ovejas','Caballos'];
+const especiesPorcinas = ['Cerdos','Cerdas de cría','Porcinos'];
+const especiesAvicolas = ['Gallinas','Patos','Pavos','Codornices','Aves de corral'];
+
 function updateVentaMode() {
   const esp = document.getElementById('especieNuevo').value;
   document.getElementById('precioKiloWrap').style.display = porKilo.includes(esp) ? 'block' : 'none';
   document.getElementById('precioUniWrap').style.display  = (!porKilo.includes(esp) && esp) ? 'block' : 'none';
+}
+
+function toggleAvicolaNuevo() {
+  const esp = document.getElementById('especieNuevo').value;
+  var elAvi  = document.getElementById('camposAvicolaNuevo');
+  var elPorc = document.getElementById('camposPorcicolaNuevo');
+  if (elAvi)  elAvi.style.display  = especiesAvicolas.includes(esp) ? 'block' : 'none';
+  if (elPorc) elPorc.style.display = especiesPorcinas.includes(esp) ? 'block' : 'none';
 }
 </script>
 @endpush

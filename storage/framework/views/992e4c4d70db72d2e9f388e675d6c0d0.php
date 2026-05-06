@@ -95,18 +95,35 @@
   <div class="section-title" style="margin-bottom:10px;">🐖 Estado actual de la piara</div>
   <?php $__empty_1 = true; $__currentLoopData = $lotes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
   <?php
-    $iconos = ['lechon'=>'🐷','levante'=>'🐖','ceba'=>'🏋️','hembra_cria'=>'🐷','verraco'=>'🐗','otro'=>'🐾'];
-    $ico = $iconos[$l->categoria_porcina ?? 'otro'] ?? '🐾';
-    $esHembra = $l->categoria_porcina === 'hembra_cria';
+    // Sin emojis en PHP (Windows Blade no los soporta)
+    $catMap = [
+      'lechon'           => 'Lechon',
+      'levante'          => 'Levante',
+      'ceba'             => 'Ceba',
+      'hembra_cria'      => 'Hembra cria',
+      'verraco'          => 'Verraco',
+      'vientre_descarte' => 'Descarte',
+      'otro'             => 'Otro',
+    ];
+    $catLabel = $catMap[$l->categoria_porcina ?? 'otro'] ?? 'Otro';
+    $esHembra = ($l->categoria_porcina === 'hembra_cria');
+    $catReemplazada = str_replace('_', ' ', $l->categoria_porcina ?? 'sin categoria');
   ?>
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:.83rem;">
     <div>
-      <div style="font-weight:700;"><?php echo e($ico); ?> <?php echo e($l->nombre_lote); ?></div>
+      <div style="font-weight:700;"><?php echo e($l->nombre_lote); ?></div>
       <div style="font-size:.72rem;color:#64748b;">
-        <?php echo e(str_replace('_',' ',$l->categoria_porcina ?? 'sin categoría')); ?>
+        <?php echo e($catReemplazada); ?>
 
-        <?php if($l->raza_porcina): ?> · <?php echo e($l->raza_porcina); ?><?php endif; ?>
-        <?php if($esHembra && ($l->num_partos ?? 0) > 0): ?> · <?php echo e($l->num_partos); ?> partos@endif
+        <?php if($l->raza_porcina): ?>
+        · <?php echo e($l->raza_porcina); ?>
+
+        <?php endif; ?>
+        <?php if($esHembra): ?>
+        <?php if(($l->num_partos ?? 0) > 0): ?>
+        · <?php echo e($l->num_partos); ?> partos
+        <?php endif; ?>
+        <?php endif; ?>
       </div>
     </div>
     <div style="text-align:right;">

@@ -92,17 +92,33 @@
   <div class="section-title" style="margin-bottom:10px;">🐖 Estado actual de la piara</div>
   @forelse($lotes as $l)
   @php
-    $iconos = ['lechon'=>'🐷','levante'=>'🐖','ceba'=>'🏋️','hembra_cria'=>'🐷','verraco'=>'🐗','otro'=>'🐾'];
-    $ico = $iconos[$l->categoria_porcina ?? 'otro'] ?? '🐾';
-    $esHembra = $l->categoria_porcina === 'hembra_cria';
+    // Sin emojis en PHP (Windows Blade no los soporta)
+    $catMap = [
+      'lechon'           => 'Lechon',
+      'levante'          => 'Levante',
+      'ceba'             => 'Ceba',
+      'hembra_cria'      => 'Hembra cria',
+      'verraco'          => 'Verraco',
+      'vientre_descarte' => 'Descarte',
+      'otro'             => 'Otro',
+    ];
+    $catLabel = $catMap[$l->categoria_porcina ?? 'otro'] ?? 'Otro';
+    $esHembra = ($l->categoria_porcina === 'hembra_cria');
+    $catReemplazada = str_replace('_', ' ', $l->categoria_porcina ?? 'sin categoria');
   @endphp
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:.83rem;">
     <div>
-      <div style="font-weight:700;">{{ $ico }} {{ $l->nombre_lote }}</div>
+      <div style="font-weight:700;">{{ $l->nombre_lote }}</div>
       <div style="font-size:.72rem;color:#64748b;">
-        {{ str_replace('_',' ',$l->categoria_porcina ?? 'sin categoría') }}
-        @if($l->raza_porcina) · {{ $l->raza_porcina }}@endif
-        @if($esHembra && ($l->num_partos ?? 0) > 0) · {{ $l->num_partos }} partos@endif
+        {{ $catReemplazada }}
+        @if($l->raza_porcina)
+        · {{ $l->raza_porcina }}
+        @endif
+        @if($esHembra)
+        @if(($l->num_partos ?? 0) > 0)
+        · {{ $l->num_partos }} partos
+        @endif
+        @endif
       </div>
     </div>
     <div style="text-align:right;">
