@@ -16,6 +16,22 @@
   </button>
 </div>
 
+{{-- ACCESO RÁPIDO A PRODUCCIÓN --}}
+@if($totalActivos > 0)
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+  <a href="{{ route('produccion-animal.index') }}"
+     class="btn btn-sm btn-ghost"
+     style="font-size:.82rem;border:1.5px solid #e2e8f0;background:var(--verde-bg);color:var(--verde-dark);">
+    &#127860; Produccion del dia
+  </a>
+  <a href="{{ route('produccion-animal.productividad') }}"
+     class="btn btn-sm btn-ghost"
+     style="font-size:.82rem;border:1.5px solid #e2e8f0;">
+    &#128200; Productividad animal
+  </a>
+</div>
+@endif
+
 {{-- RESUMEN POR ESPECIE --}}
 <div class="stats-grid mb-3" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;">
   <div class="stat-card" style="background:var(--verde-bg);">

@@ -10,6 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
   @stack('head')
+<style>
+.sidebar-grupo { display:flex; flex-direction:column; }
+#subAnimales { overflow:hidden; transition:max-height .3s ease; }
+#btnToggleAnimales:hover { background:rgba(255,255,255,.12) !important; color:#fff !important; }
+</style>
 </head>
 <body>
 
@@ -59,52 +64,98 @@
         <span class="sidebar-icon">📈</span><span>Ingresos</span>
       </a>
 
-      {{-- Animales: si tiene cualquier línea animal --}}
+      {{-- Animales: si tiene cualquier línea animal — con subitems desplegables --}}
       @if(\App\Models\LineaProductiva::tieneAnimales())
-      <a href="{{ route('animales.index') }}"   class="sidebar-item {{ request()->routeIs('animales.*') ? 'active' : '' }}">
-        <span class="sidebar-icon">🐄</span><span>Animales</span>
-      </a>
+      @php
+        $tieneSubLineas = \App\Models\LineaProductiva::activa('bovino')
+            || \App\Models\LineaProductiva::activa('avicola')
+            || \App\Models\LineaProductiva::activa('porcino')
+            || \App\Models\LineaProductiva::activa('piscicola');
+        $animalesActivo = request()->routeIs('animales.*')
+            || request()->routeIs('bovino.*')
+            || request()->routeIs('avicola.*')
+            || request()->routeIs('porcicola.*')
+            || request()->routeIs('piscicola.*')
+            || request()->routeIs('produccion-animal.*');
+      @endphp
+      <div class="sidebar-grupo" id="grupoAnimales">
+        {{-- Botón principal Animales (siempre navegable) --}}
+        <div style="display:flex;align-items:center;">
+          <a href="{{ route('animales.index') }}"
+             class="sidebar-item {{ $animalesActivo ? 'active' : '' }}"
+             style="flex:1;">
+            <span class="sidebar-icon">🐄</span><span>Animales</span>
+          </a>
+          @if($tieneSubLineas)
+          <button type="button"
+                  onclick="toggleGrupoAnimales()"
+                  id="btnToggleAnimales"
+                  style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.6);
+                         padding:6px 8px;border-radius:6px;font-size:.8rem;transition:all .2s;"
+                  title="Desplegar módulos">
+            <span id="arrowAnimales">&#9660;</span>
+          </button>
+          @endif
+        </div>
 
-      {{-- Hato Bovino: solo si la línea bovina está activa --}}
-      {{-- Hato Bovino: solo si la línea bovina está activa --}}
-@if(\App\Models\LineaProductiva::activa('bovino'))
-  <a href="{{ route('bovino.hato') }}"
-     class="sidebar-item {{ request()->routeIs('bovino.*') ? 'active' : '' }}"
-     style="padding-left:2.2rem;">
-    <span class="sidebar-icon">🐮</span>
-    <span>Hato Bovino</span>
-  </a>
-@endif
+        {{-- Sub-ítems desplegables --}}
+        @if($tieneSubLineas)
+        <div id="subAnimales"
+             style="overflow:hidden;transition:max-height .3s ease;max-height:{{ $animalesActivo ? '300px' : '0px' }};">
+          <div style="padding-left:12px;display:flex;flex-direction:column;gap:2px;padding-top:2px;">
 
-{{-- Avícola: solo si la línea avícola está activa --}}
-@if(\App\Models\LineaProductiva::activa('avicola'))
-  <a href="{{ route('avicola.galpon') }}"
-     class="sidebar-item {{ request()->routeIs('avicola.*') ? 'active' : '' }}"
-     style="padding-left:2.2rem;">
-    <span class="sidebar-icon">🐔</span>
-    <span>Avícola</span>
-  </a>
-@endif
+            {{-- Producción del día --}}
+            <a href="{{ route('produccion-animal.index') }}"
+               class="sidebar-item {{ request()->routeIs('produccion-animal.*') ? 'active' : '' }}"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">&#127860;</span>
+              <span>Produccion</span>
+            </a>
 
-@if(\App\Models\LineaProductiva::activa('porcino'))
-  <a href="{{ route('porcicola.piara') }}"
-   class="sidebar-item {{ request()->routeIs('porcicola.*') ? 'active' : '' }}"
-   style="padding-left:2.2rem;">
-  <span class="sidebar-icon">🐷</span>
-  <span class="sidebar-label">Porcícola</span>
-</a>
-@endif
-@if(\App\Models\LineaProductiva::activa('piscicola'))
-<a href="{{ route('piscicola.estanques') }}"
-   class="sidebar-item {{ request()->routeIs('piscicola.*') ? 'active' : '' }}"
-   style="padding-left:2.2rem;">
-  <span class="sidebar-icon">&#128032;</span>
-  <span class="sidebar-label">Piscicola</span>
-</a>
-@endif
+            {{-- Hato Bovino --}}
+            @if(\App\Models\LineaProductiva::activa('bovino'))
+            <a href="{{ route('bovino.hato') }}"
+               class="sidebar-item {{ request()->routeIs('bovino.*') ? 'active' : '' }}"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐮</span>
+              <span>Hato Bovino</span>
+            </a>
+            @endif
 
-      
+            {{-- Avícola --}}
+            @if(\App\Models\LineaProductiva::activa('avicola'))
+            <a href="{{ route('avicola.galpon') }}"
+               class="sidebar-item {{ request()->routeIs('avicola.*') ? 'active' : '' }}"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐔</span>
+              <span>Avicola</span>
+            </a>
+            @endif
 
+            {{-- Porcícola --}}
+            @if(\App\Models\LineaProductiva::activa('porcino'))
+            <a href="{{ route('porcicola.piara') }}"
+               class="sidebar-item {{ request()->routeIs('porcicola.*') ? 'active' : '' }}"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐷</span>
+              <span>Porcicola</span>
+            </a>
+            @endif
+
+            {{-- Piscícola --}}
+            @if(\App\Models\LineaProductiva::activa('piscicola'))
+            <a href="{{ route('piscicola.estanques') }}"
+               class="sidebar-item {{ request()->routeIs('piscicola.*') ? 'active' : '' }}"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">&#128031;</span>
+              <span>Piscicola</span>
+            </a>
+            @endif
+
+          </div>
+        </div>
+        @endif
+      </div>
       @endif
 
       {{-- Personas (siempre — gestión de trabajadores aplica a todos) --}}
@@ -217,7 +268,7 @@
       @endif
 
       @if($tieneAnimales)
-      <a href="{{ route('animales.index') }}"   class="nav-item {{ request()->routeIs('animales.*') || request()->routeIs('bovino.*') ? 'active' : '' }}"><span>🐄</span><span>Animales</span></a>
+      <a href="{{ route('animales.index') }}"   class="nav-item {{ request()->routeIs('animales.*') ? 'active' : '' }}"><span>🐄</span><span>Animales</span></a>
       @endif
 
       @if(!$bothPrimary)
@@ -234,5 +285,32 @@
 
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('scripts')
+<script>
+(function(){
+  var sub   = document.getElementById('subAnimales');
+  var arrow = document.getElementById('arrowAnimales');
+  function setEstado(abrir){
+    if(!sub) return;
+    sub.style.maxHeight = abrir ? '300px' : '0px';
+    if(arrow) arrow.innerHTML = abrir ? '&#9650;' : '&#9660;';
+    try{ localStorage.setItem('agrSidebarAnim', abrir?'1':'0'); }catch(e){}
+  }
+  // Restaurar estado
+  try{
+    var esAnimal = /\/(animales|bovino|avicola|porcicola|piscicola|produccion-animal)/.test(window.location.pathname);
+    if(esAnimal){ setEstado(true); }
+    else{
+      var g = localStorage.getItem('agrSidebarAnim');
+      if(g==='1') setEstado(true);
+      else if(g==='0') setEstado(false);
+    }
+  }catch(e){}
+  window.toggleGrupoAnimales = function(){
+    if(!sub) return;
+    setEstado(sub.style.maxHeight==='0px');
+  };
+})();
+</script>
+
 </body>
 </html>

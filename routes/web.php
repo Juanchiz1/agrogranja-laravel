@@ -279,4 +279,29 @@ Route::post('/piscicola/cosecha',
 Route::get('/piscicola/reportes',
         [PiscicolaController::class, 'reportes'])->name('piscicola.reportes');
 
+   // Dashboard de sesiones diarias
+Route::get('/produccion-animal',
+        [ProduccionAnimalController::class, 'index'])
+        ->name('produccion-animal.index');
+ 
+    // Registrar sesión de producción (leche AM/PM, huevos, etc.)
+Route::post('/produccion-animal',
+        [ProduccionAnimalController::class, 'store'])
+        ->name('produccion-animal.store');
+ 
+    // Análisis de productividad por animal individual
+Route::get('/produccion-animal/productividad',
+        [ProduccionAnimalController::class, 'productividad'])
+        ->name('produccion-animal.productividad');
+ 
+    // Calcular y guardar costos por período
+Route::post('/produccion-animal/calcular-costos',
+        [ProduccionAnimalController::class, 'calcularCostos'])
+        ->name('produccion-animal.calcularCostos');
+ 
+    // Eliminar registro
+Route::post('/produccion-animal/{id}/delete',
+        [ProduccionAnimalController::class, 'destroy'])
+        ->name('produccion-animal.destroy');        
+
 });

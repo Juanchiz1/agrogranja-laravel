@@ -1,0 +1,163 @@
+/* ════════════════════════════════════════════════════════════════════
+   AGROGRANJA · MÓDULO PRODUCCIÓN ANIMAL — Fase 8
+   Destino: public/css/produccion.css
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --prod-verde:    #16a34a;
+  --prod-azul:     #2563eb;
+  --prod-naranja:  #ea580c;
+  --prod-morado:   #7c3aed;
+  --prod-gris:     #64748b;
+  --prod-rojo:     #dc2626;
+  --prod-card:     #ffffff;
+}
+
+/* ── STATS ───────────────────────────────────────────────────────── */
+.prod-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.prod-stat {
+  background: var(--prod-card);
+  border-radius: 14px; padding: 12px 8px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  border-left: 4px solid var(--prod-verde);
+}
+.prod-stat.azul    { border-left-color: var(--prod-azul);    }
+.prod-stat.naranja { border-left-color: var(--prod-naranja); }
+.prod-stat.morado  { border-left-color: var(--prod-morado);  }
+.prod-stat-ico { font-size: 1.3rem; margin-bottom: 4px; line-height: 1; }
+.prod-stat-val { font-size: 1.15rem; font-weight: 800; color: #1e293b; }
+.prod-stat-lbl { font-size: .62rem; color: var(--prod-gris); font-weight: 600;
+                 margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── SELECTOR DE FECHA Y ANIMAL ─────────────────────────────────── */
+.prod-filtros {
+  display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap; margin-bottom: 10px;
+}
+.prod-filtros .form-control {
+  font-size: .85rem; padding: 6px 10px; height: auto;
+}
+
+/* ── FILA DE SESIÓN ─────────────────────────────────────────────── */
+.sesion-row {
+  display: flex; gap: 0; align-items: stretch;
+  border: 1.5px solid #e2e8f0; border-radius: 12px;
+  overflow: hidden; margin-bottom: 8px;
+}
+.sesion-animal {
+  width: 90px; min-width: 90px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 6px;
+  background: #f8fafc; text-align: center;
+  border-right: 1.5px solid #e2e8f0;
+}
+.sesion-animal-img {
+  width: 42px; height: 42px; border-radius: 50%;
+  object-fit: cover; margin-bottom: 4px;
+}
+.sesion-animal-ico {
+  font-size: 2rem; margin-bottom: 4px; line-height: 1;
+}
+.sesion-animal-nombre {
+  font-size: .68rem; font-weight: 700; color: #334155;
+  line-height: 1.2;
+}
+.sesion-animal-sub {
+  font-size: .62rem; color: #94a3b8; margin-top: 1px;
+}
+.sesion-registros {
+  flex: 1; display: flex; flex-direction: column; gap: 0;
+}
+.sesion-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: .82rem;
+}
+.sesion-item:last-child { border-bottom: none; }
+.sesion-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 8px;
+  font-size: .68rem; font-weight: 700;
+}
+.sesion-badge.am    { background: #fef9c3; color: #854d0e; }
+.sesion-badge.pm    { background: #dbeafe; color: #1e40af; }
+.sesion-badge.noche { background: #ede9fe; color: #5b21b6; }
+.sesion-badge.manana{ background: #fef9c3; color: #854d0e; }
+.sesion-badge.tarde { background: #dbeafe; color: #1e40af; }
+.sesion-badge.unica { background: #f0fdf4; color: #15803d; }
+.sesion-badge.general{ background: #f1f5f9; color: #475569; }
+
+/* ── DESTINO BADGE ───────────────────────────────────────────────── */
+.dest-badge {
+  display: inline-block; padding: 1px 8px; border-radius: 10px;
+  font-size: .68rem; font-weight: 700;
+}
+.dest-venta    { background: #f0fdf4; color: #15803d; }
+.dest-familia  { background: #eff6ff; color: #1d4ed8; }
+.dest-transform{ background: #fffbeb; color: #92400e; }
+.dest-inventario{ background: #ede9fe; color: #5b21b6; }
+.dest-desperdicio{ background: #fef2f2; color: #dc2626; }
+
+/* ── PRODUCTIVIDAD CARD ─────────────────────────────────────────── */
+.prod-animal-card {
+  background: var(--prod-card); border-radius: 14px;
+  padding: 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  border-left: 4px solid var(--prod-verde);
+}
+.prod-animal-card.top { border-left-color: #f59e0b; background: #fffbeb; }
+.prod-animal-rank {
+  font-size: 1.4rem; font-weight: 900; color: #cbd5e1;
+  min-width: 28px;
+}
+.prod-animal-rank.top1 { color: #f59e0b; }
+.prod-animal-rank.top2 { color: #94a3b8; }
+.prod-animal-rank.top3 { color: #b45309; }
+
+/* ── BARRA DE PROGRESO PRODUCTIVIDAD ────────────────────────────── */
+.prod-barra-wrap {
+  background: #e2e8f0; border-radius: 6px; height: 8px;
+  margin: 6px 0; overflow: hidden;
+}
+.prod-barra-fill {
+  height: 100%; border-radius: 6px;
+  background: linear-gradient(90deg, var(--prod-verde), var(--prod-azul));
+  transition: width .4s;
+}
+
+/* ── COSTO CARD ─────────────────────────────────────────────────── */
+.costo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-top: 8px;
+}
+.costo-item {
+  background: #f8fafc; border-radius: 8px; padding: 8px 6px; text-align: center;
+}
+.costo-val { font-size: .88rem; font-weight: 800; color: #1e293b; }
+.costo-lbl { font-size: .62rem; color: var(--prod-gris); margin-top: 2px; }
+
+/* ── DESTINO DONUT (texto) ───────────────────────────────────────── */
+.destino-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid #e2e8f0; font-size: .82rem;
+}
+.destino-bar-wrap {
+  flex: 1; margin: 0 10px;
+  background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden;
+}
+.destino-bar-fill {
+  height: 100%; border-radius: 4px;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 430px) {
+  .prod-stats   { grid-template-columns: repeat(2, 1fr); }
+  .costo-grid   { grid-template-columns: repeat(2, 1fr); }
+  .sesion-animal{ width: 72px; min-width: 72px; }
+}

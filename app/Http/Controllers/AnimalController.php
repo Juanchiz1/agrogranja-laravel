@@ -135,10 +135,55 @@ class AnimalController extends Controller
         $especies = $this->especies();
         $personas = Persona::delUsuario($uid)->activos()->orderBy('nombre')->get();
 
+        // ── Genealogía bovina (Fase 4) ────────────────────────────────────
+        $esBovino = in_array($animal->especie, ['Ganado bovino', 'Terneros']);
+        $genealogia = [
+            'madre'        => null,
+            'crias'        => collect(),
+            'hermanos'     => collect(),
+            'partosBovinos'=> collect(),
+        ];
+
+        if ($esBovino) {
+            // Madre
+            if ($animal->madre_id) {
+                $genealogia['madre'] = DB::table('animales')
+                    ->where('id', $animal->madre_id)->first();
+            }
+
+            // Crías (este animal es la madre)
+            $genealogia['crias'] = DB::table('animales')
+                ->where('usuario_id', $uid)
+                ->where('madre_id', $id)
+                ->orderBy('fecha_nacimiento', 'desc')
+                ->get();
+
+            // Hermanos (misma madre, distinto animal)
+            if ($animal->madre_id) {
+                $genealogia['hermanos'] = DB::table('animales')
+                    ->where('usuario_id', $uid)
+                    ->where('madre_id', $animal->madre_id)
+                    ->where('id', '!=', $id)
+                    ->orderBy('fecha_nacimiento', 'desc')
+                    ->get();
+            }
+
+            // Historial de partos bovinos
+            try {
+                $genealogia['partosBovinos'] = DB::table('animal_reproduccion')
+                    ->where('animal_id', $id)
+                    ->whereNotNull('fecha_parto_real')
+                    ->orderBy('fecha_parto_real', 'desc')
+                    ->get();
+            } catch (\Exception $e) {
+                $genealogia['partosBovinos'] = collect();
+            }
+        }
+
         return view('pages.animal-detalle', compact(
             'animal', 'gastos', 'ingresos', 'totalGastos', 'totalIngresos',
             'fotos', 'pesos', 'eventos', 'propietarios', 'timeline',
-            'valorVentaEst', 'emojis', 'especies'
+            'valorVentaEst', 'emojis', 'especies', 'personas', 'genealogia', 'esBovino'
         ));
     }
 
@@ -146,69 +191,52 @@ class AnimalController extends Controller
      * Registra un nuevo animal o lote con su evento inicial.
      */
     public function store(AnimalRequest $request)
-{
-    $uid  = session('usuario_id');
+    {
+        $uid  = session('usuario_id');
 
-    $foto = null;
-    if ($request->hasFile('foto')) {
-        $foto = $this->guardarImagen($request->file('foto'), 'animales');
-    }
+        $foto = null;
+        if ($request->hasFile('foto')) {
+            $foto = $this->guardarImagen($request->file('foto'), 'animales');
+        }
 
-    $animal = Animal::create([
-        'usuario_id'        => $uid,
-        'especie'           => $request->especie,
-        'nombre_lote'       => $request->nombre_lote,
-        'cantidad'          => $request->cantidad ?? 1,
-        'fecha_ingreso'     => $request->fecha_ingreso ?: null,
-        'fecha_nacimiento'  => $request->fecha_nacimiento ?: null,
-        'estado'            => $request->estado ?? 'activo',
-        'peso_promedio'     => $request->peso_promedio ?: null,
-        'unidad_peso'       => $request->unidad_peso ?? 'kg',
-        'ubicacion'         => $request->ubicacion,
-        'propietario'       => $request->propietario,
-        'etapa_vida'        => $request->etapa_vida ?? 'adulto',
-        'produccion'        => $request->produccion,
-        'vende_por_kilo'    => $request->has('vende_por_kilo') ? 1 : 0,
-        'precio_kilo'       => $request->precio_kilo ?: null,
-        'precio_unidad'     => $request->precio_unidad ?: null,
-        'favorito'          => 0,
-        'atencion_especial' => 0,
-        'notas'             => $request->notas,
-        'foto'              => $foto,
-
-        // ── Campos bovinos (ya los puedes añadir si quieres consistencia) ──
-        'raza'              => $request->raza ?: null,
-        'categoria_bovina'  => $request->categoria_bovina ?: null,
-        'peso_meta_kg'      => $request->peso_meta_kg ?: null,
-
-        // ── Campos avícolas (CLAVE para Postura / Engorde) ─────────────────
-        'tipo_ave'              => $request->tipo_ave ?: null,
-        'linea_ave'             => $request->linea_ave ?: null,
-        'fecha_nacimiento_lote' => $request->fecha_nacimiento_lote ?: null,
-        'capacidad_galpon'      => $request->capacidad_galpon ?: null,
-
-        // ── Campos porcícolas (opcional, pero por simetría) ────────────────
-        'categoria_porcina'        => $request->categoria_porcina ?: null,
-        'raza_porcina'            => $request->raza_porcina ?: null,
-        'peso_entrada_kg'         => $request->peso_entrada_kg ?: null,
-        'peso_meta_sacrificio_kg' => $request->peso_meta_sacrificio_kg ?: null,
-    ]);
-
-    try {
-        DB::table('animal_eventos')->insert([
-            'animal_id'   => $animal->id,
-            'usuario_id'  => $uid,
-            'tipo'        => 'nota',
-            'titulo'      => '🐾 Animal registrado',
-            'descripcion' => 'Ingreso de '.$request->especie.($request->nombre_lote ? ' — '.$request->nombre_lote : ''),
-            'fecha'       => $request->fecha_ingreso ?? now()->toDateString(),
-            'creado_en'   => now()->toDateTimeString(),
+        $animal = Animal::create([
+            'usuario_id'       => $uid,
+            'especie'          => $request->especie,
+            'nombre_lote'      => $request->nombre_lote,
+            'cantidad'         => $request->cantidad ?? 1,
+            'fecha_ingreso'    => $request->fecha_ingreso ?: null,
+            'fecha_nacimiento' => $request->fecha_nacimiento ?: null,
+            'estado'           => $request->estado ?? 'activo',
+            'peso_promedio'    => $request->peso_promedio ?: null,
+            'unidad_peso'      => $request->unidad_peso ?? 'kg',
+            'ubicacion'        => $request->ubicacion,
+            'propietario'      => $request->propietario,
+            'etapa_vida'       => $request->etapa_vida ?? 'adulto',
+            'produccion'       => $request->produccion,
+            'vende_por_kilo'   => $request->has('vende_por_kilo') ? 1 : 0,
+            'precio_kilo'      => $request->precio_kilo ?: null,
+            'precio_unidad'    => $request->precio_unidad ?: null,
+            'favorito'         => 0,
+            'atencion_especial'=> 0,
+            'notas'            => $request->notas,
+            'foto'             => $foto,
         ]);
-    } catch (\Exception $e) {}
 
-    return redirect()->route('animales.index')
-        ->with('msg', 'Animal registrado.')->with('msgType', 'success');
-}
+        try {
+            DB::table('animal_eventos')->insert([
+                'animal_id'   => $animal->id,
+                'usuario_id'  => $uid,
+                'tipo'        => 'nota',
+                'titulo'      => '🐾 Animal registrado',
+                'descripcion' => 'Ingreso de '.$request->especie.($request->nombre_lote ? ' — '.$request->nombre_lote : ''),
+                'fecha'       => $request->fecha_ingreso ?? now()->toDateString(),
+                'creado_en'   => now()->toDateTimeString(),
+            ]);
+        } catch (\Exception $e) {}
+
+        return redirect()->route('animales.index')
+            ->with('msg', 'Animal registrado.')->with('msgType', 'success');
+    }
 
     /**
      * Actualiza los datos del animal. Crea ingreso automático si pasa a "vendido".
@@ -247,8 +275,7 @@ class AnimalController extends Controller
             'linea_ave'              => $request->linea_ave ?: null,
             'fecha_nacimiento_lote'  => $request->fecha_nacimiento_lote ?: null,
             'capacidad_galpon'       => $request->capacidad_galpon ?: null,
-
-             // ── Campos porcícolas (Fase 6) ───────────────────────────
+            // ── Campos porcícolas (Fase 6) ───────────────────────────
             'categoria_porcina'      => $request->categoria_porcina ?: null,
             'raza_porcina'           => $request->raza_porcina ?: null,
             'peso_entrada_kg'        => $request->peso_entrada_kg ?: null,

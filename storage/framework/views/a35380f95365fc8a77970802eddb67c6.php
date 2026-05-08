@@ -10,6 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
   <?php echo $__env->yieldPushContent('head'); ?>
+<style>
+.sidebar-grupo { display:flex; flex-direction:column; }
+#subAnimales { overflow:hidden; transition:max-height .3s ease; }
+#btnToggleAnimales:hover { background:rgba(255,255,255,.12) !important; color:#fff !important; }
+</style>
 </head>
 <body>
 
@@ -61,50 +66,96 @@
 
       
       <?php if(\App\Models\LineaProductiva::tieneAnimales()): ?>
-      <a href="<?php echo e(route('animales.index')); ?>"   class="sidebar-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>">
-        <span class="sidebar-icon">🐄</span><span>Animales</span>
-      </a>
+      <?php
+        $tieneSubLineas = \App\Models\LineaProductiva::activa('bovino')
+            || \App\Models\LineaProductiva::activa('avicola')
+            || \App\Models\LineaProductiva::activa('porcino')
+            || \App\Models\LineaProductiva::activa('piscicola');
+        $animalesActivo = request()->routeIs('animales.*')
+            || request()->routeIs('bovino.*')
+            || request()->routeIs('avicola.*')
+            || request()->routeIs('porcicola.*')
+            || request()->routeIs('piscicola.*')
+            || request()->routeIs('produccion-animal.*');
+      ?>
+      <div class="sidebar-grupo" id="grupoAnimales">
+        
+        <div style="display:flex;align-items:center;">
+          <a href="<?php echo e(route('animales.index')); ?>"
+             class="sidebar-item <?php echo e($animalesActivo ? 'active' : ''); ?>"
+             style="flex:1;">
+            <span class="sidebar-icon">🐄</span><span>Animales</span>
+          </a>
+          <?php if($tieneSubLineas): ?>
+          <button type="button"
+                  onclick="toggleGrupoAnimales()"
+                  id="btnToggleAnimales"
+                  style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.6);
+                         padding:6px 8px;border-radius:6px;font-size:.8rem;transition:all .2s;"
+                  title="Desplegar módulos">
+            <span id="arrowAnimales">&#9660;</span>
+          </button>
+          <?php endif; ?>
+        </div>
 
-      
-      
-<?php if(\App\Models\LineaProductiva::activa('bovino')): ?>
-  <a href="<?php echo e(route('bovino.hato')); ?>"
-     class="sidebar-item <?php echo e(request()->routeIs('bovino.*') ? 'active' : ''); ?>"
-     style="padding-left:2.2rem;">
-    <span class="sidebar-icon">🐮</span>
-    <span>Hato Bovino</span>
-  </a>
-<?php endif; ?>
+        
+        <?php if($tieneSubLineas): ?>
+        <div id="subAnimales"
+             style="overflow:hidden;transition:max-height .3s ease;max-height:<?php echo e($animalesActivo ? '300px' : '0px'); ?>;">
+          <div style="padding-left:12px;display:flex;flex-direction:column;gap:2px;padding-top:2px;">
 
+            
+            <a href="<?php echo e(route('produccion-animal.index')); ?>"
+               class="sidebar-item <?php echo e(request()->routeIs('produccion-animal.*') ? 'active' : ''); ?>"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">&#127860;</span>
+              <span>Produccion</span>
+            </a>
 
-<?php if(\App\Models\LineaProductiva::activa('avicola')): ?>
-  <a href="<?php echo e(route('avicola.galpon')); ?>"
-     class="sidebar-item <?php echo e(request()->routeIs('avicola.*') ? 'active' : ''); ?>"
-     style="padding-left:2.2rem;">
-    <span class="sidebar-icon">🐔</span>
-    <span>Avícola</span>
-  </a>
-<?php endif; ?>
+            
+            <?php if(\App\Models\LineaProductiva::activa('bovino')): ?>
+            <a href="<?php echo e(route('bovino.hato')); ?>"
+               class="sidebar-item <?php echo e(request()->routeIs('bovino.*') ? 'active' : ''); ?>"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐮</span>
+              <span>Hato Bovino</span>
+            </a>
+            <?php endif; ?>
 
-<?php if(\App\Models\LineaProductiva::activa('porcino')): ?>
-  <a href="<?php echo e(route('porcicola.piara')); ?>"
-   class="sidebar-item <?php echo e(request()->routeIs('porcicola.*') ? 'active' : ''); ?>"
-   style="padding-left:2.2rem;">
-  <span class="sidebar-icon">🐷</span>
-  <span class="sidebar-label">Porcícola</span>
-</a>
-<?php endif; ?>
-<?php if(\App\Models\LineaProductiva::activa('piscicola')): ?>
-<a href="<?php echo e(route('piscicola.estanques')); ?>"
-   class="sidebar-item <?php echo e(request()->routeIs('piscicola.*') ? 'active' : ''); ?>"
-   style="padding-left:2.2rem;">
-  <span class="sidebar-icon">&#128032;</span>
-  <span class="sidebar-label">Piscicola</span>
-</a>
-<?php endif; ?>
+            
+            <?php if(\App\Models\LineaProductiva::activa('avicola')): ?>
+            <a href="<?php echo e(route('avicola.galpon')); ?>"
+               class="sidebar-item <?php echo e(request()->routeIs('avicola.*') ? 'active' : ''); ?>"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐔</span>
+              <span>Avicola</span>
+            </a>
+            <?php endif; ?>
 
-      
+            
+            <?php if(\App\Models\LineaProductiva::activa('porcino')): ?>
+            <a href="<?php echo e(route('porcicola.piara')); ?>"
+               class="sidebar-item <?php echo e(request()->routeIs('porcicola.*') ? 'active' : ''); ?>"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">🐷</span>
+              <span>Porcicola</span>
+            </a>
+            <?php endif; ?>
 
+            
+            <?php if(\App\Models\LineaProductiva::activa('piscicola')): ?>
+            <a href="<?php echo e(route('piscicola.estanques')); ?>"
+               class="sidebar-item <?php echo e(request()->routeIs('piscicola.*') ? 'active' : ''); ?>"
+               style="font-size:.82rem;padding:7px 10px;">
+              <span class="sidebar-icon" style="font-size:.95rem;">&#128031;</span>
+              <span>Piscicola</span>
+            </a>
+            <?php endif; ?>
+
+          </div>
+        </div>
+        <?php endif; ?>
+      </div>
       <?php endif; ?>
 
       
@@ -209,7 +260,7 @@
       <?php endif; ?>
 
       <?php if($tieneAnimales): ?>
-      <a href="<?php echo e(route('animales.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('animales.*') || request()->routeIs('bovino.*') ? 'active' : ''); ?>"><span>🐄</span><span>Animales</span></a>
+      <a href="<?php echo e(route('animales.index')); ?>"   class="nav-item <?php echo e(request()->routeIs('animales.*') ? 'active' : ''); ?>"><span>🐄</span><span>Animales</span></a>
       <?php endif; ?>
 
       <?php if(!$bothPrimary): ?>
@@ -226,5 +277,32 @@
 
 <script src="<?php echo e(asset('js/app.js')); ?>"></script>
 <?php echo $__env->yieldPushContent('scripts'); ?>
+<script>
+(function(){
+  var sub   = document.getElementById('subAnimales');
+  var arrow = document.getElementById('arrowAnimales');
+  function setEstado(abrir){
+    if(!sub) return;
+    sub.style.maxHeight = abrir ? '300px' : '0px';
+    if(arrow) arrow.innerHTML = abrir ? '&#9650;' : '&#9660;';
+    try{ localStorage.setItem('agrSidebarAnim', abrir?'1':'0'); }catch(e){}
+  }
+  // Restaurar estado
+  try{
+    var esAnimal = /\/(animales|bovino|avicola|porcicola|piscicola|produccion-animal)/.test(window.location.pathname);
+    if(esAnimal){ setEstado(true); }
+    else{
+      var g = localStorage.getItem('agrSidebarAnim');
+      if(g==='1') setEstado(true);
+      else if(g==='0') setEstado(false);
+    }
+  }catch(e){}
+  window.toggleGrupoAnimales = function(){
+    if(!sub) return;
+    setEstado(sub.style.maxHeight==='0px');
+  };
+})();
+</script>
+
 </body>
 </html><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/layouts/app.blade.php ENDPATH**/ ?>
