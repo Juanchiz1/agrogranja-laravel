@@ -21,6 +21,7 @@
 }
 .dash-alert.rojo { background: #fef2f2; border-color: var(--rojo); color: #991b1b; }
 .dash-alert.azul { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+.dash-alert.naranja { background: #fff7ed; border-color: #fb923c; color: #9a3412; }
 
 /* ── Stats rápidas ──────────────────────────────────────────────── */
 .quick-stat     { background: var(--surface); border-radius: var(--radius-lg); padding: 10px; text-align: center; box-shadow: var(--shadow-sm); }

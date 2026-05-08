@@ -10,7 +10,7 @@
 @section('content')
 @php $balance = $ingresosMes - $gastosMes; @endphp
 
-{{-- BANNER ENCUESTA (ahora dentro del content, bien posicionado) --}}
+{{-- BANNER ENCUESTA --}}
 @if(!session('encuesta_respondida_en') || \Carbon\Carbon::parse(session('encuesta_respondida_en'))->diffInDays(now()) > 90)
 <div class="encuesta-banner">
     <div class="encuesta-banner-text">
@@ -29,31 +29,53 @@
 </div>
 @endif
 
-{{-- ALERTAS ACTIVAS --}}
+{{-- ALERTAS INTELIGENTES CONTEXTUALES (Fase 9) --}}
+@if(isset($alertasInteligentes) && count($alertasInteligentes) > 0)
+@php
+ $iconosAlerta = [
+    'vacuna'     => '💉',
+    'cria'       => '🐣',
+    'alerta'     => '⚠️',
+    'agua'       => '💧',
+    'muestreo'   => '📊',
+    'inventario' => '📦',
+    'cosecha'    => '🌾',
+];
+@endphp
+@foreach(array_slice($alertasInteligentes, 0, 4) as $alerta)
+@php
+  $claseAlerta = $alerta['nivel'] === 'critica' ? 'dash-alert rojo'
+               : ($alerta['nivel'] === 'alta'   ? 'dash-alert naranja' : 'dash-alert');
+  $icoAlerta   = $iconosAlerta[$alerta['icono'] ?? 'alerta'] ?? '!';
+@endphp
+<div class="{{ $claseAlerta }}" onclick="location.href='{{ $alerta['url'] }}'">
+  <span>{{ $icoAlerta }} {{ $alerta['texto'] }}</span>
+  <span style="font-size:.8rem;">Ver →</span>
+</div>
+@endforeach
+@else
+{{-- Alertas clásicas (fallback) --}}
 @if($tareasVencidas > 0)
 <div class="dash-alert rojo" onclick="location.href='{{ route('calendario.index') }}?tab=vencidas'">
   <span>⚠️ {{ $tareasVencidas }} tarea(s) vencida(s) sin completar</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
 @endif
-
 @if($alertasInventario > 0)
 <div class="dash-alert" onclick="location.href='{{ route('inventario.alertas') }}'">
   <span>📦 {{ $alertasInventario }} insumo(s) con stock bajo mínimo</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
 @endif
-
 @if(\App\Models\LineaProductiva::tieneAnimales() && $proximasDosis->count())
 <div class="dash-alert azul" onclick="location.href='{{ route('animales.index') }}'">
   <span>💊 {{ $proximasDosis->count() }} dosis de medicamento próxima(s)</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
 @endif
+@endif
 
-{{-- ══════════════════════════════════════════════════════════════
-     STATS GRID — KPIs principales (siempre visibles)
-     ══════════════════════════════════════════════════════════════ --}}
+{{-- STATS GRID --}}
 <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
   @if(in_array('cultivos', $lineasActivas))
     <div class="quick-stat"><div class="quick-stat-val">{{ $cultivosActivos }}</div><div class="quick-stat-lbl">Cultivos activos</div></div>
@@ -67,16 +89,19 @@
   <div class="quick-stat" style="{{ $tareasPend>0?'background:#fef2f2':'' }}"><div class="quick-stat-val" style="{{ $tareasPend>0?'color:var(--rojo)':'' }}">{{ $tareasPend }}</div><div class="quick-stat-lbl">Tareas pend.</div></div>
 </div>
 
-{{-- ══════════════════════════════════════════════════════════════
-     KPIs POR LÍNEA PRODUCTIVA — solo aparece si tiene líneas con datos
-     ══════════════════════════════════════════════════════════════ --}}
+{{-- KPIs POR LÍNEA — clicables (Fase 9) --}}
 @if(!empty($kpisLineas))
 <div class="kpis-lineas-grid">
   @foreach($kpisLineas as $codigo => $kpi)
-  <div class="kpi-linea-card kpi-color-{{ $kpi['color'] }}">
+  @php $rutaKpi = $kpi['ruta'] ?? null; @endphp
+  <div class="kpi-linea-card kpi-color-{{ $kpi['color'] }}"
+       @if($rutaKpi) style="cursor:pointer;" onclick="location.href='{{ $rutaKpi }}'" @endif>
     <div class="kpi-linea-header">
       <span class="kpi-linea-emoji">{{ $kpi['emoji'] }}</span>
       <span class="kpi-linea-titulo">{{ $kpi['titulo'] }}</span>
+      @if($rutaKpi)
+      <span style="margin-left:auto;font-size:.7rem;color:#94a3b8;">Ver →</span>
+      @endif
     </div>
     <div class="kpi-linea-metricas">
       @foreach($kpi['metricas'] as $m)
@@ -84,7 +109,7 @@
         <div class="kpi-linea-valor">{{ $m['valor'] }}</div>
         <div class="kpi-linea-label">{{ $m['label'] }}</div>
         @if(!empty($m['sub']))
-          <div class="kpi-linea-sub">{{ $m['sub'] }}</div>
+        <div class="kpi-linea-sub">{{ $m['sub'] }}</div>
         @endif
       </div>
       @endforeach
@@ -113,34 +138,45 @@
   </div>
 </div>
 
-{{-- ══════════════════════════════════════════════════════════════
-     MENÚ PRINCIPAL — Solo muestra módulos relevantes a las líneas
-     productivas activas. Todos los siempre-visibles (gastos,
-     ingresos, agenda, personas, inventario, reportes) aparecen
-     siempre.
-     ══════════════════════════════════════════════════════════════ --}}
+{{-- MENÚ PRINCIPAL --}}
 <div class="menu-grid">
   @if(in_array('cultivos', $lineasActivas))
   <a href="{{ route('cultivos.index') }}"    class="menu-card"><div class="menu-icon" style="background:#edf7ed;">🌱</div><span class="menu-label">Cultivos</span></a>
   @endif
-
   <a href="{{ route('gastos.index') }}"      class="menu-card"><div class="menu-icon" style="background:#fdf3ea;">💰</div><span class="menu-label">Gastos</span></a>
   <a href="{{ route('ingresos.index') }}"    class="menu-card"><div class="menu-icon" style="background:#eff6ff;">📈</div><span class="menu-label">Ingresos</span></a>
   <a href="{{ route('calendario.index') }}"  class="menu-card"><div class="menu-icon" style="background:#fdf2f8;">📅</div><span class="menu-label">Agenda</span></a>
-
   @if(\App\Models\LineaProductiva::tieneAnimales())
   <a href="{{ route('animales.index') }}"    class="menu-card"><div class="menu-icon" style="background:#f5f3ff;">🐄</div><span class="menu-label">Animales</span></a>
+  <a href="{{ route('produccion-animal.index') }}" class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🥛</div><span class="menu-label">Produccion</span></a>
   @endif
-
   <a href="{{ route('personas.index') }}"    class="menu-card"><div class="menu-icon" style="background:#fdf4ff;">👥</div><span class="menu-label">Personas</span></a>
-
   @if(in_array('cultivos', $lineasActivas))
   <a href="{{ route('cosechas.index') }}"    class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🌾</div><span class="menu-label">Cosechas</span></a>
   @endif
-
   <a href="{{ route('inventario.index') }}"  class="menu-card"><div class="menu-icon" style="background:#fff7ed;">📦</div><span class="menu-label">Inventario</span></a>
   <a href="{{ route('reportes.index') }}"    class="menu-card"><div class="menu-icon" style="background:#eef2ff;">📊</div><span class="menu-label">Reportes</span></a>
 </div>
+
+{{-- PRÓXIMAS DOSIS (filtradas por línea activa) --}}
+@if($proximasDosis->count())
+<div class="flex items-center justify-between mt-3 mb-2">
+  <p class="section-title" style="margin:0;">💊 Próximas dosis (7 días)</p>
+  <a href="{{ route('animales.index') }}" class="text-sm text-green font-bold">Ver animales</a>
+</div>
+@foreach($proximasDosis as $pd)
+<div class="list-item">
+  <div class="item-icon" style="background:#eff6ff;">💊</div>
+  <div class="item-body">
+    <div class="item-title">{{ $pd->nombre_lote ?? $pd->especie }} · {{ $pd->titulo }}</div>
+    <div class="item-sub">{{ $pd->especie }}</div>
+  </div>
+  <span style="font-weight:700;color:#4f46e5;font-size:.87rem;">
+    {{ \Carbon\Carbon::parse($pd->proxima_dosis)->format('d/m') }}
+  </span>
+</div>
+@endforeach
+@endif
 
 {{-- TAREAS DE HOY --}}
 @if($tareasHoy->count())
@@ -148,9 +184,9 @@
   <p class="section-title" style="margin:0;">📌 Tareas de hoy</p>
   <a href="{{ route('calendario.index') }}?tab=hoy" class="text-sm text-green font-bold">Ver todas</a>
 </div>
-@php $tiposIcono=['riego'=>'💧','vacunacion'=>'💉','cosecha'=>'🌾','fertilizacion'=>'🌿','fumigacion'=>'🧴','poda'=>'✂️','otro'=>'📝','medicamento'=>'💊','traslado_animal'=>'🏃','parto'=>'🐣','pago_proveedor'=>'🏪']; @endphp
+@php $tiposIcono=['riego'=>'&#128167;','vacunacion'=>'&#128138;','cosecha'=>'&#127806;','fertilizacion'=>'&#127807;','fumigacion'=>'Fum','poda'=>'Poda','otro'=>'&#128221;','medicamento'=>'&#128138;','traslado_animal'=>'Mov','parto'=>'&#128036;','pago_proveedor'=>'&#127978;']; @endphp
 @foreach($tareasHoy as $t)
-@php $ic=$tiposIcono[$t->tipo]??'📝'; $pc=['alta'=>'var(--rojo)','media'=>'#d97706','baja'=>'var(--verde-dark)'][$t->prioridad]??'var(--text-secondary)'; @endphp
+@php $ic=$tiposIcono[$t->tipo]??'?'; $pc=['alta'=>'var(--rojo)','media'=>'#d97706','baja'=>'var(--verde-dark)'][$t->prioridad]??'var(--text-secondary)'; @endphp
 <div class="list-item">
   <div class="item-icon" style="background:var(--verde-bg)">{{ $ic }}</div>
   <div class="item-body">
@@ -164,7 +200,7 @@
 @endforeach
 @endif
 
-{{-- ÚLTIMOS CULTIVOS (solo si tiene línea de cultivos) --}}
+{{-- ÚLTIMOS CULTIVOS --}}
 @if(in_array('cultivos', $lineasActivas) && $recentCultivos->count())
 <div class="flex items-center justify-between mt-3 mb-2">
   <p class="section-title" style="margin:0;">🌱 Cultivos recientes</p>
@@ -183,7 +219,7 @@
 @endforeach
 @endif
 
-{{-- COSECHAS RECIENTES (solo si tiene línea de cultivos) --}}
+{{-- COSECHAS RECIENTES --}}
 @if(in_array('cultivos', $lineasActivas) && $cosechasRecientes->count())
 <div class="flex items-center justify-between mt-3 mb-2">
   <p class="section-title" style="margin:0;">🌾 Últimas cosechas</p>
@@ -201,7 +237,7 @@
 @endforeach
 @endif
 
-{{-- TOP CULTIVO (solo si tiene línea de cultivos) --}}
+{{-- TOP CULTIVO --}}
 @if(in_array('cultivos', $lineasActivas) && $topCultivo && $topCultivo->rentabilidad > 0)
 <div style="background:var(--verde-bg);border-radius:var(--radius-lg);padding:12px 14px;margin-top:16px;border-left:3px solid var(--verde-dark);">
   <p style="font-size:.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:4px;">⭐ Cultivo más rentable {{ now()->year }}</p>
@@ -218,4 +254,5 @@
 </div>
 @endif
 
+<div style="margin-bottom:80px;"></div>
 @endsection

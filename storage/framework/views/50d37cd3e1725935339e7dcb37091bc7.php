@@ -29,25 +29,49 @@
 <?php endif; ?>
 
 
+<?php if(isset($alertasInteligentes) && count($alertasInteligentes) > 0): ?>
+<?php
+ $iconosAlerta = [
+    'vacuna'     => '💉',
+    'cria'       => '🐣',
+    'alerta'     => '⚠️',
+    'agua'       => '💧',
+    'muestreo'   => '📊',
+    'inventario' => '📦',
+    'cosecha'    => '🌾',
+];
+?>
+<?php $__currentLoopData = array_slice($alertasInteligentes, 0, 4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $alerta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<?php
+  $claseAlerta = $alerta['nivel'] === 'critica' ? 'dash-alert rojo'
+               : ($alerta['nivel'] === 'alta'   ? 'dash-alert naranja' : 'dash-alert');
+  $icoAlerta   = $iconosAlerta[$alerta['icono'] ?? 'alerta'] ?? '!';
+?>
+<div class="<?php echo e($claseAlerta); ?>" onclick="location.href='<?php echo e($alerta['url']); ?>'">
+  <span><?php echo e($icoAlerta); ?> <?php echo e($alerta['texto']); ?></span>
+  <span style="font-size:.8rem;">Ver →</span>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+<?php else: ?>
+
 <?php if($tareasVencidas > 0): ?>
 <div class="dash-alert rojo" onclick="location.href='<?php echo e(route('calendario.index')); ?>?tab=vencidas'">
   <span>⚠️ <?php echo e($tareasVencidas); ?> tarea(s) vencida(s) sin completar</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
 <?php endif; ?>
-
 <?php if($alertasInventario > 0): ?>
 <div class="dash-alert" onclick="location.href='<?php echo e(route('inventario.alertas')); ?>'">
   <span>📦 <?php echo e($alertasInventario); ?> insumo(s) con stock bajo mínimo</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
 <?php endif; ?>
-
 <?php if(\App\Models\LineaProductiva::tieneAnimales() && $proximasDosis->count()): ?>
 <div class="dash-alert azul" onclick="location.href='<?php echo e(route('animales.index')); ?>'">
   <span>💊 <?php echo e($proximasDosis->count()); ?> dosis de medicamento próxima(s)</span>
   <span style="font-size:.8rem;">Ver →</span>
 </div>
+<?php endif; ?>
 <?php endif; ?>
 
 
@@ -68,10 +92,15 @@
 <?php if(!empty($kpisLineas)): ?>
 <div class="kpis-lineas-grid">
   <?php $__currentLoopData = $kpisLineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $codigo => $kpi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-  <div class="kpi-linea-card kpi-color-<?php echo e($kpi['color']); ?>">
+  <?php $rutaKpi = $kpi['ruta'] ?? null; ?>
+  <div class="kpi-linea-card kpi-color-<?php echo e($kpi['color']); ?>"
+       <?php if($rutaKpi): ?> style="cursor:pointer;" onclick="location.href='<?php echo e($rutaKpi); ?>'" <?php endif; ?>>
     <div class="kpi-linea-header">
       <span class="kpi-linea-emoji"><?php echo e($kpi['emoji']); ?></span>
       <span class="kpi-linea-titulo"><?php echo e($kpi['titulo']); ?></span>
+      <?php if($rutaKpi): ?>
+      <span style="margin-left:auto;font-size:.7rem;color:#94a3b8;">Ver →</span>
+      <?php endif; ?>
     </div>
     <div class="kpi-linea-metricas">
       <?php $__currentLoopData = $kpi['metricas']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -79,7 +108,7 @@
         <div class="kpi-linea-valor"><?php echo e($m['valor']); ?></div>
         <div class="kpi-linea-label"><?php echo e($m['label']); ?></div>
         <?php if(!empty($m['sub'])): ?>
-          <div class="kpi-linea-sub"><?php echo e($m['sub']); ?></div>
+        <div class="kpi-linea-sub"><?php echo e($m['sub']); ?></div>
         <?php endif; ?>
       </div>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -114,24 +143,41 @@
   <?php if(in_array('cultivos', $lineasActivas)): ?>
   <a href="<?php echo e(route('cultivos.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#edf7ed;">🌱</div><span class="menu-label">Cultivos</span></a>
   <?php endif; ?>
-
   <a href="<?php echo e(route('gastos.index')); ?>"      class="menu-card"><div class="menu-icon" style="background:#fdf3ea;">💰</div><span class="menu-label">Gastos</span></a>
   <a href="<?php echo e(route('ingresos.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#eff6ff;">📈</div><span class="menu-label">Ingresos</span></a>
   <a href="<?php echo e(route('calendario.index')); ?>"  class="menu-card"><div class="menu-icon" style="background:#fdf2f8;">📅</div><span class="menu-label">Agenda</span></a>
-
   <?php if(\App\Models\LineaProductiva::tieneAnimales()): ?>
   <a href="<?php echo e(route('animales.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#f5f3ff;">🐄</div><span class="menu-label">Animales</span></a>
+  <a href="<?php echo e(route('produccion-animal.index')); ?>" class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🥛</div><span class="menu-label">Produccion</span></a>
   <?php endif; ?>
-
   <a href="<?php echo e(route('personas.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#fdf4ff;">👥</div><span class="menu-label">Personas</span></a>
-
   <?php if(in_array('cultivos', $lineasActivas)): ?>
   <a href="<?php echo e(route('cosechas.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#f0fdf4;">🌾</div><span class="menu-label">Cosechas</span></a>
   <?php endif; ?>
-
   <a href="<?php echo e(route('inventario.index')); ?>"  class="menu-card"><div class="menu-icon" style="background:#fff7ed;">📦</div><span class="menu-label">Inventario</span></a>
   <a href="<?php echo e(route('reportes.index')); ?>"    class="menu-card"><div class="menu-icon" style="background:#eef2ff;">📊</div><span class="menu-label">Reportes</span></a>
 </div>
+
+
+<?php if($proximasDosis->count()): ?>
+<div class="flex items-center justify-between mt-3 mb-2">
+  <p class="section-title" style="margin:0;">💊 Próximas dosis (7 días)</p>
+  <a href="<?php echo e(route('animales.index')); ?>" class="text-sm text-green font-bold">Ver animales</a>
+</div>
+<?php $__currentLoopData = $proximasDosis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pd): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="list-item">
+  <div class="item-icon" style="background:#eff6ff;">💊</div>
+  <div class="item-body">
+    <div class="item-title"><?php echo e($pd->nombre_lote ?? $pd->especie); ?> · <?php echo e($pd->titulo); ?></div>
+    <div class="item-sub"><?php echo e($pd->especie); ?></div>
+  </div>
+  <span style="font-weight:700;color:#4f46e5;font-size:.87rem;">
+    <?php echo e(\Carbon\Carbon::parse($pd->proxima_dosis)->format('d/m')); ?>
+
+  </span>
+</div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+<?php endif; ?>
 
 
 <?php if($tareasHoy->count()): ?>
@@ -139,9 +185,9 @@
   <p class="section-title" style="margin:0;">📌 Tareas de hoy</p>
   <a href="<?php echo e(route('calendario.index')); ?>?tab=hoy" class="text-sm text-green font-bold">Ver todas</a>
 </div>
-<?php $tiposIcono=['riego'=>'💧','vacunacion'=>'💉','cosecha'=>'🌾','fertilizacion'=>'🌿','fumigacion'=>'🧴','poda'=>'✂️','otro'=>'📝','medicamento'=>'💊','traslado_animal'=>'🏃','parto'=>'🐣','pago_proveedor'=>'🏪']; ?>
+<?php $tiposIcono=['riego'=>'&#128167;','vacunacion'=>'&#128138;','cosecha'=>'&#127806;','fertilizacion'=>'&#127807;','fumigacion'=>'Fum','poda'=>'Poda','otro'=>'&#128221;','medicamento'=>'&#128138;','traslado_animal'=>'Mov','parto'=>'&#128036;','pago_proveedor'=>'&#127978;']; ?>
 <?php $__currentLoopData = $tareasHoy; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-<?php $ic=$tiposIcono[$t->tipo]??'📝'; $pc=['alta'=>'var(--rojo)','media'=>'#d97706','baja'=>'var(--verde-dark)'][$t->prioridad]??'var(--text-secondary)'; ?>
+<?php $ic=$tiposIcono[$t->tipo]??'?'; $pc=['alta'=>'var(--rojo)','media'=>'#d97706','baja'=>'var(--verde-dark)'][$t->prioridad]??'var(--text-secondary)'; ?>
 <div class="list-item">
   <div class="item-icon" style="background:var(--verde-bg)"><?php echo e($ic); ?></div>
   <div class="item-body">
@@ -209,5 +255,6 @@
 </div>
 <?php endif; ?>
 
+<div style="margin-bottom:80px;"></div>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\Juan Diego\Documents\Universidad Documentos clases\Sem Investigacion\agrogranja-laravel\resources\views/pages/dashboard.blade.php ENDPATH**/ ?>
