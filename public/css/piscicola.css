@@ -1,0 +1,156 @@
+/* ════════════════════════════════════════════════════════════════════
+   AGROGRANJA · MÓDULO PISCÍCOLA — Fase 7
+   Destino: public/css/piscicola.css
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --pisc-azul:      #0ea5e9;
+  --pisc-azul-dark: #0369a1;
+  --pisc-verde:     #10b981;
+  --pisc-naranja:   #f59e0b;
+  --pisc-rojo:      #ef4444;
+  --pisc-gris:      #64748b;
+  --pisc-bg:        #f0f9ff;
+  --pisc-card:      #ffffff;
+}
+
+/* ── STATS ───────────────────────────────────────────────────────── */
+.pisc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pisc-stat {
+  background: var(--pisc-card);
+  border-radius: 14px; padding: 12px 8px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  border-left: 4px solid var(--pisc-azul);
+}
+.pisc-stat.verde   { border-left-color: var(--pisc-verde);   }
+.pisc-stat.naranja { border-left-color: var(--pisc-naranja); }
+.pisc-stat.rojo    { border-left-color: var(--pisc-rojo);    }
+.pisc-stat-ico { font-size: 1.4rem; margin-bottom: 4px; line-height: 1; }
+.pisc-stat-val { font-size: 1.2rem; font-weight: 800; color: #1e293b; }
+.pisc-stat-lbl {
+  font-size: .64rem; color: var(--pisc-gris); font-weight: 600;
+  margin-top: 2px; text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* ── MENÚ ────────────────────────────────────────────────────────── */
+.pisc-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.pisc-menu-card {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 14px 8px 10px;
+  background: var(--pisc-card); border-radius: 14px;
+  border-top: 3px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  text-decoration: none; color: #1e293b;
+  transition: transform .15s, box-shadow .15s;
+}
+.pisc-menu-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.10); color:#1e293b; }
+.pisc-menu-ico { font-size: 1.8rem; margin-bottom: 4px; }
+.pisc-menu-lbl { font-size: .82rem; font-weight: 700; }
+.pisc-menu-sub { font-size: .66rem; color: #94a3b8; margin-top: 2px; }
+
+/* ── ESTANQUE CARD ───────────────────────────────────────────────── */
+.estanque-card {
+  background: var(--pisc-card); border-radius: 14px;
+  padding: 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  border-left: 4px solid var(--pisc-azul);
+}
+.estanque-card.vacio         { border-left-color: #cbd5e1; }
+.estanque-card.activo        { border-left-color: var(--pisc-azul); }
+.estanque-card.mantenimiento { border-left-color: var(--pisc-naranja); }
+.estanque-card.cosechado     { border-left-color: var(--pisc-verde); }
+.estanque-nombre { font-weight: 800; font-size: .95rem; color: #1e293b; }
+.estanque-sub    { font-size: .74rem; color: var(--pisc-gris); margin-top: 2px; }
+
+/* ── BIOMASA BARRA ───────────────────────────────────────────────── */
+.biomasa-barra-wrap {
+  background: #e2e8f0; border-radius: 6px; height: 8px; margin: 6px 0; overflow: hidden;
+}
+.biomasa-barra-fill {
+  height: 100%; border-radius: 6px;
+  background: linear-gradient(90deg, var(--pisc-azul), var(--pisc-verde));
+  transition: width .4s;
+}
+
+/* ── CALIDAD AGUA INDICADORES ────────────────────────────────────── */
+.agua-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-bottom: 10px;
+}
+.agua-param {
+  border-radius: 10px; padding: 8px 6px; text-align: center;
+}
+.agua-param.ok      { background: #f0fdf4; }
+.agua-param.alerta  { background: #fef2f2; }
+.agua-param.sin_dato{ background: #f8fafc; }
+.agua-val  { font-size: 1rem; font-weight: 800; }
+.agua-lbl  { font-size: .65rem; color: var(--pisc-gris); margin-top: 2px; }
+.agua-ideal{ font-size: .62rem; color: #94a3b8; }
+
+/* ── FILA DE ALIMENTACIÓN ────────────────────────────────────────── */
+.alim-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: .83rem;
+}
+.alim-tasa {
+  display: inline-block; padding: 1px 8px; border-radius: 10px;
+  font-size: .72rem; font-weight: 700;
+}
+.alim-tasa.ok   { background: #dcfce7; color: #15803d; }
+.alim-tasa.alto { background: #fef2f2; color: #dc2626; }
+.alim-tasa.bajo { background: #fffbeb; color: #b45309; }
+
+/* ── COSECHA CARD ────────────────────────────────────────────────── */
+.cosecha-card {
+  background: var(--pisc-card); border-radius: 12px;
+  padding: 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  border-left: 4px solid var(--pisc-verde);
+}
+.cosecha-kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px; margin-top: 10px;
+}
+.cosecha-kpi {
+  background: #f8fafc; border-radius: 8px; padding: 8px 4px; text-align: center;
+}
+.cosecha-kpi-val { font-size: .9rem; font-weight: 800; color: #1e293b; }
+.cosecha-kpi-lbl { font-size: .64rem; color: var(--pisc-gris); margin-top: 2px; }
+
+/* ── BADGE ESTADO ESTANQUE ───────────────────────────────────────── */
+.estado-pisc {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  font-size: .72rem; font-weight: 700;
+}
+.estado-pisc.activo        { background: #dbeafe; color: var(--pisc-azul-dark); }
+.estado-pisc.vacio         { background: #f1f5f9; color: #475569; }
+.estado-pisc.mantenimiento { background: #fef9c3; color: #92400e; }
+.estado-pisc.cosechado     { background: #dcfce7; color: #15803d; }
+
+/* ── ALERTAS ─────────────────────────────────────────────────────── */
+.alerta-pisc {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; margin-bottom: 6px;
+  font-size: .82rem; line-height: 1.4;
+}
+.alerta-pisc.critica { background: #fef2f2; color: #991b1b; }
+.alerta-pisc.aviso   { background: #fffbeb; color: #92400e; }
+.alerta-pisc.info    { background: #eff6ff; color: #1d4ed8; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────── */
+@media (max-width: 430px) {
+  .pisc-stats     { grid-template-columns: repeat(2, 1fr); }
+  .pisc-menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .agua-grid      { grid-template-columns: repeat(2, 1fr); }
+  .cosecha-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}

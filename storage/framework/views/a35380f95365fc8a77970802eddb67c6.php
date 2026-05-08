@@ -94,6 +94,14 @@
   <span class="sidebar-label">Porcícola</span>
 </a>
 <?php endif; ?>
+<?php if(\App\Models\LineaProductiva::activa('piscicola')): ?>
+<a href="<?php echo e(route('piscicola.estanques')); ?>"
+   class="sidebar-item <?php echo e(request()->routeIs('piscicola.*') ? 'active' : ''); ?>"
+   style="padding-left:2.2rem;">
+  <span class="sidebar-icon">&#128032;</span>
+  <span class="sidebar-label">Piscicola</span>
+</a>
+<?php endif; ?>
 
       
 

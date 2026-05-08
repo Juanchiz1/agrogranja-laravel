@@ -94,6 +94,14 @@
   <span class="sidebar-label">Porcícola</span>
 </a>
 @endif
+@if(\App\Models\LineaProductiva::activa('piscicola'))
+<a href="{{ route('piscicola.estanques') }}"
+   class="sidebar-item {{ request()->routeIs('piscicola.*') ? 'active' : '' }}"
+   style="padding-left:2.2rem;">
+  <span class="sidebar-icon">&#128032;</span>
+  <span class="sidebar-label">Piscicola</span>
+</a>
+@endif
 
       
 

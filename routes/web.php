@@ -21,6 +21,7 @@ use App\Http\Controllers\ProduccionAnimalController;
 use App\Http\Controllers\BovinoController;                 // ← Fase 4
 use App\Http\Controllers\AvicolaController;
 use App\Http\Controllers\PorcicolaController;
+use App\Http\Controllers\PiscicolaController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -231,5 +232,51 @@ Route::get('/porcicola/sanidad', [PorcicolaController::class, 'sanidad'])->name(
 Route::post('/porcicola/sanidad/{id}/aplicar', [PorcicolaController::class, 'aplicarSanidad'])->name('porcicola.sanidad.aplicar');
 Route::post('/porcicola/sanidad/personalizado', [PorcicolaController::class, 'storeSanidadPersonalizada'])->name('porcicola.sanidad.personalizado');
 Route::get('/porcicola/reportes', [PorcicolaController::class, 'reportes'])->name('porcicola.reportes');
+
+// Estanques — Dashboard
+Route::get('/piscicola',
+        [PiscicolaController::class, 'estanques'])->name('piscicola.estanques');
+Route::post('/piscicola/estanques',
+        [PiscicolaController::class, 'storeEstanque'])->name('piscicola.estanques.store');
+Route::post('/piscicola/estanques/{id}/update',
+        [PiscicolaController::class, 'updateEstanque'])->name('piscicola.estanques.update');
+ 
+    // Siembra
+Route::get('/piscicola/siembra',
+        [PiscicolaController::class, 'siembra'])->name('piscicola.siembra');
+Route::post('/piscicola/siembra',
+        [PiscicolaController::class, 'storeSiembra'])->name('piscicola.siembra.store');
+ 
+    // Muestreos de biomasa
+Route::get('/piscicola/muestreo',
+        [PiscicolaController::class, 'muestreo'])->name('piscicola.muestreo');
+Route::post('/piscicola/muestreo',
+        [PiscicolaController::class, 'storeMuestreo'])->name('piscicola.muestreo.store');
+ 
+    // Alimentación
+Route::get('/piscicola/alimentacion',
+        [PiscicolaController::class, 'alimentacion'])->name('piscicola.alimentacion');
+Route::post('/piscicola/alimentacion',
+        [PiscicolaController::class, 'storeAlimentacion'])->name('piscicola.alimentacion.store');
+ 
+    // Mortalidad (solo POST — se registra desde otras vistas)
+Route::post('/piscicola/mortalidad',
+        [PiscicolaController::class, 'storeMortalidad'])->name('piscicola.mortalidad.store');
+ 
+    // Calidad del agua
+Route::get('/piscicola/calidad-agua',
+        [PiscicolaController::class, 'calidadAgua'])->name('piscicola.calidad_agua');
+Route::post('/piscicola/calidad-agua',
+        [PiscicolaController::class, 'storeCalidadAgua'])->name('piscicola.calidad_agua.store');
+ 
+    // Cosecha
+Route::get('/piscicola/cosecha',
+        [PiscicolaController::class, 'cosecha'])->name('piscicola.cosecha');
+Route::post('/piscicola/cosecha',
+        [PiscicolaController::class, 'storeCosecha'])->name('piscicola.cosecha.store');
+ 
+    // Reportes
+Route::get('/piscicola/reportes',
+        [PiscicolaController::class, 'reportes'])->name('piscicola.reportes');
 
 });
