@@ -1,1 +1,1 @@
-a:5:{s:6:"_token";s:40:"mnknvzGHIFVbr9XBw2Z4RVJdMi86NyyPhLRf6RV7";s:9:"_previous";a:1:{s:3:"url";s:46:"http://localhost:8000/perfil?tab=investigacion";}s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}s:10:"usuario_id";i:1;s:14:"usuario_nombre";s:12:"Usuario Demo";}
+a:5:{s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}s:6:"_token";s:40:"SA9r3k3zEVQy2JagPAUTTW5hdVgAQgtBDnJaNeiF";s:9:"_previous";a:1:{s:3:"url";s:33:"http://localhost:8000/animales/18";}s:10:"usuario_id";i:2;s:14:"usuario_nombre";s:10:"Juan Perez";}

@@ -385,7 +385,7 @@
 
       <div class="form-group">
         <label>Especie *</label>
-        <select name="especie" class="form-control" required id="especieNuevo" onchange="updateVentaMode(); toggleAvicolaNuevo();">
+        <select name="especie" class="form-control" required id="especieNuevo" onchange="updateVentaMode(); toggleCamposEspecie();">
           <option value="">Seleccionar...</option>
           @foreach($especies as $e)
             <option value="{{ $e }}">{{ $e }}</option>
@@ -463,6 +463,41 @@
       <div id="precioUniWrap" class="form-group" style="display:none;">
         <label>Precio de venta por cabeza (COP)</label>
         <input type="number" step="100" name="precio_unidad" class="form-control" placeholder="Ej: 25000">
+      </div>
+
+
+      {{-- CAMPOS BOVINOS NUEVO --}}
+      <div id="camposBovinoNuevo" style="display:none;background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;">🐄 Datos bovinos</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza" class="form-control" placeholder="Ej: Brahman, Holstein, Normando">
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select name="categoria_bovina" class="form-control">
+              <option value="">— Sin categoría —</option>
+              <option value="vaca_lechera">Vaca lechera</option>
+              <option value="vaca_carne">Vaca de carne</option>
+              <option value="novilla">Novilla</option>
+              <option value="ternero">Ternero</option>
+              <option value="toro">Toro</option>
+              <option value="buey">Buey</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Meta peso al sacrificio (kg)</label>
+            <input type="number" name="peso_meta_kg" step="1" min="0" class="form-control" placeholder="Ej: 450">
+            <div style="font-size:.72rem;color:#64748b;margin-top:2px;">Se usa en el módulo de pesaje para calcular avance.</div>
+          </div>
+          <div class="form-group">
+            <label>Descripción del padre</label>
+            <input type="text" name="padre_descripcion" class="form-control" placeholder="Nombre padre o código semen">
+          </div>
+        </div>
       </div>
 
       {{-- CAMPOS AVÍCOLAS NUEVOS --}}
@@ -587,8 +622,8 @@
 
 @push('scripts')
 <script>
-// REEMPLAZA tu función updateVentaMode() y añade la nueva:
-const porKilo = ['Ganado bovino','Terneros','Cerdos','Cerdas de cría','Cabras','Ovejas','Caballos'];
+const porKilo          = ['Ganado bovino','Terneros','Cerdos','Cerdas de cría','Cabras','Ovejas','Caballos'];
+const especiesBovinas  = ['Ganado bovino','Terneros'];
 const especiesPorcinas = ['Cerdos','Cerdas de cría','Porcinos'];
 const especiesAvicolas = ['Gallinas','Patos','Pavos','Codornices','Aves de corral'];
 
@@ -598,13 +633,18 @@ function updateVentaMode() {
   document.getElementById('precioUniWrap').style.display  = (!porKilo.includes(esp) && esp) ? 'block' : 'none';
 }
 
-function toggleAvicolaNuevo() {
-  const esp = document.getElementById('especieNuevo').value;
-  var elAvi  = document.getElementById('camposAvicolaNuevo');
-  var elPorc = document.getElementById('camposPorcicolaNuevo');
+function toggleCamposEspecie() {
+  const esp  = document.getElementById('especieNuevo').value;
+  const elBov  = document.getElementById('camposBovinoNuevo');
+  const elAvi  = document.getElementById('camposAvicolaNuevo');
+  const elPorc = document.getElementById('camposPorcicolaNuevo');
+  if (elBov)  elBov.style.display  = especiesBovinas.includes(esp)  ? 'block' : 'none';
   if (elAvi)  elAvi.style.display  = especiesAvicolas.includes(esp) ? 'block' : 'none';
   if (elPorc) elPorc.style.display = especiesPorcinas.includes(esp) ? 'block' : 'none';
 }
+
+// Compatibilidad hacia atrás
+function toggleAvicolaNuevo() { toggleCamposEspecie(); }
 </script>
 @endpush
 @endsection

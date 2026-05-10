@@ -33,7 +33,7 @@ class Kernel extends HttpKernel
         'auth.session' => \App\Http\Middleware\AuthSession::class,
         'can'          => \Illuminate\Auth\Middleware\Authorize::class,
         'diagnostico'  => \App\Http\Middleware\CheckDiagnostico::class,  // <- AGREGAR
-        'guest' => \Illuminate\Auth\Middleware\RedirectIfUnauthenticated::class,
+        //'guest' => \Illuminate\Auth\Middleware\RedirectIfUnauthenticated::class,
         'signed'       => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle'     => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'     => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,

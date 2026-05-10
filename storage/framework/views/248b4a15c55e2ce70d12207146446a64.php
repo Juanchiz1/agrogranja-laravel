@@ -646,8 +646,10 @@
         <div class="form-group"><label>Precio/cabeza (COP)</label><input type="number" step="100" name="precio_unidad" class="form-control" value="<?php echo e($animal->precio_unidad); ?>"></div>
       </div>
       <div class="form-group"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="vende_por_kilo" <?php echo e(($animal->vende_por_kilo??1)?'checked':''); ?>> Se vende por kg</label></div>
+
+
       
-      <?php if($esBovino): ?>
+      <?php if(in_array($animal->especie, ['Ganado bovino','Terneros'])): ?>
       <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px;">
         <div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;">🐄 Datos bovinos</div>
         <div class="grid-2">
@@ -670,11 +672,103 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label>Meta de peso al sacrificio (kg)</label>
-          <input type="number" name="peso_meta_kg" step="1" min="0"
-                 class="form-control" value="<?php echo e($animal->peso_meta_kg ?? ''); ?>"
-                 placeholder="Ej: 450 kg">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Meta de peso al sacrificio (kg)</label>
+            <input type="number" name="peso_meta_kg" step="1" min="0"
+                   class="form-control" value="<?php echo e($animal->peso_meta_kg ?? ''); ?>"
+                   placeholder="Ej: 450 kg">
+          </div>
+          <div class="form-group">
+            <label>Descripción del padre</label>
+            <input type="text" name="padre_descripcion" class="form-control"
+                   value="<?php echo e($animal->padre_descripcion ?? ''); ?>"
+                   placeholder="Nombre del padre o código semen">
+          </div>
+        </div>
+      </div>
+      <?php endif; ?>
+      
+
+      
+      <?php if(in_array($animal->especie, ['Gallinas','Patos','Pavos','Codornices','Aves de corral'])): ?>
+      <div style="background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:8px;">🐔 Datos avícolas</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Tipo de ave</label>
+            <select name="tipo_ave" class="form-control">
+              <option value="">— Sin tipo —</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'ponedora'        ? 'selected' : ''); ?> value="ponedora">🥚 Ponedora</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'engorde'         ? 'selected' : ''); ?> value="engorde">🍗 Engorde</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'doble_proposito' ? 'selected' : ''); ?> value="doble_proposito">🐔 Doble propósito</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'reproductora'    ? 'selected' : ''); ?> value="reproductora">🐣 Reproductora</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'pato'            ? 'selected' : ''); ?> value="pato">🦆 Pato</option>
+              <option <?php echo e(($animal->tipo_ave ?? '') === 'pavo'            ? 'selected' : ''); ?> value="pavo">🦃 Pavo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Línea genética</label>
+            <input type="text" name="linea_ave" class="form-control"
+                   value="<?php echo e($animal->linea_ave ?? ''); ?>"
+                   placeholder="Isa Brown, Ross 308, Hy-Line...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Fecha nacimiento del lote</label>
+            <input type="date" name="fecha_nacimiento_lote" class="form-control"
+                   value="<?php echo e($animal->fecha_nacimiento_lote ?? ''); ?>">
+            <div style="font-size:.68rem;color:#b45309;margin-top:2px;">Necesaria para vacunación automática y cálculo de semanas.</div>
+          </div>
+          <div class="form-group">
+            <label>Capacidad del galpón</label>
+            <input type="number" name="capacidad_galpon" class="form-control"
+                   value="<?php echo e($animal->capacidad_galpon ?? ''); ?>"
+                   min="1" placeholder="Máximo de aves">
+          </div>
+        </div>
+      </div>
+      <?php endif; ?>
+      
+
+      
+      <?php if(in_array($animal->especie, ['Cerdos','Cerdas de cría','Porcinos'])): ?>
+      <div style="background:#fdf2f8;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;font-weight:700;color:#be185d;text-transform:uppercase;margin-bottom:8px;">🐷 Datos porcícolas</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Categoría</label>
+            <select name="categoria_porcina" class="form-control">
+              <option value="">Sin categoría</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'lechon'           ? 'selected' : ''); ?> value="lechon">Lechón</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'levante'          ? 'selected' : ''); ?> value="levante">Levante</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'ceba'             ? 'selected' : ''); ?> value="ceba">Ceba</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'hembra_cria'      ? 'selected' : ''); ?> value="hembra_cria">Hembra de cría</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'verraco'          ? 'selected' : ''); ?> value="verraco">Verraco</option>
+              <option <?php echo e(($animal->categoria_porcina ?? '') === 'vientre_descarte' ? 'selected' : ''); ?> value="vientre_descarte">Descarte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Raza</label>
+            <input type="text" name="raza_porcina" class="form-control"
+                   value="<?php echo e($animal->raza_porcina ?? ''); ?>"
+                   placeholder="Landrace, Duroc, Yorkshire...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Peso entrada ceba (kg)</label>
+            <input type="number" name="peso_entrada_kg" step="0.1" min="0"
+                   class="form-control" value="<?php echo e($animal->peso_entrada_kg ?? ''); ?>"
+                   placeholder="Ej: 20">
+          </div>
+          <div class="form-group">
+            <label>Meta sacrificio (kg)</label>
+            <input type="number" name="peso_meta_sacrificio_kg" step="0.1" min="0"
+                   class="form-control" value="<?php echo e($animal->peso_meta_sacrificio_kg ?? 100); ?>"
+                   placeholder="Ej: 100">
+          </div>
         </div>
       </div>
       <?php endif; ?>
@@ -687,53 +781,6 @@
         <button type="submit" class="btn btn-primary btn-full">Guardar cambios</button>
       </div>
 
-      <?php if(in_array($animal->especie, ['Gallinas','Patos','Pavos','Codornices','Aves de corral'])): ?>
-<div style="background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:8px;">
-  <div style="font-size:.75rem;font-weight:700;color:#b45309;margin-bottom:8px;">
-    🐔 DATOS AVÍCOLAS
-  </div>
-
-  <div class="grid-2">
-    <div class="form-group">
-      <label>Tipo de ave</label>
-      <select name="tipo_ave" class="form-control">
-        <option value="">— Sin tipo —</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'ponedora'         ? 'selected' : ''); ?> value="ponedora">🥚 Ponedora</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'engorde'          ? 'selected' : ''); ?> value="engorde">🍗 Engorde</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'doble_proposito'  ? 'selected' : ''); ?> value="doble_proposito">Doble propósito</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'reproductora'     ? 'selected' : ''); ?> value="reproductora">Reproductora</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'pato'             ? 'selected' : ''); ?> value="pato">Pato</option>
-        <option <?php echo e(($animal->tipo_ave ?? '') === 'pavo'             ? 'selected' : ''); ?> value="pavo">Pavo</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Línea genética</label>
-      <input type="text" name="linea_ave" class="form-control"
-             value="<?php echo e($animal->linea_ave ?? ''); ?>"
-             placeholder="Isa Brown, Ross 308...">
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <div class="form-group">
-      <label>Fecha nacimiento del lote</label>
-      <input type="date" name="fecha_nacimiento_lote" class="form-control"
-             value="<?php echo e($animal->fecha_nacimiento_lote ?? ''); ?>">
-      <div style="font-size:.68rem;color:#b45309;margin-top:2px;">
-        Necesaria para el calendario de vacunación automático
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Capacidad del galpón</label>
-      <input type="number" name="capacidad_galpon" class="form-control"
-             value="<?php echo e($animal->capacidad_galpon ?? ''); ?>"
-             placeholder="Máximo de aves">
-    </div>
-  </div>
-</div>
-<?php endif; ?>
     </form>
   </div>
 </div>
