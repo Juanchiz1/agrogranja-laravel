@@ -22,7 +22,6 @@ use App\Http\Controllers\BovinoController;                 // ← Fase 4
 use App\Http\Controllers\AvicolaController;
 use App\Http\Controllers\PorcicolaController;
 use App\Http\Controllers\PiscicolaController;
-use App\Http\Controllers\ReportesController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -303,10 +302,7 @@ Route::post('/produccion-animal/calcular-costos',
     // Eliminar registro
 Route::post('/produccion-animal/{id}/delete',
         [ProduccionAnimalController::class, 'destroy'])
-        ->name('produccion-animal.destroy');    
-     
-Route::get('/reportes',
-        [ReportesController::class, 'index'])->name('reportes.index');      
+        ->name('produccion-animal.destroy');        
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');          
 

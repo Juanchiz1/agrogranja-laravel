@@ -24,6 +24,7 @@
   <a href="?tab=cultivos&anio={{ $anio }}" class="tab-rep {{ $tab==='cultivos'?'active':'' }}">🌱 Cultivos</a>
   <a href="?tab=animales&anio={{ $anio }}" class="tab-rep {{ $tab==='animales'?'active':'' }}">🐄 Animales</a>
   <a href="?tab=rentabilidad&anio={{ $anio }}" class="tab-rep {{ $tab==='rentabilidad'?'active':'' }}">💹 Rentabilidad</a>
+  <a href="?tab=lineas&anio={{ $anio }}" class="tab-rep {{ $tab==='lineas'?'active':'' }}">&#127806; Lineas</a>
   <a href="?tab=exportar&anio={{ $anio }}" class="tab-rep {{ $tab==='exportar'?'active':'' }}">📤 Exportar</a>
 </div>
 
@@ -360,6 +361,115 @@
 @endforeach
 @endif
 
+{{-- ═══════════════════ TAB LINEAS (FASE 9) ═══════════════════ --}}
+@elseif($tab === 'lineas')
+
+@php
+// Calcular en la vista como fallback si el controller no los calcula
+if (!isset($rentabilidadLineas)) {
+    $uidR = session('usuario_id');
+    $inicioR = $anio . '-01-01';
+    $finR    = $anio . '-12-31';
+    $emojiMapR = ['cultivos'=>'&#127807;','bovino'=>'&#128004;','avicola'=>'&#128020;','porcino'=>'&#128023;',
+                  'piscicola'=>'&#128031;','caprino_ovino'=>'&#128016;','equino'=>'&#128052;','cunicola'=>'&#128000;'];
+    $especiesR = ['bovino'=>['Ganado bovino','Terneros'],'avicola'=>['Gallinas','Patos','Pavos'],
+                  'porcino'=>['Cerdos','Cerdas de cria'],'piscicola'=>['Peces'],
+                  'caprino_ovino'=>['Cabras','Ovejas'],'equino'=>['Caballos'],'cunicola'=>['Conejos']];
+    $lineasR = \App\Models\LineaProductiva::activasDelUsuario($uidR);
+    $rentabilidadLineas = [];
+    foreach ($lineasR as $linea) {
+        $ing = 0; $gas = 0;
+        if ($linea === 'cultivos') {
+            $ing = DB::table('ingresos')->where('usuario_id',$uidR)->whereBetween('fecha',[$inicioR,$finR])->whereNotNull('cultivo_id')->sum('valor_total');
+            $gas = DB::table('gastos')->where('usuario_id',$uidR)->whereBetween('fecha',[$inicioR,$finR])->whereNotNull('cultivo_id')->sum('valor');
+        } elseif (isset($especiesR[$linea])) {
+            $ids = DB::table('animales')->where('usuario_id',$uidR)->whereIn('especie',$especiesR[$linea])->pluck('id');
+            if ($ids->count()) {
+                $ing = DB::table('ingresos')->where('usuario_id',$uidR)->whereBetween('fecha',[$inicioR,$finR])->whereIn('animal_id',$ids)->sum('valor_total');
+                $gas = DB::table('gastos')->where('usuario_id',$uidR)->whereBetween('fecha',[$inicioR,$finR])->whereIn('animal_id',$ids)->sum('valor');
+            }
+        } else { continue; }
+        $rentabilidadLineas[$linea] = [
+            'nombre'       => ucfirst(str_replace('_',' ',$linea)),
+            'emoji'        => $emojiMapR[$linea] ?? '',
+            'ingresos'     => round((float)$ing, 0),
+            'gastos'       => round((float)$gas, 0),
+            'rentabilidad' => round((float)$ing - (float)$gas, 0),
+            'margen'       => $ing > 0 ? round((($ing-$gas)/$ing)*100,1) : 0,
+            'es_rentable'  => ($ing - $gas) >= 0,
+        ];
+    }
+    uasort($rentabilidadLineas, fn($a,$b) => $b['rentabilidad'] - $a['rentabilidad']);
+}
+$kpisLineasReporte = $kpisLineasReporte ?? [];
+@endphp
+
+@if(!isset($rentabilidadLineas) || count($rentabilidadLineas) === 0)
+<div class="empty-state"><div class="emoji">&#128075;</div><p>Sin datos de lineas para {{ $anio }}. Verifica que el ReporteController incluya las variables de Fase 9.</p></div>
+@else
+<div class="stats-row" style="margin-bottom:14px;">
+  <div class="stat-mini" style="background:var(--verde-bg)"><div class="stat-mini-val text-green">${{ number_format($totalIngresos/1000,1) }}k</div><div class="stat-mini-label">Ingresos</div></div>
+  <div class="stat-mini" style="background:var(--marron-bg)"><div class="stat-mini-val" style="color:var(--marron)">${{ number_format($totalGastos/1000,1) }}k</div><div class="stat-mini-label">Gastos</div></div>
+  <div class="stat-mini" style="background:{{ $balance>=0?'var(--verde-bg)':'#fef2f2' }}"><div class="stat-mini-val" style="color:{{ $balance>=0?'var(--verde-dark)':'var(--rojo)' }}">{{ $balance>=0?'+':'' }}${{ number_format(abs($balance)/1000,1) }}k</div><div class="stat-mini-label">Balance</div></div>
+</div>
+
+<div class="rep-card">
+  <div class="rep-card-title">Rentabilidad por linea productiva</div>
+  @php $rlSafe2 = isset($rentabilidadLineas) ? $rentabilidadLineas : []; $maxAbsRent = $rlSafe2 ? max(1, max(array_map(fn($r) => abs($r['rentabilidad']), $rlSafe2))) : 1; @endphp
+  @foreach(($rentabilidadLineas ?? []) as $lk => $r)
+  @php
+    $pctBarra = round((abs($r['rentabilidad']) / $maxAbsRent) * 100);
+    $colorB   = $r['es_rentable'] ? 'var(--verde-dark)' : 'var(--rojo)';
+    $margenC  = $r['margen'] >= 20 ? '#15803d' : ($r['margen'] >= 0 ? '#b45309' : '#dc2626');
+  @endphp
+  <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div>
+        <span style="font-size:.95rem;font-weight:700;">{!! $r['emoji'] !!} {{ $r['nombre'] }}</span>
+        <span style="font-size:.72rem;color:#64748b;margin-left:8px;">Margen: <strong style="color:{{ $margenC }}">{{ $r['margen'] }}%</strong></span>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.92rem;font-weight:800;color:{{ $colorB }};">{{ $r['es_rentable'] ? '+' : '' }}${{ number_format($r['rentabilidad']/1000,1) }}k</div>
+        <div style="font-size:.68rem;color:#94a3b8;">rentabilidad neta</div>
+      </div>
+    </div>
+    <div style="background:#e2e8f0;border-radius:6px;height:8px;overflow:hidden;margin-bottom:4px;">
+      <div style="width:{{ $pctBarra }}%;height:100%;border-radius:6px;background:{{ $colorB }};"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:#64748b;">
+      <span style="color:var(--verde-dark);">Ingresos: ${{ number_format($r['ingresos']/1000,1) }}k</span>
+      <span style="color:var(--rojo);">Gastos: ${{ number_format($r['gastos']/1000,1) }}k</span>
+    </div>
+  </div>
+  @endforeach
+</div>
+
+<div class="rep-card">
+  <div class="rep-card-title">Comparativo entre lineas</div>
+  <canvas id="chartLineasComp" height="220"></canvas>
+</div>
+
+@if(!empty($kpisLineasReporte ?? []))
+<div class="rep-card">
+  <div class="rep-card-title">KPIs especificos por linea</div>
+  @foreach(($kpisLineasReporte ?? []) as $lk => $k)
+  <div style="margin-bottom:14px;">
+    <div style="font-weight:700;font-size:.88rem;margin-bottom:8px;">{{ $k['emoji'] }} {{ $k['titulo'] }}</div>
+    @foreach($k['items'] as $item)
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:.82rem;">
+      <div>
+        <span style="color:#475569;">{{ $item['kpi'] }}</span>
+        @if(isset($item['meta']))<div style="font-size:.68rem;color:#94a3b8;">Meta: {{ $item['meta'] }}</div>@endif
+      </div>
+      <span style="font-weight:800;color:#1e293b;margin-left:8px;white-space:nowrap;">{{ $item['valor'] }}</span>
+    </div>
+    @endforeach
+  </div>
+  @endforeach
+</div>
+@endif
+@endif
+
 {{-- ═══════════════════ TAB EXPORTAR ═══════════════════ --}}
 @elseif($tab === 'exportar')
 
@@ -561,6 +671,27 @@ new Chart(document.getElementById('chartAnimalesEspecie'), {
   options:{ responsive:true, plugins:{legend:{position:'bottom',labels:{boxWidth:12}}} }
 });
 @endif
+
+@elseif($tab === 'lineas')
+@php
+  $rlSafe     = isset($rentabilidadLineas) ? $rentabilidadLineas : [];
+  $lineasLabels = array_values(array_map(fn($r) => $r['nombre'], $rlSafe));
+  $lineasIng    = array_values(array_map(fn($r) => round($r['ingresos']/1000,1), $rlSafe));
+  $lineasGast   = array_values(array_map(fn($r) => round($r['gastos']/1000,1), $rlSafe));
+  $lineasRent   = array_values(array_map(fn($r) => round($r['rentabilidad']/1000,1), $rlSafe));
+@endphp
+if(document.getElementById('chartLineasComp') && @json(count($rlSafe)) > 0) {
+  new Chart(document.getElementById('chartLineasComp'), {
+    type:'bar',
+    data:{ labels:@json($lineasLabels), datasets:[
+      { label:'Ingresos',          data:@json($lineasIng),  backgroundColor:'rgba(61,139,61,.75)', borderRadius:4 },
+      { label:'Gastos',            data:@json($lineasGast), backgroundColor:'rgba(122,79,42,.65)', borderRadius:4 },
+      { label:'Rentabilidad neta', data:@json($lineasRent), backgroundColor:'rgba(37,99,235,.6)',  borderRadius:4 }
+    ]},
+    options:{ responsive:true, plugins:{legend:{position:'bottom'}},
+      scales:{ y:{ ticks:{ callback:v=>'$'+v+'k' } } } }
+  });
+}
 
 @elseif($tab === 'rentabilidad')
 @if(count($rentChartLabels) > 0)

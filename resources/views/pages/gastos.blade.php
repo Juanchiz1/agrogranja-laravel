@@ -21,11 +21,11 @@
   <div class="flex items-center justify-between">
     <div>
       <p class="text-xs font-bold text-gray" style="text-transform:uppercase;">Gasto mensual</p>
-      <p style="font-size:1.7rem;font-weight:800;color:var(--marron);">${{ number_format($totalMes,0,',','.') }}</p>
+      <p style="font-size:1.7rem;font-weight:800;color:var(--marron);" data-cop="{{ $totalMes }}">${{ number_format($totalMes,0,',','.') }}</p>
     </div>
     <div style="text-align:right;">
       <p class="text-xs text-gray">Este año</p>
-      <p class="font-bold text-brown">${{ number_format($totalAnio,0,',','.') }}</p>
+      <p class="font-bold text-brown" data-cop="{{ $totalAnio }}">${{ number_format($totalAnio,0,',','.') }}</p>
     </div>
   </div>
 </div>
@@ -52,7 +52,7 @@
   <div class="flex items-center justify-between" style="margin-bottom:6px;">
     <span style="font-size:.83rem;">{{ $r->descripcion }}</span>
     <div class="flex gap-2 items-center">
-      <span style="font-weight:700;font-size:.83rem;color:var(--marron);">${{ number_format($r->valor,0,',','.') }}</span>
+      <span style="font-weight:700;font-size:.83rem;color:var(--marron);" data-cop="{{ $r->valor }}">${{ number_format($r->valor,0,',','.') }}</span>
       <form method="POST" action="{{ route('gastos.recurrente.generar',$r->id) }}">@csrf
         <button class="btn btn-sm btn-primary" style="font-size:.72rem;padding:3px 10px;">Registrar</button>
       </form>
@@ -120,7 +120,7 @@
         <img src="{{ asset($g->foto_factura) }}" class="foto-factura-thumb" onclick="openLightbox('{{ asset($g->foto_factura) }}')" title="Ver factura">
       @endif
       <div style="text-align:right;">
-        <div class="font-bold text-brown text-sm">${{ number_format($g->valor,0,',','.') }}</div>
+        <div class="font-bold text-brown text-sm" data-cop="{{ $g->valor }}">${{ number_format($g->valor,0,',','.') }}</div>
         <div style="font-size:.7rem;color:var(--text-muted);">{{ \Carbon\Carbon::parse($g->fecha)->format('d/m/Y') }}</div>
       </div>
       <button onclick="openModal('editGasto{{ $g->id }}')" class="btn btn-sm btn-secondary btn-icon">✏️</button>
@@ -149,7 +149,7 @@
           <div class="form-group"><label>Unidad</label><input type="text" name="unidad_cantidad" class="form-control" value="{{ $g->unidad_cantidad }}" placeholder="kg, bultos..."></div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required value="{{ $g->valor }}"></div>
+          <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required value="{{ $g->valor }}" data-cop-input data-cop-type="gasto"></div>
           <div class="form-group"><label>Fecha</label><input type="date" name="fecha" class="form-control" value="{{ $g->fecha }}"></div>
         </div>
         <div class="form-group"><label>N° Factura</label><input type="text" name="factura_numero" class="form-control" value="{{ $g->factura_numero }}" placeholder="Opcional"></div>
@@ -220,7 +220,7 @@
       @if($r->proveedor)<div style="font-size:.75rem;color:var(--text-muted);">🏪 {{ $r->proveedor }}</div>@endif
     </div>
     <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-      <span style="font-weight:800;color:var(--marron);">${{ number_format($r->valor,0,',','.') }}</span>
+      <span style="font-weight:800;color:var(--marron);" data-cop="{{ $r->valor }}">${{ number_format($r->valor,0,',','.') }}</span>
       @if($r->proximo_vencimiento)
         <span class="vencimiento-badge {{ $vcClass }}">
           @if($diasR >= 0) Vence hoy
@@ -290,7 +290,7 @@
         <div class="form-group"><label>Unidad</label><input type="text" name="unidad_cantidad" class="form-control" placeholder="kg, bultos..."></div>
       </div>
       <div class="grid-2">
-        <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required placeholder="0"></div>
+        <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required placeholder="0" data-cop-input data-cop-type="gasto"></div>
         <div class="form-group"><label>Fecha</label><input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}"></div>
       </div>
       <div class="form-group"><label>N° Factura</label><input type="text" name="factura_numero" class="form-control" placeholder="Opcional"></div>
@@ -371,7 +371,7 @@
       </div>
       <div class="form-group"><label>Descripción *</label><input type="text" name="descripcion" class="form-control" required placeholder="Ej: Arriendo del lote norte"></div>
       <div class="grid-2">
-        <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required placeholder="0"></div>
+        <div class="form-group"><label>Valor (COP) *</label><input type="number" step="100" name="valor" class="form-control" required placeholder="0" data-cop-input data-cop-type="gasto"></div>
         <div class="form-group"><label>Frecuencia *</label>
           <select name="frecuencia" class="form-control" required>
             <option value="semanal">Semanal</option>
@@ -450,6 +450,7 @@
 <button class="fab" style="background:var(--marron);" onclick="openModal('modalNuevoGasto')">+</button>
 
 @push('scripts')
+<script src="{{ asset('js/cop-format.js') }}"></script>
 <script>
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

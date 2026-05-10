@@ -18,11 +18,11 @@
 
 <div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
   <div class="stat-card" style="background:var(--verde-bg);">
-    <div class="stat-value text-green" style="font-size:1.2rem;">$<?php echo e(number_format($totalMes,0,',','.')); ?></div>
+    <div class="stat-value text-green" style="font-size:1.2rem;" data-cop="<?php echo e($totalMes); ?>">$<?php echo e(number_format($totalMes,0,',','.')); ?></div>
     <div class="stat-label">Este mes</div>
   </div>
   <div class="stat-card" style="background:var(--verde-bg);">
-    <div class="stat-value text-green" style="font-size:1.2rem;">$<?php echo e(number_format($totalAnio,0,',','.')); ?></div>
+    <div class="stat-value text-green" style="font-size:1.2rem;" data-cop="<?php echo e($totalAnio); ?>">$<?php echo e(number_format($totalAnio,0,',','.')); ?></div>
     <div class="stat-label">Este año</div>
   </div>
 </div>
@@ -38,7 +38,7 @@
 
       <span style="font-size:.72rem;color:var(--text-muted);">(<?php echo e($st->cnt); ?>)</span>
     </span>
-    <strong style="color:var(--verde-dark);">$<?php echo e(number_format($st->total,0,',','.')); ?></strong>
+    <strong style="color:var(--verde-dark);" data-cop="<?php echo e($st->total); ?>">$<?php echo e(number_format($st->total,0,',','.')); ?></strong>
   </div>
   <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
@@ -100,7 +100,7 @@
         <img src="<?php echo e(asset($i->foto_soporte)); ?>" class="ingreso-foto" onclick="openLightboxI('<?php echo e(asset($i->foto_soporte)); ?>')" title="Ver soporte">
       <?php endif; ?>
       <div style="text-align:right;">
-        <div class="font-bold text-green text-sm">$<?php echo e(number_format($i->valor_total,0,',','.')); ?></div>
+        <div class="font-bold text-green text-sm" data-cop="<?php echo e($i->valor_total); ?>">$<?php echo e(number_format($i->valor_total,0,',','.')); ?></div>
         <?php if($i->precio_unitario && $i->cantidad): ?>
           <div style="font-size:.7rem;color:var(--text-muted);">$<?php echo e(number_format($i->precio_unitario,0,',','.')); ?>/u</div>
         <?php endif; ?>
@@ -127,8 +127,8 @@
           <div class="form-group"><label>Unidad</label><input type="text" name="unidad" class="form-control" value="<?php echo e($i->unidad); ?>" placeholder="kg, bultos..."></div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label>Precio unitario</label><input type="number" step="100" name="precio_unitario" id="pue<?php echo e($i->id); ?>" class="form-control" value="<?php echo e($i->precio_unitario); ?>" oninput="calcTotalE<?php echo e($i->id); ?>()"></div>
-          <div class="form-group"><label>Total (COP) *</label><input type="number" step="100" name="valor_total" id="vte<?php echo e($i->id); ?>" class="form-control" required value="<?php echo e($i->valor_total); ?>"></div>
+          <div class="form-group"><label>Precio unitario</label><input type="number" step="100" name="precio_unitario" id="pue<?php echo e($i->id); ?>" class="form-control" value="<?php echo e($i->precio_unitario); ?>" data-cop-input oninput="calcTotalE<?php echo e($i->id); ?>()"></div>
+          <div class="form-group"><label>Total (COP) *</label><input type="number" step="100" name="valor_total" id="vte<?php echo e($i->id); ?>" class="form-control" required value="<?php echo e($i->valor_total); ?>" data-cop-input></div>
         </div>
         <div class="grid-2">
           <div class="form-group"><label>Fecha</label><input type="date" name="fecha" class="form-control" value="<?php echo e($i->fecha); ?>"></div>
@@ -214,7 +214,7 @@
         <div style="font-weight:600;font-size:.88rem;"><?php echo e($tc->comprador); ?></div>
         <div style="font-size:.75rem;color:var(--text-secondary);"><?php echo e($tc->cnt); ?> transacción(es)</div>
       </div>
-      <strong style="color:var(--verde-dark);">$<?php echo e(number_format($tc->total,0,',','.')); ?></strong>
+      <strong style="color:var(--verde-dark);" data-cop="<?php echo e($tc->total); ?>">$<?php echo e(number_format($tc->total,0,',','.')); ?></strong>
     </div>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
   </div>
@@ -238,7 +238,7 @@
     <div style="margin-bottom:12px;">
       <div class="flex items-center justify-between mb-1">
         <span style="font-size:.85rem;font-weight:600;"><?php echo e($tipoI['emoji']); ?> <?php echo e($tipoI['label']); ?></span>
-        <span style="font-size:.85rem;font-weight:700;color:var(--verde-dark);">$<?php echo e(number_format($total,0,',','.')); ?></span>
+        <span style="font-size:.85rem;font-weight:700;color:var(--verde-dark);" data-cop="<?php echo e($total); ?>">$<?php echo e(number_format($total,0,',','.')); ?></span>
       </div>
       <div style="background:#e5e7eb;border-radius:99px;height:6px;overflow:hidden;">
         <div style="height:100%;border-radius:99px;background:var(--verde-mid);width:<?php echo e(round($total/$granTotal*100)); ?>%;"></div>
@@ -269,8 +269,8 @@
         <div class="form-group"><label>Unidad</label><input type="text" name="unidad" class="form-control" placeholder="kg, bultos..."></div>
       </div>
       <div class="grid-2">
-        <div class="form-group"><label>Precio unitario</label><input type="number" step="100" name="precio_unitario" class="form-control" placeholder="0" id="puN" oninput="calcTotalN()"></div>
-        <div class="form-group"><label>Total (COP) *</label><input type="number" step="100" name="valor_total" class="form-control" required placeholder="0" id="vtN"></div>
+        <div class="form-group"><label>Precio unitario</label><input type="number" step="100" name="precio_unitario" class="form-control" placeholder="0" id="puN" data-cop-input oninput="calcTotalN()"></div>
+        <div class="form-group"><label>Total (COP) *</label><input type="number" step="100" name="valor_total" class="form-control" required placeholder="0" id="vtN" data-cop-input></div>
       </div>
       <div class="grid-2">
         <div class="form-group"><label>Fecha</label><input type="date" name="fecha" class="form-control" value="<?php echo e(date('Y-m-d')); ?>"></div>
@@ -379,6 +379,7 @@
 <button class="fab" style="background:var(--verde-dark);" onclick="openModal('modalNuevoIngreso')">+</button>
 
 <?php $__env->startPush('scripts'); ?>
+<script src="<?php echo e(asset('js/cop-format.js')); ?>"></script>
 <script>
 function switchTabI(name, btn) {
   document.querySelectorAll('.tab-btn-i').forEach(b => b.classList.remove('active'));
