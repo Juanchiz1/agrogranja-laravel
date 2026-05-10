@@ -22,6 +22,8 @@ use App\Http\Controllers\BovinoController;                 // ← Fase 4
 use App\Http\Controllers\AvicolaController;
 use App\Http\Controllers\PorcicolaController;
 use App\Http\Controllers\PiscicolaController;
+use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\MetricasController;
 
 
 // ── Públicas ─────────────────────────────────────────────────
@@ -39,7 +41,10 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/onboarding',  [AuthController::class, 'onboarding'])->name('onboarding');
     Route::post('/onboarding', [AuthController::class, 'onboardingComplete'])->name('onboarding.complete');
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+     Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('diagnostico');
+ 
 
     // Exportaciones
     Route::get('/exportar/cultivos/pdf',     [ExportController::class, 'cultivosPdf'])->name('exportar.cultivos.pdf');
@@ -304,6 +309,22 @@ Route::post('/produccion-animal/{id}/delete',
         [ProduccionAnimalController::class, 'destroy'])
         ->name('produccion-animal.destroy');        
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');          
+Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');    
+
+Route::get('/diagnostico',          [DiagnosticoController::class, 'show'])->name('diagnostico.show');
+Route::post('/diagnostico',         [DiagnosticoController::class, 'store'])->name('diagnostico.store');
+Route::post('/diagnostico/omitir',  [DiagnosticoController::class, 'omitir'])->name('diagnostico.omitir');
+ 
+    // Métricas por período (O3 - productividad objetiva)
+Route::post('/metricas/snapshot',   [MetricasController::class, 'enviarSnapshot'])->name('metricas.snapshot');
+Route::post('/metricas/historial',  [MetricasController::class, 'enviarHistorial'])->name('metricas.historial');
+
+Route::get('/diagnostico',         [DiagnosticoController::class, 'show'])->name('diagnostico.show');
+Route::post('/diagnostico',        [DiagnosticoController::class, 'store'])->name('diagnostico.store');
+ Route::post('/diagnostico/omitir', [DiagnosticoController::class, 'omitir'])->name('diagnostico.omitir');
+Route::post('/diagnostico/reset',  [DiagnosticoController::class, 'reset'])->name('diagnostico.reset');  // <- NUEVO
+
+ Route::post('/metricas/snapshot',  [MetricasController::class, 'enviarSnapshot'])->name('metricas.snapshot');
+ Route::post('/metricas/historial', [MetricasController::class, 'enviarHistorial'])->name('metricas.historial');
 
 });

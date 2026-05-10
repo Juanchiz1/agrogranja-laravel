@@ -28,11 +28,12 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    protected $middlewareAliases = [
+     protected $middlewareAliases = [
         'auth'         => \Illuminate\Auth\Middleware\Authenticate::class,
         'auth.session' => \App\Http\Middleware\AuthSession::class,
         'can'          => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest'        => \Illuminate\Auth\Middleware\RedirectIfUnauthenticated::class,
+        'diagnostico'  => \App\Http\Middleware\CheckDiagnostico::class,  // <- AGREGAR
+        'guest' => \Illuminate\Auth\Middleware\RedirectIfUnauthenticated::class,
         'signed'       => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle'     => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'     => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,

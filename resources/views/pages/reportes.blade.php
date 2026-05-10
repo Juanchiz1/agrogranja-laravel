@@ -708,4 +708,50 @@ new Chart(document.getElementById('chartRentComp'), {
 @endif
 </script>
 @endpush
+
+<div class="section-card" style="background:var(--surface);border-radius:var(--radius-lg);padding:16px;margin-top:16px;box-shadow:var(--shadow-sm);border-left:3px solid var(--verde-dark);">
+    <p style="font-size:.82rem;font-weight:700;color:var(--verde-dark);text-transform:uppercase;margin-bottom:6px;">
+        📊 Registro de investigación
+    </p>
+    <p style="font-size:.83rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
+        Envía las métricas de productividad de tu finca a la base de datos de investigación. Esto ayuda a medir el impacto real de Agrogranja en la región.
+    </p>
+ 
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+ 
+        {{-- Botón: enviar mes anterior --}}
+        <form method="POST" action="{{ route('metricas.snapshot') }}" style="flex:1;min-width:140px;">
+            @csrf
+            <input type="hidden" name="periodo" value="{{ \Carbon\Carbon::now()->subMonth()->format('Y-m') }}">
+            <button type="submit" class="btn btn-primary btn-full" style="font-size:.83rem;">
+                📤 Enviar métricas — {{ \Carbon\Carbon::now()->subMonth()->translatedFormat('F Y') }}
+            </button>
+        </form>
+ 
+        {{-- Botón: enviar mes específico --}}
+        <form method="POST" action="{{ route('metricas.snapshot') }}" style="flex:1;min-width:140px;display:flex;gap:6px;">
+            @csrf
+            <input type="month" name="periodo" class="form-control" value="{{ \Carbon\Carbon::now()->subMonth()->format('Y-m') }}" style="flex:1;">
+            <button type="submit" class="btn btn-secondary" style="font-size:.83rem;white-space:nowrap;">Otro mes</button>
+        </form>
+ 
+    </div>
+ 
+    {{-- Botón: cargar historial completo (solo usar una vez) --}}
+    <details style="margin-top:12px;">
+        <summary style="font-size:.78rem;color:var(--text-muted);cursor:pointer;">▸ Cargar historial completo (usar solo una vez)</summary>
+        <div style="margin-top:10px;padding:10px;background:var(--verde-bg);border-radius:8px;">
+            <p style="font-size:.78rem;color:var(--verde-dark);margin-bottom:8px;">
+                ⚠️ Esto enviará todos los períodos desde que empezaste a usar Agrogranja. Puede tardar unos segundos.
+            </p>
+            <form method="POST" action="{{ route('metricas.historial') }}">
+                @csrf
+                <button type="submit" class="btn btn-secondary btn-full" style="font-size:.82rem;"
+                    onclick="return confirm('¿Enviar el historial completo de métricas? Solo es necesario hacerlo una vez.')">
+                    📦 Enviar historial completo
+                </button>
+            </form>
+        </div>
+    </details>
+</div>
 @endsection

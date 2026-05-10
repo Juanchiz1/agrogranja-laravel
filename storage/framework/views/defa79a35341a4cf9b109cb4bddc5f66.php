@@ -12,7 +12,6 @@
 
 
 <div style="text-align:center;padding:16px 0 20px;">
-  
   <div class="perfil-avatar-wrap">
     <label for="fotoPerfilInput" style="cursor:pointer;">
       <?php if(isset($user->foto_perfil) && $user->foto_perfil): ?>
@@ -62,26 +61,22 @@
 
 
 <div class="tabs-perfil">
-  <a href="?tab=datos"        class="tab-perfil <?php echo e($tabActual==='datos'        ? 'active' : ''); ?>">👤 Datos</a>
-  <a href="?tab=finca"        class="tab-perfil <?php echo e($tabActual==='finca'        ? 'active' : ''); ?>">🏡 Mi Finca</a>
-  <a href="?tab=financiero"   class="tab-perfil <?php echo e($tabActual==='financiero'   ? 'active' : ''); ?>">💳 Financiero</a>
-  <a href="?tab=preferencias" class="tab-perfil <?php echo e($tabActual==='preferencias' ? 'active' : ''); ?>">⚙️ Preferencias</a>
-  <a href="?tab=seguridad"    class="tab-perfil <?php echo e($tabActual==='seguridad'    ? 'active' : ''); ?>">🔐 Seguridad</a>
+  <a href="?tab=datos"          class="tab-perfil <?php echo e($tabActual==='datos'          ? 'active' : ''); ?>">👤 Datos</a>
+  <a href="?tab=finca"          class="tab-perfil <?php echo e($tabActual==='finca'          ? 'active' : ''); ?>">🏡 Mi Finca</a>
+  <a href="?tab=financiero"     class="tab-perfil <?php echo e($tabActual==='financiero'     ? 'active' : ''); ?>">💳 Financiero</a>
+  <a href="?tab=preferencias"   class="tab-perfil <?php echo e($tabActual==='preferencias'   ? 'active' : ''); ?>">⚙️ Preferencias</a>
+  <a href="?tab=seguridad"      class="tab-perfil <?php echo e($tabActual==='seguridad'      ? 'active' : ''); ?>">🔐 Seguridad</a>
+  <a href="?tab=investigacion"  class="tab-perfil <?php echo e($tabActual==='investigacion'  ? 'active' : ''); ?>">🔬 Datos</a>
 </div>
 
-<div style="background:#f0faf5; border:1px solid #b2dfc9; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-    <div>
-        <p style="font-weight:600; color:#085041; margin:0; font-size:14px;">
-            Encuesta de impacto
-        </p>
-        <p style="font-size:12px; color:#0F6E56; margin:0;">
-            Cuéntanos cómo Agrogranja ha cambiado tu trabajo en el campo
-        </p>
-    </div>
-    <a href="<?php echo e(route('encuesta.show')); ?>"
-       style="background:#1D9E75; color:#fff; padding:8px 18px; border-radius:9px; text-decoration:none; font-size:13px; font-weight:500; white-space:nowrap;">
-        Responder encuesta
-    </a>
+<div style="background:#f0faf5;border:1px solid #b2dfc9;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+  <div>
+    <p style="font-weight:600;color:#085041;margin:0;font-size:14px;">Encuesta de impacto</p>
+    <p style="font-size:12px;color:#0F6E56;margin:0;">Cuéntanos cómo Agrogranja ha cambiado tu trabajo en el campo</p>
+  </div>
+  <a href="<?php echo e(route('encuesta.show')); ?>" style="background:#1D9E75;color:#fff;padding:8px 18px;border-radius:9px;text-decoration:none;font-size:13px;font-weight:500;white-space:nowrap;">
+    Responder encuesta
+  </a>
 </div>
 
 
@@ -90,8 +85,6 @@
   <form method="POST" action="<?php echo e(route('perfil.update')); ?>" enctype="multipart/form-data">
     <?php echo csrf_field(); ?>
     <input type="hidden" name="tab_actual" value="datos">
-
-    
     <input type="file" id="fotoPerfilInput" name="foto_perfil" accept="image/*" style="display:none;" onchange="this.form.submit()">
 
     <div class="form-group">
@@ -128,7 +121,6 @@
 
 <?php elseif($tabActual === 'finca'): ?>
 <div class="card">
-  
   <?php if(isset($user->foto_finca) && $user->foto_finca): ?>
     <img src="<?php echo e(asset($user->foto_finca)); ?>" class="finca-foto" onclick="document.getElementById('fotoFincaInput').click()">
   <?php else: ?>
@@ -187,7 +179,6 @@
     <button type="submit" class="btn btn-primary btn-full mt-2">Guardar información de la finca</button>
   </form>
 
-  
   <div style="margin-top:20px;padding:14px;background:var(--verde-bg);border-radius:var(--radius-lg);">
     <p style="font-weight:700;margin-bottom:10px;color:var(--verde-dark);">📊 Resumen de actividad</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.83rem;">
@@ -237,8 +228,8 @@
         <label>Tipo de cuenta</label>
         <select name="tipo_cuenta" class="form-control">
           <option value="">Seleccionar</option>
-          <option <?php echo e(($user->tipo_cuenta ?? '') === 'Ahorros' ? 'selected' : ''); ?>>Ahorros</option>
-          <option <?php echo e(($user->tipo_cuenta ?? '') === 'Corriente' ? 'selected' : ''); ?>>Corriente</option>
+          <option <?php echo e(($user->tipo_cuenta ?? '') === 'Ahorros'       ? 'selected' : ''); ?>>Ahorros</option>
+          <option <?php echo e(($user->tipo_cuenta ?? '') === 'Corriente'     ? 'selected' : ''); ?>>Corriente</option>
           <option <?php echo e(($user->tipo_cuenta ?? '') === 'Nequi/Daviplata' ? 'selected' : ''); ?>>Nequi/Daviplata</option>
         </select>
       </div>
@@ -246,7 +237,6 @@
     <button type="submit" class="btn btn-primary btn-full mt-2">Guardar datos financieros</button>
   </form>
 </div>
-
 
 <div class="card mt-3">
   <p style="font-weight:700;margin-bottom:14px;">💹 Mi desempeño <?php echo e(now()->year); ?></p>
@@ -315,24 +305,23 @@
 
 
 <?php
-  // Configuración rápida por línea (mismas opciones que el onboarding).
   $configCamposPerfil = [
-    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas', 'cantidad_ph'=>'Ej: 2',
-        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']], 'opciones'=>[]],
-    'bovino'        => ['cantidad_label'=>'Cabezas aprox.', 'cantidad_ph'=>'Ej: 25',
+    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas','cantidad_ph'=>'Ej: 2',
+        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']],'opciones'=>[]],
+    'bovino'        => ['cantidad_label'=>'Cabezas aprox.','cantidad_ph'=>'Ej: 25',
         'opciones'=>[['name'=>'leche','label'=>'Lechería'],['name'=>'carne','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
-    'porcino'       => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 30',
+    'porcino'       => ['cantidad_label'=>'Cantidad aprox.','cantidad_ph'=>'Ej: 30',
         'opciones'=>[['name'=>'engorde','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
-    'avicola'       => ['cantidad_label'=>'Aves aprox.', 'cantidad_ph'=>'Ej: 200',
+    'avicola'       => ['cantidad_label'=>'Aves aprox.','cantidad_ph'=>'Ej: 200',
         'opciones'=>[['name'=>'postura','label'=>'Postura'],['name'=>'engorde','label'=>'Engorde']]],
-    'piscicola'     => ['cantidad_label'=>'Estanques', 'cantidad_ph'=>'Ej: 3',
-        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']], 'opciones'=>[]],
-    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 15',
+    'piscicola'     => ['cantidad_label'=>'Estanques','cantidad_ph'=>'Ej: 3',
+        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']],'opciones'=>[]],
+    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.','cantidad_ph'=>'Ej: 15',
         'opciones'=>[['name'=>'leche','label'=>'Leche'],['name'=>'carne','label'=>'Carne'],['name'=>'lana','label'=>'Lana']]],
-    'apicola'       => ['cantidad_label'=>'Colmenas', 'cantidad_ph'=>'Ej: 10', 'opciones'=>[]],
-    'equino'        => ['cantidad_label'=>'Cantidad', 'cantidad_ph'=>'Ej: 4',
+    'apicola'       => ['cantidad_label'=>'Colmenas','cantidad_ph'=>'Ej: 10','opciones'=>[]],
+    'equino'        => ['cantidad_label'=>'Cantidad','cantidad_ph'=>'Ej: 4',
         'opciones'=>[['name'=>'trabajo','label'=>'Trabajo'],['name'=>'cria','label'=>'Cría']]],
-    'cunicola'      => ['cantidad_label'=>'Jaulas / madres', 'cantidad_ph'=>'Ej: 12', 'opciones'=>[]],
+    'cunicola'      => ['cantidad_label'=>'Jaulas / madres','cantidad_ph'=>'Ej: 12','opciones'=>[]],
   ];
 ?>
 
@@ -351,91 +340,85 @@
 
     <div class="lineas-grid lineas-grid-compact">
       <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php
-          $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa;
-        ?>
-        <label class="linea-card <?php echo e($marcada ? 'selected' : ''); ?>" data-codigo="<?php echo e($linea->codigo); ?>">
-          <input type="checkbox" name="lineas[]" value="<?php echo e($linea->codigo); ?>"
-                 class="linea-check"
-                 onchange="this.closest('.linea-card').classList.toggle('selected', this.checked); togglePerfilConfig('<?php echo e($linea->codigo); ?>', this.checked);"
-                 <?php echo e($marcada ? 'checked' : ''); ?>>
-          <div class="linea-emoji"><?php echo e($linea->emoji); ?></div>
-          <div class="linea-nombre"><?php echo e($linea->nombre); ?></div>
-        </label>
+      <?php $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa; ?>
+      <label class="linea-card <?php echo e($marcada ? 'selected' : ''); ?>" data-codigo="<?php echo e($linea->codigo); ?>">
+        <input type="checkbox" name="lineas[]" value="<?php echo e($linea->codigo); ?>"
+               class="linea-check"
+               onchange="this.closest('.linea-card').classList.toggle('selected',this.checked);togglePerfilConfig('<?php echo e($linea->codigo); ?>',this.checked);"
+               <?php echo e($marcada ? 'checked' : ''); ?>>
+        <div class="linea-emoji"><?php echo e($linea->emoji); ?></div>
+        <div class="linea-nombre"><?php echo e($linea->nombre); ?></div>
+      </label>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
     <div id="perfilConfigContainer" style="margin-top:18px;">
       <?php $__currentLoopData = $lineas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linea): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php
-          $codigo  = $linea->codigo;
-          $cfg     = $configCamposPerfil[$codigo] ?? null;
-          $actual  = $lineasUsuario[$codigo] ?? null;
-          $marcada = $actual && $actual->activa;
-          $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
-        ?>
-
-        <?php if($cfg): ?>
-        <div class="config-block <?php echo e($marcada ? '' : 'hidden'); ?>" data-config-perfil-for="<?php echo e($codigo); ?>">
-          <div class="config-block-header">
-            <span class="config-emoji"><?php echo e($linea->emoji); ?></span>
-            <span class="config-titulo"><?php echo e($linea->nombre); ?></span>
+      <?php
+        $codigo  = $linea->codigo;
+        $cfg     = $configCamposPerfil[$codigo] ?? null;
+        $actual  = $lineasUsuario[$codigo] ?? null;
+        $marcada = $actual && $actual->activa;
+        $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
+      ?>
+      <?php if($cfg): ?>
+      <div class="config-block <?php echo e($marcada ? '' : 'hidden'); ?>" data-config-perfil-for="<?php echo e($codigo); ?>">
+        <div class="config-block-header">
+          <span class="config-emoji"><?php echo e($linea->emoji); ?></span>
+          <span class="config-titulo"><?php echo e($linea->nombre); ?></span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label><?php echo e($cfg['cantidad_label']); ?></label>
+            <input type="number" min="0" step="1"
+                   name="config[<?php echo e($codigo); ?>][cantidad]"
+                   class="form-control"
+                   placeholder="<?php echo e($cfg['cantidad_ph']); ?>"
+                   value="<?php echo e($actual->cantidad_aprox ?? ''); ?>">
           </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label><?php echo e($cfg['cantidad_label']); ?></label>
-              <input type="number" min="0" step="1"
-                     name="config[<?php echo e($codigo); ?>][cantidad]"
-                     class="form-control"
-                     placeholder="<?php echo e($cfg['cantidad_ph']); ?>"
-                     value="<?php echo e($actual->cantidad_aprox ?? ''); ?>">
-            </div>
-            <div class="form-group">
-              <label>Escala</label>
-              <select name="config[<?php echo e($codigo); ?>][escala]" class="form-control">
-                <?php $__currentLoopData = ['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $val => $lbl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                  <option value="<?php echo e($val); ?>" <?php echo e(($actual->escala ?? 'pequena') === $val ? 'selected' : ''); ?>><?php echo e($lbl); ?></option>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Escala</label>
+            <select name="config[<?php echo e($codigo); ?>][escala]" class="form-control">
+              <?php $__currentLoopData = ['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $val => $lbl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($val); ?>" <?php echo e(($actual->escala ?? 'pequena') === $val ? 'selected' : ''); ?>><?php echo e($lbl); ?></option>
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
           </div>
+        </div>
+        <?php if(!empty($cfg['extras'])): ?>
+          <?php $__currentLoopData = $cfg['extras']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extra): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <div class="form-group">
+            <label><?php echo e($extra['label']); ?></label>
+            <input type="text"
+                   name="config[<?php echo e($codigo); ?>][<?php echo e($extra['name']); ?>]"
+                   class="form-control"
+                   placeholder="<?php echo e($extra['ph']); ?>"
+                   value="<?php echo e($meta[$extra['name']] ?? ''); ?>">
+          </div>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endif; ?>
+        <?php if(!empty($cfg['opciones'])): ?>
+        <div class="form-group">
+          <label>Tipo (puedes marcar varios)</label>
+          <div class="opciones-pills">
+            <?php $__currentLoopData = $cfg['opciones']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $op): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $opMarcada = !empty($meta[$op['name']]); ?>
+            <label class="opcion-pill <?php echo e($opMarcada ? 'selected' : ''); ?>">
+              <input type="checkbox"
+                     name="config[<?php echo e($codigo); ?>][<?php echo e($op['name']); ?>]"
+                     value="1"
+                     <?php echo e($opMarcada ? 'checked' : ''); ?>
 
-          <?php if(!empty($cfg['extras'])): ?>
-            <?php $__currentLoopData = $cfg['extras']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extra): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-              <div class="form-group">
-                <label><?php echo e($extra['label']); ?></label>
-                <input type="text"
-                       name="config[<?php echo e($codigo); ?>][<?php echo e($extra['name']); ?>]"
-                       class="form-control"
-                       placeholder="<?php echo e($extra['ph']); ?>"
-                       value="<?php echo e($meta[$extra['name']] ?? ''); ?>">
-              </div>
+                     onchange="this.closest('.opcion-pill').classList.toggle('selected',this.checked);">
+              <?php echo e($op['label']); ?>
+
+            </label>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-          <?php endif; ?>
-
-          <?php if(!empty($cfg['opciones'])): ?>
-            <div class="form-group">
-              <label>Tipo (puedes marcar varios)</label>
-              <div class="opciones-pills">
-                <?php $__currentLoopData = $cfg['opciones']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $op): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                  <?php $opMarcada = !empty($meta[$op['name']]); ?>
-                  <label class="opcion-pill <?php echo e($opMarcada ? 'selected' : ''); ?>">
-                    <input type="checkbox"
-                           name="config[<?php echo e($codigo); ?>][<?php echo e($op['name']); ?>]"
-                           value="1"
-                           <?php echo e($opMarcada ? 'checked' : ''); ?>
-
-                           onchange="this.closest('.opcion-pill').classList.toggle('selected', this.checked);">
-                    <?php echo e($op['label']); ?>
-
-                  </label>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-              </div>
-            </div>
-          <?php endif; ?>
+          </div>
         </div>
         <?php endif; ?>
+      </div>
+      <?php endif; ?>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
@@ -445,15 +428,14 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-  function togglePerfilConfig(codigo, mostrar) {
-    const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
-    if (!block) return;
-    if (mostrar) block.classList.remove('hidden');
-    else block.classList.add('hidden');
-  }
+function togglePerfilConfig(codigo, mostrar) {
+  const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
+  if (!block) return;
+  if (mostrar) block.classList.remove('hidden');
+  else block.classList.add('hidden');
+}
 </script>
 <?php $__env->stopPush(); ?>
-
 
 <div class="card mt-3">
   <p style="font-weight:700;margin-bottom:12px;">⚙️ Cuenta</p>
@@ -502,6 +484,96 @@
 
   </div>
 </div>
+
+
+<?php elseif($tabActual === 'investigacion'): ?>
+
+
+<div class="card" style="margin-bottom:12px;">
+  <p style="font-weight:700;margin-bottom:4px;">📋 Diagnóstico inicial</p>
+  <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
+    Registra tu situación tecnológica y productiva <em>antes</em> de usar Agrogranja. Son los datos de línea base del estudio de impacto en San Pelayo.
+  </p>
+
+  <?php if(isset($user->diagnostico_completado) && $user->diagnostico_completado): ?>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--verde-bg);border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+      <span style="font-size:1.3rem;">✅</span>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--verde-dark);">Diagnóstico completado</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">Tus datos de línea base están en la base de investigación.</div>
+      </div>
+    </div>
+    <form method="POST" action="<?php echo e(route('diagnostico.reset')); ?>"
+          onsubmit="return confirm('¿Deseas responder el diagnóstico de nuevo? Solo hazlo si cometiste un error en las respuestas anteriores.')">
+      <?php echo csrf_field(); ?>
+      <button type="submit" class="btn btn-secondary btn-full" style="font-size:.83rem;">
+        🔄 Responder diagnóstico de nuevo
+      </button>
+    </form>
+  <?php else: ?>
+    <div style="display:flex;align-items:center;gap:10px;background:#fff7ed;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+      <span style="font-size:1.3rem;">⏳</span>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:#9a3412;">Diagnóstico pendiente</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">Aún no has registrado tu situación inicial. Solo toma 2 minutos.</div>
+      </div>
+    </div>
+    <a href="<?php echo e(route('diagnostico.show')); ?>" class="btn btn-primary btn-full" style="text-align:center;display:block;text-decoration:none;font-size:.88rem;">
+      📋 Completar diagnóstico ahora
+    </a>
+  <?php endif; ?>
+</div>
+
+
+<div class="card" style="margin-bottom:12px;">
+  <p style="font-weight:700;margin-bottom:4px;">📊 Métricas de productividad</p>
+  <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
+    Envía los datos reales de tu finca (ingresos, gastos, cosechas, actividad) a la base de investigación para comparar tu productividad en el tiempo.
+  </p>
+
+  <form method="POST" action="<?php echo e(route('metricas.snapshot')); ?>" style="margin-bottom:10px;">
+    <?php echo csrf_field(); ?>
+    <input type="hidden" name="periodo" value="<?php echo e(\Carbon\Carbon::now()->subMonth()->format('Y-m')); ?>">
+    <button type="submit" class="btn btn-primary btn-full" style="font-size:.85rem;">
+      📤 Enviar métricas de <?php echo e(\Carbon\Carbon::now()->subMonth()->translatedFormat('F Y')); ?>
+
+    </button>
+  </form>
+
+  <form method="POST" action="<?php echo e(route('metricas.snapshot')); ?>" style="display:flex;gap:8px;margin-bottom:10px;">
+    <?php echo csrf_field(); ?>
+    <input type="month" name="periodo" class="form-control"
+           value="<?php echo e(\Carbon\Carbon::now()->subMonth()->format('Y-m')); ?>" style="flex:1;">
+    <button type="submit" class="btn btn-secondary" style="font-size:.83rem;white-space:nowrap;">
+      Enviar mes
+    </button>
+  </form>
+
+  <details>
+    <summary style="font-size:.78rem;color:var(--text-muted);cursor:pointer;padding:6px 0;">
+      ▸ Enviar historial completo (usar solo una vez)
+    </summary>
+    <div style="margin-top:8px;padding:10px 12px;background:var(--verde-bg);border-radius:10px;">
+      <p style="font-size:.78rem;color:var(--verde-dark);margin-bottom:8px;">
+        Envía todos los períodos desde que empezaste a registrar datos en Agrogranja.
+      </p>
+      <form method="POST" action="<?php echo e(route('metricas.historial')); ?>"
+            onsubmit="return confirm('¿Enviar el historial completo? Solo es necesario hacerlo una vez.')">
+        <?php echo csrf_field(); ?>
+        <button type="submit" class="btn btn-secondary btn-full" style="font-size:.82rem;">
+          📦 Cargar historial completo
+        </button>
+      </form>
+    </div>
+  </details>
+</div>
+
+<div style="background:#eff6ff;border-radius:var(--radius-lg);padding:12px 14px;border-left:3px solid #3b82f6;">
+  <p style="font-size:.8rem;color:#1e40af;line-height:1.5;">
+    🔒 Todos los datos enviados son <strong>anónimos</strong> y se usan exclusivamente para el estudio de impacto de Agrogranja en pequeños productores de San Pelayo. Nunca se comparte información personal.
+  </p>
+</div>
+
 <?php endif; ?>
 
 <?php $__env->stopSection(); ?>

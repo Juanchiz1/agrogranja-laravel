@@ -13,7 +13,6 @@
 
 {{-- HEADER PERFIL --}}
 <div style="text-align:center;padding:16px 0 20px;">
-  {{-- Avatar --}}
   <div class="perfil-avatar-wrap">
     <label for="fotoPerfilInput" style="cursor:pointer;">
       @if(isset($user->foto_perfil) && $user->foto_perfil)
@@ -62,26 +61,22 @@
 
 {{-- TABS --}}
 <div class="tabs-perfil">
-  <a href="?tab=datos"        class="tab-perfil {{ $tabActual==='datos'        ? 'active' : '' }}">👤 Datos</a>
-  <a href="?tab=finca"        class="tab-perfil {{ $tabActual==='finca'        ? 'active' : '' }}">🏡 Mi Finca</a>
-  <a href="?tab=financiero"   class="tab-perfil {{ $tabActual==='financiero'   ? 'active' : '' }}">💳 Financiero</a>
-  <a href="?tab=preferencias" class="tab-perfil {{ $tabActual==='preferencias' ? 'active' : '' }}">⚙️ Preferencias</a>
-  <a href="?tab=seguridad"    class="tab-perfil {{ $tabActual==='seguridad'    ? 'active' : '' }}">🔐 Seguridad</a>
+  <a href="?tab=datos"          class="tab-perfil {{ $tabActual==='datos'          ? 'active' : '' }}">👤 Datos</a>
+  <a href="?tab=finca"          class="tab-perfil {{ $tabActual==='finca'          ? 'active' : '' }}">🏡 Mi Finca</a>
+  <a href="?tab=financiero"     class="tab-perfil {{ $tabActual==='financiero'     ? 'active' : '' }}">💳 Financiero</a>
+  <a href="?tab=preferencias"   class="tab-perfil {{ $tabActual==='preferencias'   ? 'active' : '' }}">⚙️ Preferencias</a>
+  <a href="?tab=seguridad"      class="tab-perfil {{ $tabActual==='seguridad'      ? 'active' : '' }}">🔐 Seguridad</a>
+  <a href="?tab=investigacion"  class="tab-perfil {{ $tabActual==='investigacion'  ? 'active' : '' }}">🔬 Datos</a>
 </div>
 
-<div style="background:#f0faf5; border:1px solid #b2dfc9; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-    <div>
-        <p style="font-weight:600; color:#085041; margin:0; font-size:14px;">
-            Encuesta de impacto
-        </p>
-        <p style="font-size:12px; color:#0F6E56; margin:0;">
-            Cuéntanos cómo Agrogranja ha cambiado tu trabajo en el campo
-        </p>
-    </div>
-    <a href="{{ route('encuesta.show') }}"
-       style="background:#1D9E75; color:#fff; padding:8px 18px; border-radius:9px; text-decoration:none; font-size:13px; font-weight:500; white-space:nowrap;">
-        Responder encuesta
-    </a>
+<div style="background:#f0faf5;border:1px solid #b2dfc9;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+  <div>
+    <p style="font-weight:600;color:#085041;margin:0;font-size:14px;">Encuesta de impacto</p>
+    <p style="font-size:12px;color:#0F6E56;margin:0;">Cuéntanos cómo Agrogranja ha cambiado tu trabajo en el campo</p>
+  </div>
+  <a href="{{ route('encuesta.show') }}" style="background:#1D9E75;color:#fff;padding:8px 18px;border-radius:9px;text-decoration:none;font-size:13px;font-weight:500;white-space:nowrap;">
+    Responder encuesta
+  </a>
 </div>
 
 {{-- ===== TAB: DATOS PERSONALES ===== --}}
@@ -90,8 +85,6 @@
   <form method="POST" action="{{ route('perfil.update') }}" enctype="multipart/form-data">
     @csrf
     <input type="hidden" name="tab_actual" value="datos">
-
-    {{-- Input oculto para foto --}}
     <input type="file" id="fotoPerfilInput" name="foto_perfil" accept="image/*" style="display:none;" onchange="this.form.submit()">
 
     <div class="form-group">
@@ -128,7 +121,6 @@
 {{-- ===== TAB: MI FINCA ===== --}}
 @elseif($tabActual === 'finca')
 <div class="card">
-  {{-- Foto de la finca --}}
   @if(isset($user->foto_finca) && $user->foto_finca)
     <img src="{{ asset($user->foto_finca) }}" class="finca-foto" onclick="document.getElementById('fotoFincaInput').click()">
   @else
@@ -187,7 +179,6 @@
     <button type="submit" class="btn btn-primary btn-full mt-2">Guardar información de la finca</button>
   </form>
 
-  {{-- Resumen de la finca --}}
   <div style="margin-top:20px;padding:14px;background:var(--verde-bg);border-radius:var(--radius-lg);">
     <p style="font-weight:700;margin-bottom:10px;color:var(--verde-dark);">📊 Resumen de actividad</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.83rem;">
@@ -236,8 +227,8 @@
         <label>Tipo de cuenta</label>
         <select name="tipo_cuenta" class="form-control">
           <option value="">Seleccionar</option>
-          <option {{ ($user->tipo_cuenta ?? '') === 'Ahorros' ? 'selected' : '' }}>Ahorros</option>
-          <option {{ ($user->tipo_cuenta ?? '') === 'Corriente' ? 'selected' : '' }}>Corriente</option>
+          <option {{ ($user->tipo_cuenta ?? '') === 'Ahorros'       ? 'selected' : '' }}>Ahorros</option>
+          <option {{ ($user->tipo_cuenta ?? '') === 'Corriente'     ? 'selected' : '' }}>Corriente</option>
           <option {{ ($user->tipo_cuenta ?? '') === 'Nequi/Daviplata' ? 'selected' : '' }}>Nequi/Daviplata</option>
         </select>
       </div>
@@ -246,7 +237,6 @@
   </form>
 </div>
 
-{{-- Resumen financiero del año --}}
 <div class="card mt-3">
   <p style="font-weight:700;margin-bottom:14px;">💹 Mi desempeño {{ now()->year }}</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
@@ -311,26 +301,25 @@
   </form>
 </div>
 
-{{-- ===== LÍNEAS PRODUCTIVAS ===== --}}
+{{-- LÍNEAS PRODUCTIVAS --}}
 @php
-  // Configuración rápida por línea (mismas opciones que el onboarding).
   $configCamposPerfil = [
-    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas', 'cantidad_ph'=>'Ej: 2',
-        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']], 'opciones'=>[]],
-    'bovino'        => ['cantidad_label'=>'Cabezas aprox.', 'cantidad_ph'=>'Ej: 25',
+    'cultivos'      => ['cantidad_label'=>'Hectáreas dedicadas','cantidad_ph'=>'Ej: 2',
+        'extras'=>[['name'=>'tipos','label'=>'¿Qué cultivas?','ph'=>'Maíz, yuca, plátano...']],'opciones'=>[]],
+    'bovino'        => ['cantidad_label'=>'Cabezas aprox.','cantidad_ph'=>'Ej: 25',
         'opciones'=>[['name'=>'leche','label'=>'Lechería'],['name'=>'carne','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
-    'porcino'       => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 30',
+    'porcino'       => ['cantidad_label'=>'Cantidad aprox.','cantidad_ph'=>'Ej: 30',
         'opciones'=>[['name'=>'engorde','label'=>'Engorde'],['name'=>'cria','label'=>'Cría']]],
-    'avicola'       => ['cantidad_label'=>'Aves aprox.', 'cantidad_ph'=>'Ej: 200',
+    'avicola'       => ['cantidad_label'=>'Aves aprox.','cantidad_ph'=>'Ej: 200',
         'opciones'=>[['name'=>'postura','label'=>'Postura'],['name'=>'engorde','label'=>'Engorde']]],
-    'piscicola'     => ['cantidad_label'=>'Estanques', 'cantidad_ph'=>'Ej: 3',
-        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']], 'opciones'=>[]],
-    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.', 'cantidad_ph'=>'Ej: 15',
+    'piscicola'     => ['cantidad_label'=>'Estanques','cantidad_ph'=>'Ej: 3',
+        'extras'=>[['name'=>'especies','label'=>'Especies','ph'=>'Tilapia, cachama...']],'opciones'=>[]],
+    'caprino_ovino' => ['cantidad_label'=>'Cantidad aprox.','cantidad_ph'=>'Ej: 15',
         'opciones'=>[['name'=>'leche','label'=>'Leche'],['name'=>'carne','label'=>'Carne'],['name'=>'lana','label'=>'Lana']]],
-    'apicola'       => ['cantidad_label'=>'Colmenas', 'cantidad_ph'=>'Ej: 10', 'opciones'=>[]],
-    'equino'        => ['cantidad_label'=>'Cantidad', 'cantidad_ph'=>'Ej: 4',
+    'apicola'       => ['cantidad_label'=>'Colmenas','cantidad_ph'=>'Ej: 10','opciones'=>[]],
+    'equino'        => ['cantidad_label'=>'Cantidad','cantidad_ph'=>'Ej: 4',
         'opciones'=>[['name'=>'trabajo','label'=>'Trabajo'],['name'=>'cria','label'=>'Cría']]],
-    'cunicola'      => ['cantidad_label'=>'Jaulas / madres', 'cantidad_ph'=>'Ej: 12', 'opciones'=>[]],
+    'cunicola'      => ['cantidad_label'=>'Jaulas / madres','cantidad_ph'=>'Ej: 12','opciones'=>[]],
   ];
 @endphp
 
@@ -349,89 +338,83 @@
 
     <div class="lineas-grid lineas-grid-compact">
       @foreach($lineas as $linea)
-        @php
-          $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa;
-        @endphp
-        <label class="linea-card {{ $marcada ? 'selected' : '' }}" data-codigo="{{ $linea->codigo }}">
-          <input type="checkbox" name="lineas[]" value="{{ $linea->codigo }}"
-                 class="linea-check"
-                 onchange="this.closest('.linea-card').classList.toggle('selected', this.checked); togglePerfilConfig('{{ $linea->codigo }}', this.checked);"
-                 {{ $marcada ? 'checked' : '' }}>
-          <div class="linea-emoji">{{ $linea->emoji }}</div>
-          <div class="linea-nombre">{{ $linea->nombre }}</div>
-        </label>
+      @php $marcada = isset($lineasUsuario[$linea->codigo]) && $lineasUsuario[$linea->codigo]->activa; @endphp
+      <label class="linea-card {{ $marcada ? 'selected' : '' }}" data-codigo="{{ $linea->codigo }}">
+        <input type="checkbox" name="lineas[]" value="{{ $linea->codigo }}"
+               class="linea-check"
+               onchange="this.closest('.linea-card').classList.toggle('selected',this.checked);togglePerfilConfig('{{ $linea->codigo }}',this.checked);"
+               {{ $marcada ? 'checked' : '' }}>
+        <div class="linea-emoji">{{ $linea->emoji }}</div>
+        <div class="linea-nombre">{{ $linea->nombre }}</div>
+      </label>
       @endforeach
     </div>
 
     <div id="perfilConfigContainer" style="margin-top:18px;">
       @foreach($lineas as $linea)
-        @php
-          $codigo  = $linea->codigo;
-          $cfg     = $configCamposPerfil[$codigo] ?? null;
-          $actual  = $lineasUsuario[$codigo] ?? null;
-          $marcada = $actual && $actual->activa;
-          $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
-        @endphp
-
-        @if($cfg)
-        <div class="config-block {{ $marcada ? '' : 'hidden' }}" data-config-perfil-for="{{ $codigo }}">
-          <div class="config-block-header">
-            <span class="config-emoji">{{ $linea->emoji }}</span>
-            <span class="config-titulo">{{ $linea->nombre }}</span>
+      @php
+        $codigo  = $linea->codigo;
+        $cfg     = $configCamposPerfil[$codigo] ?? null;
+        $actual  = $lineasUsuario[$codigo] ?? null;
+        $marcada = $actual && $actual->activa;
+        $meta    = $actual && $actual->metadata ? json_decode($actual->metadata, true) : [];
+      @endphp
+      @if($cfg)
+      <div class="config-block {{ $marcada ? '' : 'hidden' }}" data-config-perfil-for="{{ $codigo }}">
+        <div class="config-block-header">
+          <span class="config-emoji">{{ $linea->emoji }}</span>
+          <span class="config-titulo">{{ $linea->nombre }}</span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>{{ $cfg['cantidad_label'] }}</label>
+            <input type="number" min="0" step="1"
+                   name="config[{{ $codigo }}][cantidad]"
+                   class="form-control"
+                   placeholder="{{ $cfg['cantidad_ph'] }}"
+                   value="{{ $actual->cantidad_aprox ?? '' }}">
           </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label>{{ $cfg['cantidad_label'] }}</label>
-              <input type="number" min="0" step="1"
-                     name="config[{{ $codigo }}][cantidad]"
-                     class="form-control"
-                     placeholder="{{ $cfg['cantidad_ph'] }}"
-                     value="{{ $actual->cantidad_aprox ?? '' }}">
-            </div>
-            <div class="form-group">
-              <label>Escala</label>
-              <select name="config[{{ $codigo }}][escala]" class="form-control">
-                @foreach(['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande'] as $val => $lbl)
-                  <option value="{{ $val }}" {{ ($actual->escala ?? 'pequena') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
-                @endforeach
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Escala</label>
+            <select name="config[{{ $codigo }}][escala]" class="form-control">
+              @foreach(['pequena'=>'Pequeña','mediana'=>'Mediana','grande'=>'Grande'] as $val => $lbl)
+                <option value="{{ $val }}" {{ ($actual->escala ?? 'pequena') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+              @endforeach
+            </select>
           </div>
-
-          @if(!empty($cfg['extras']))
-            @foreach($cfg['extras'] as $extra)
-              <div class="form-group">
-                <label>{{ $extra['label'] }}</label>
-                <input type="text"
-                       name="config[{{ $codigo }}][{{ $extra['name'] }}]"
-                       class="form-control"
-                       placeholder="{{ $extra['ph'] }}"
-                       value="{{ $meta[$extra['name']] ?? '' }}">
-              </div>
+        </div>
+        @if(!empty($cfg['extras']))
+          @foreach($cfg['extras'] as $extra)
+          <div class="form-group">
+            <label>{{ $extra['label'] }}</label>
+            <input type="text"
+                   name="config[{{ $codigo }}][{{ $extra['name'] }}]"
+                   class="form-control"
+                   placeholder="{{ $extra['ph'] }}"
+                   value="{{ $meta[$extra['name']] ?? '' }}">
+          </div>
+          @endforeach
+        @endif
+        @if(!empty($cfg['opciones']))
+        <div class="form-group">
+          <label>Tipo (puedes marcar varios)</label>
+          <div class="opciones-pills">
+            @foreach($cfg['opciones'] as $op)
+            @php $opMarcada = !empty($meta[$op['name']]); @endphp
+            <label class="opcion-pill {{ $opMarcada ? 'selected' : '' }}">
+              <input type="checkbox"
+                     name="config[{{ $codigo }}][{{ $op['name'] }}]"
+                     value="1"
+                     {{ $opMarcada ? 'checked' : '' }}
+                     onchange="this.closest('.opcion-pill').classList.toggle('selected',this.checked);">
+              {{ $op['label'] }}
+            </label>
             @endforeach
-          @endif
-
-          @if(!empty($cfg['opciones']))
-            <div class="form-group">
-              <label>Tipo (puedes marcar varios)</label>
-              <div class="opciones-pills">
-                @foreach($cfg['opciones'] as $op)
-                  @php $opMarcada = !empty($meta[$op['name']]); @endphp
-                  <label class="opcion-pill {{ $opMarcada ? 'selected' : '' }}">
-                    <input type="checkbox"
-                           name="config[{{ $codigo }}][{{ $op['name'] }}]"
-                           value="1"
-                           {{ $opMarcada ? 'checked' : '' }}
-                           onchange="this.closest('.opcion-pill').classList.toggle('selected', this.checked);">
-                    {{ $op['label'] }}
-                  </label>
-                @endforeach
-              </div>
-            </div>
-          @endif
+          </div>
         </div>
         @endif
+      </div>
+      @endif
       @endforeach
     </div>
 
@@ -441,16 +424,15 @@
 
 @push('scripts')
 <script>
-  function togglePerfilConfig(codigo, mostrar) {
-    const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
-    if (!block) return;
-    if (mostrar) block.classList.remove('hidden');
-    else block.classList.add('hidden');
-  }
+function togglePerfilConfig(codigo, mostrar) {
+  const block = document.querySelector('[data-config-perfil-for="' + codigo + '"]');
+  if (!block) return;
+  if (mostrar) block.classList.remove('hidden');
+  else block.classList.add('hidden');
+}
 </script>
 @endpush
 
-{{-- Acciones de cuenta --}}
 <div class="card mt-3">
   <p style="font-weight:700;margin-bottom:12px;">⚙️ Cuenta</p>
   <div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px;">
@@ -497,6 +479,95 @@
     Última sesión: {{ \Carbon\Carbon::parse($user->actualizado_en ?? $user->creado_en ?? now())->format('d/m/Y H:i') }}
   </div>
 </div>
+
+{{-- ===== TAB: INVESTIGACIÓN ===== --}}
+@elseif($tabActual === 'investigacion')
+
+{{-- Diagnóstico inicial --}}
+<div class="card" style="margin-bottom:12px;">
+  <p style="font-weight:700;margin-bottom:4px;">📋 Diagnóstico inicial</p>
+  <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
+    Registra tu situación tecnológica y productiva <em>antes</em> de usar Agrogranja. Son los datos de línea base del estudio de impacto en San Pelayo.
+  </p>
+
+  @if(isset($user->diagnostico_completado) && $user->diagnostico_completado)
+    <div style="display:flex;align-items:center;gap:10px;background:var(--verde-bg);border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+      <span style="font-size:1.3rem;">✅</span>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--verde-dark);">Diagnóstico completado</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">Tus datos de línea base están en la base de investigación.</div>
+      </div>
+    </div>
+    <form method="POST" action="{{ route('diagnostico.reset') }}"
+          onsubmit="return confirm('¿Deseas responder el diagnóstico de nuevo? Solo hazlo si cometiste un error en las respuestas anteriores.')">
+      @csrf
+      <button type="submit" class="btn btn-secondary btn-full" style="font-size:.83rem;">
+        🔄 Responder diagnóstico de nuevo
+      </button>
+    </form>
+  @else
+    <div style="display:flex;align-items:center;gap:10px;background:#fff7ed;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+      <span style="font-size:1.3rem;">⏳</span>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:#9a3412;">Diagnóstico pendiente</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">Aún no has registrado tu situación inicial. Solo toma 2 minutos.</div>
+      </div>
+    </div>
+    <a href="{{ route('diagnostico.show') }}" class="btn btn-primary btn-full" style="text-align:center;display:block;text-decoration:none;font-size:.88rem;">
+      📋 Completar diagnóstico ahora
+    </a>
+  @endif
+</div>
+
+{{-- Métricas de productividad --}}
+<div class="card" style="margin-bottom:12px;">
+  <p style="font-weight:700;margin-bottom:4px;">📊 Métricas de productividad</p>
+  <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
+    Envía los datos reales de tu finca (ingresos, gastos, cosechas, actividad) a la base de investigación para comparar tu productividad en el tiempo.
+  </p>
+
+  <form method="POST" action="{{ route('metricas.snapshot') }}" style="margin-bottom:10px;">
+    @csrf
+    <input type="hidden" name="periodo" value="{{ \Carbon\Carbon::now()->subMonth()->format('Y-m') }}">
+    <button type="submit" class="btn btn-primary btn-full" style="font-size:.85rem;">
+      📤 Enviar métricas de {{ \Carbon\Carbon::now()->subMonth()->translatedFormat('F Y') }}
+    </button>
+  </form>
+
+  <form method="POST" action="{{ route('metricas.snapshot') }}" style="display:flex;gap:8px;margin-bottom:10px;">
+    @csrf
+    <input type="month" name="periodo" class="form-control"
+           value="{{ \Carbon\Carbon::now()->subMonth()->format('Y-m') }}" style="flex:1;">
+    <button type="submit" class="btn btn-secondary" style="font-size:.83rem;white-space:nowrap;">
+      Enviar mes
+    </button>
+  </form>
+
+  <details>
+    <summary style="font-size:.78rem;color:var(--text-muted);cursor:pointer;padding:6px 0;">
+      ▸ Enviar historial completo (usar solo una vez)
+    </summary>
+    <div style="margin-top:8px;padding:10px 12px;background:var(--verde-bg);border-radius:10px;">
+      <p style="font-size:.78rem;color:var(--verde-dark);margin-bottom:8px;">
+        Envía todos los períodos desde que empezaste a registrar datos en Agrogranja.
+      </p>
+      <form method="POST" action="{{ route('metricas.historial') }}"
+            onsubmit="return confirm('¿Enviar el historial completo? Solo es necesario hacerlo una vez.')">
+        @csrf
+        <button type="submit" class="btn btn-secondary btn-full" style="font-size:.82rem;">
+          📦 Cargar historial completo
+        </button>
+      </form>
+    </div>
+  </details>
+</div>
+
+<div style="background:#eff6ff;border-radius:var(--radius-lg);padding:12px 14px;border-left:3px solid #3b82f6;">
+  <p style="font-size:.8rem;color:#1e40af;line-height:1.5;">
+    🔒 Todos los datos enviados son <strong>anónimos</strong> y se usan exclusivamente para el estudio de impacto de Agrogranja en pequeños productores de San Pelayo. Nunca se comparte información personal.
+  </p>
+</div>
+
 @endif
 
 @endsection
