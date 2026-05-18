@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Gasto extends Model
 {
+    use HasFactory; 
     protected $table = 'gastos';
 
     // Solo tiene creado_en, sin actualizado_en

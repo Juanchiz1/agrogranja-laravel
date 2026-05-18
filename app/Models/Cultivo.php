@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Cultivo extends Model
 {
+    use HasFactory;
     protected $table = 'cultivos';
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';

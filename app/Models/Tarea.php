@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Tarea extends Model
 {
+    use HasFactory;
     protected $table = 'tareas';
 
     // Solo tiene creado_en, sin actualizado_en
