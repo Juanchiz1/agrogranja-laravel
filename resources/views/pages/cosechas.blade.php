@@ -76,7 +76,7 @@
   <button type="submit" class="btn btn-secondary">🔍</button>
 </form>
 
-//Lista de cosechas
+
 @if($cosechas->isEmpty())
 <div class="empty-state"><div class="emoji">🌾</div><p><strong>Sin cosechas registradas.</strong></p><p>Toca + para registrar tu primera cosecha.</p></div>
 @else
@@ -121,7 +121,7 @@
   </div>
 </div>
 
-// MODAL EDITAR COSECHA
+
 <div class="modal-overlay" id="editCosecha{{ $cs->id }}" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">✏️ Editar cosecha</h3>
     <form method="POST" action="{{ route('cosechas.update',$cs->id) }}" enctype="multipart/form-data">@csrf
@@ -136,7 +136,7 @@
 @endforeach
 @endif
 
-// MODAL NUEVA COSECHA
+
 <div class="modal-overlay" id="modalNuevaCosecha" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">🌾 Registrar cosecha</h3>
     <form method="POST" action="{{ route('cosechas.store') }}" enctype="multipart/form-data">@csrf
@@ -149,7 +149,6 @@
   </div>
 </div>
 
-// MODAL AYUDA
 <div class="modal-overlay" id="modalAyudaCosechas" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div>
     <h3 class="modal-title">🌾 ¿Cómo funciona Cosechas?</h3>
