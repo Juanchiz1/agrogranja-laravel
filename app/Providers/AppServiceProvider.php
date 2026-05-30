@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\LineaProductiva;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,21 +14,13 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    /**
-     * Bootstrapping de la app.
-     *
-     * Aquí registramos un view composer GLOBAL que comparte con todas
-     * las vistas el array `$lineasActivas` (códigos de las líneas
-     * productivas del usuario logueado). Así, en cualquier .blade.php
-     * podemos hacer:
-     *
-     *   @if(in_array('bovino', $lineasActivas)) ... @endif
-     *
-     * sin tocar ningún controlador. Si no hay sesión, $lineasActivas
-     * llega como array vacío.
-     */
     public function boot(): void
     {
+        // Forzar HTTPS en producción (Railway termina SSL en el proxy)
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         View::composer('*', function ($view) {
             $lineasActivas = [];
             try {
