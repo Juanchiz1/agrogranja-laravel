@@ -133,9 +133,11 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/animales/{id}/delete',                       [AnimalController::class, 'destroy'])->name('animales.destroy');
 
     // Producción animal
-    Route::get('/produccion-animal',          [ProduccionAnimalController::class, 'index'])->name('produccion-animal.index');
-    Route::post('/produccion-animal',         [ProduccionAnimalController::class, 'store'])->name('produccion-animal.store');
-    Route::delete('/produccion-animal/{id}',  [ProduccionAnimalController::class, 'destroy'])->name('produccion-animal.destroy');
+Route::get('/produccion-animal',                 [ProduccionAnimalController::class, 'index'])->name('produccion-animal.index');
+Route::post('/produccion-animal',                [ProduccionAnimalController::class, 'store'])->name('produccion-animal.store');
+Route::delete('/produccion-animal/{id}',         [ProduccionAnimalController::class, 'destroy'])->name('produccion-animal.destroy');
+Route::get('/produccion-animal/productividad',   [ProduccionAnimalController::class, 'productividad'])->name('produccion-animal.productividad');
+Route::post('/produccion-animal/calcularCostos', [ProduccionAnimalController::class, 'calcularCostos'])->name('produccion-animal.calcularCostos');
 
     // Tareas / Calendario
     Route::get('/calendario',              [TareaController::class, 'index'])->name('calendario.index');
