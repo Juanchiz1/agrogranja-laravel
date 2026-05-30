@@ -308,7 +308,9 @@ Route::post('/produccion-animal/calcular-costos',
 Route::post('/produccion-animal/{id}/delete',
         [ProduccionAnimalController::class, 'destroy'])
         ->name('produccion-animal.destroy');        
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
 Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');    
 
 Route::get('/diagnostico',          [DiagnosticoController::class, 'show'])->name('diagnostico.show');
