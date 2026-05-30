@@ -284,49 +284,23 @@ Route::post('/piscicola/cosecha',
 Route::get('/piscicola/reportes',
         [PiscicolaController::class, 'reportes'])->name('piscicola.reportes');
 
-   // Dashboard de sesiones diarias
-Route::get('/produccion-animal',
-        [ProduccionAnimalController::class, 'index'])
-        ->name('produccion-animal.index');
- 
-    // Registrar sesión de producción (leche AM/PM, huevos, etc.)
-Route::post('/produccion-animal',
-        [ProduccionAnimalController::class, 'store'])
-        ->name('produccion-animal.store');
- 
-    // Análisis de productividad por animal individual
-Route::get('/produccion-animal/productividad',
-        [ProduccionAnimalController::class, 'productividad'])
-        ->name('produccion-animal.productividad');
- 
-    // Calcular y guardar costos por período
-Route::post('/produccion-animal/calcular-costos',
-        [ProduccionAnimalController::class, 'calcularCostos'])
-        ->name('produccion-animal.calcularCostos');
- 
-    // Eliminar registro
-Route::post('/produccion-animal/{id}/delete',
-        [ProduccionAnimalController::class, 'destroy'])
-        ->name('produccion-animal.destroy');        
+
+    // Rutas de diagnóstico inicial
+    Route::get('/diagnostico',          [DiagnosticoController::class, 'show'])->name('diagnostico.show');
+    Route::post('/diagnostico',         [DiagnosticoController::class, 'store'])->name('diagnostico.store');
+    Route::post('/diagnostico/omitir',  [DiagnosticoController::class, 'omitir'])->name('diagnostico.omitir');
+    Route::post('/diagnostico/reset',   [DiagnosticoController::class, 'reset'])->name('diagnostico.reset');
+
+    // Métricas por período
+    Route::post('/metricas/snapshot',   [MetricasController::class, 'enviarSnapshot'])->name('metricas.snapshot');
+    Route::post('/metricas/historial',  [MetricasController::class, 'enviarHistorial'])->name('metricas.historial');
+
+    // Inicio alternativo
+    Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');
+
+});
+
+// Ruta raíz pública → redirige al dashboard si está autenticado, si no al login
 Route::get('/', function () {
     return redirect()->route('dashboard');
-});
-Route::get('/inicio', [DashboardController::class, 'index'])->name('inicio');    
-
-Route::get('/diagnostico',          [DiagnosticoController::class, 'show'])->name('diagnostico.show');
-Route::post('/diagnostico',         [DiagnosticoController::class, 'store'])->name('diagnostico.store');
-Route::post('/diagnostico/omitir',  [DiagnosticoController::class, 'omitir'])->name('diagnostico.omitir');
- 
-    // Métricas por período (O3 - productividad objetiva)
-Route::post('/metricas/snapshot',   [MetricasController::class, 'enviarSnapshot'])->name('metricas.snapshot');
-Route::post('/metricas/historial',  [MetricasController::class, 'enviarHistorial'])->name('metricas.historial');
-
-Route::get('/diagnostico',         [DiagnosticoController::class, 'show'])->name('diagnostico.show');
-Route::post('/diagnostico',        [DiagnosticoController::class, 'store'])->name('diagnostico.store');
- Route::post('/diagnostico/omitir', [DiagnosticoController::class, 'omitir'])->name('diagnostico.omitir');
-Route::post('/diagnostico/reset',  [DiagnosticoController::class, 'reset'])->name('diagnostico.reset');  // <- NUEVO
-
- Route::post('/metricas/snapshot',  [MetricasController::class, 'enviarSnapshot'])->name('metricas.snapshot');
- Route::post('/metricas/historial', [MetricasController::class, 'enviarHistorial'])->name('metricas.historial');
-
 });
