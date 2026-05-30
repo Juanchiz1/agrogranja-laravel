@@ -308,7 +308,7 @@
         <span>Agrogranja</span>
     </div>
 
-    <!-- Overlay con texto abajo -->
+   
     <div class="photo-overlay">
         <p class="panel-tagline">Para pequeños productores</p>
         <h2 class="panel-quote">Gestiona tu finca como nunca antes</h2>
@@ -322,10 +322,10 @@
 
 </div>
 
-<!-- ── PANEL FORMULARIO ── -->
+
 <div class="form-panel">
 
-    <!-- Logo mobile -->
+  
     <div class="mobile-logo">
         <img src="{{ asset('img/logo-seedling-transparente.svg') }}" alt="Agrogranja"
              onerror="this.style.display='none'">

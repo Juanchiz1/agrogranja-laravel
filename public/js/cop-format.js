@@ -1,9 +1,3 @@
-/**
- * cop-format.js - Agrogranja
- * Formato y verbalización de Pesos Colombianos (COP)
- * Uso: agregar atributo data-cop-input en inputs de dinero
- *      agregar atributo data-cop="valor" en spans/divs de montos mostrados
- */
 
 (function() {
   'use strict';
