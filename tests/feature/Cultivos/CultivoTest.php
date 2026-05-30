@@ -11,7 +11,8 @@ class CultivoTest extends TestCase
     public function lista_cultivos_requiere_sesion_activa(): void
     {
         $response = $this->get(route('cultivos.index'));
-        // Sin sesión debe redirigir al login
+        
+        // Sin no hay sesión, debería redirigir al login
         $response->assertRedirect(route('login'));
     }
 
@@ -54,8 +55,8 @@ class CultivoTest extends TestCase
         $this->crearYLoguearUsuario();
 
         $response = $this->post(route('cultivos.store'), [
-            'tipo'  => '',  // Falta tipo
-            'nombre'=> '',  // Falta nombre
+            'tipo'  => '',  
+            'nombre'=> '',  
         ]);
 
         $response->assertSessionHasErrors(['tipo', 'nombre']);

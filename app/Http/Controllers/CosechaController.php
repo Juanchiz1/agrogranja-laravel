@@ -15,23 +15,21 @@ class CosechaController extends Controller
 {
     use ManejadorImagenes;
 
-    private function destinos(): array
-    {
-        return [
-            'venta'         => ['label' => 'ðŸ’µ Venta directa',    'crea_ingreso' => true],
-            'intermediario' => ['label' => 'ðŸ¤� Intermediario',    'crea_ingreso' => true],
-            'plaza_mercado' => ['label' => 'ðŸ�ª Plaza de mercado', 'crea_ingreso' => true],
-            'exportacion'   => ['label' => 'ðŸŒŽ ExportaciÃ³n',      'crea_ingreso' => true],
-            'autoconsumo'   => ['label' => 'ðŸ�  Autoconsumo',      'crea_ingreso' => false],
-            'almacenaje'    => ['label' => 'ðŸ“¦ Almacenaje',       'crea_ingreso' => false],
-            'semilla'       => ['label' => 'ðŸŒ± Reserva semilla',  'crea_ingreso' => false],
-            'donacion'      => ['label' => 'ðŸ¤² DonaciÃ³n',         'crea_ingreso' => false],
-        ];
-    }
+   private function destinos(): array
+{
+    return [
+        'venta'         => ['label' => '💰 Venta directa',      'crea_ingreso' => true],
+        'intermediario' => ['label' => '🤝 Intermediario',      'crea_ingreso' => true],
+        'plaza_mercado' => ['label' => '🏪 Plaza de mercado',   'crea_ingreso' => true],
+        'exportacion'   => ['label' => '🌍 Exportación',        'crea_ingreso' => true],
+        'autoconsumo'   => ['label' => '🏠 Autoconsumo',       'crea_ingreso' => false],
+        'almacenaje'    => ['label' => '📦 Almacenaje',        'crea_ingreso' => false],
+        'semilla'       => ['label' => '🌱 Reserva semilla',   'crea_ingreso' => false],
+        'donacion'      => ['label' => '🎁 Donación',          'crea_ingreso' => false],
+    ];
+}
 
-    /**
-     * Muestra el listado de cosechas con estadÃ­sticas del perÃ­odo.
-     */
+    //Estadisticas de cosechas, total del mes, total del año, cantidad del mes, top productos, en almacen...
     public function index(Request $request)
     {
         $uid = session('usuario_id');
@@ -76,9 +74,8 @@ class CosechaController extends Controller
         ));
     }
 
-    /**
-     * Registra una nueva cosecha y opcionalmente crea un ingreso automÃ¡tico.
-     */
+   
+    //Registro de una nueva cosecha
     public function store(CosechaRequest $request)
     {
         $uid  = session('usuario_id');
@@ -127,7 +124,7 @@ class CosechaController extends Controller
                 ->update(['estado' => 'cosechado']);
         }
 
-        // Recalcular rendimiento real por ha al registrar cosecha
+        
         if ($request->cultivo_id) {
             $cultivoObj = Cultivo::where('id', $request->cultivo_id)
                 ->where('usuario_id', $uid)->first();
@@ -160,9 +157,7 @@ class CosechaController extends Controller
             ->with('msg', 'Cosecha registrada correctamente.')->with('msgType', 'success');
     }
 
-    /**
-     * Actualiza los datos de una cosecha existente.
-     */
+    //Actualización de una cosecha existente
     public function update(CosechaRequest $request, $id)
     {
         $uid     = session('usuario_id');
@@ -200,9 +195,7 @@ class CosechaController extends Controller
             ->with('msg', 'Cosecha actualizada.')->with('msgType', 'success');
     }
 
-    /**
-     * Elimina una cosecha y su foto asociada.
-     */
+   // Eliminación de una cosecha
     public function destroy($id)
     {
         $uid     = session('usuario_id');

@@ -9,14 +9,14 @@
 
 @section('content')
 
-{{-- SELECTOR AÑO --}}
+//Selecciona el año
 <div class="flex items-center gap-2 mb-3">
   <a href="?anio={{ $anio-1 }}" class="btn btn-sm btn-secondary btn-icon">‹</a>
   <span class="font-bold" style="flex:1;text-align:center;">{{ $cultivo->tipo }} · {{ $anio }}</span>
   <a href="?anio={{ $anio+1 }}" class="btn btn-sm btn-secondary btn-icon">›</a>
 </div>
 
-{{-- KPIs PRINCIPALES --}}
+
 <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px;">
   <div class="stat-card" style="background:var(--verde-bg);">
     <div class="stat-value text-green" style="font-size:1rem;">${{ number_format($ingresoReal,0,',','.') }}</div>
@@ -34,7 +34,7 @@
   </div>
 </div>
 
-{{-- BALANCE GRANDE --}}
+
 <div class="card mb-3" style="background:{{ $rentabilidad >= 0 ? 'var(--verde-bg)' : '#fef2f2' }};text-align:center;">
   <p class="text-xs font-bold text-gray" style="text-transform:uppercase;margin-bottom:4px;">Balance del cultivo</p>
   <p style="font-size:2rem;font-weight:800;color:{{ $rentabilidad >= 0 ? 'var(--verde-dark)' : 'var(--rojo)' }};">
@@ -64,13 +64,13 @@
   </div>
 </div>
 
-{{-- GRÁFICA MENSUAL --}}
+//GRÁFICO EVOLUCIÓN MENSUAL
 <div class="card mb-3">
   <p class="font-bold mb-3">Evolución mensual {{ $anio }}</p>
   <canvas id="chartMensual" height="180"></canvas>
 </div>
 
-{{-- TABS --}}
+
 <div class="tabs">
   <button class="tab-btn active" onclick="showTab('gastos', this)">
     💰 Gastos ({{ count($gastos ?? []) }})

@@ -18,7 +18,7 @@ use App\Http\Controllers\RentabilidadController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProduccionAnimalController;
-use App\Http\Controllers\BovinoController;                 // ← Fase 4
+use App\Http\Controllers\BovinoController;                 
 use App\Http\Controllers\AvicolaController;
 use App\Http\Controllers\PorcicolaController;
 use App\Http\Controllers\PiscicolaController;

@@ -80,7 +80,7 @@ class GastoTest extends TestCase
             'descripcion'=> 'Gasto a eliminar',
             'valor'      => 50000,
             'fecha'      => now()->format('Y-m-d'),
-            'creado_en' => now(),   // ← cambiar created_at por creado_en
+            'creado_en' => now(),  
         ]);
 
         $this->delete(route('gastos.destroy', $gastoId));

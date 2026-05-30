@@ -58,10 +58,9 @@ class TareaTest extends TestCase
             'fecha'      => now()->format('Y-m-d'),
             'prioridad'  => 'media',
             'completada' => false,
-            'creado_en' => now(),   // ← cambiar created_at por creado_en
+            'creado_en' => now(),   
         ]);
 
-        // Ajusta la ruta/método según tu implementación real
         $this->patch(route('tareas.update', $tareaId), [
             'titulo'     => 'Tarea pendiente',
             'tipo'       => 'riego',

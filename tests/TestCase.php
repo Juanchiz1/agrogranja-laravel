@@ -11,7 +11,6 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    /** Carga el Application Bootstrap de Laravel */
     public function createApplication()
     {
         $app = require __DIR__ . '/../bootstrap/app.php';
@@ -19,13 +18,7 @@ abstract class TestCase extends BaseTestCase
         return $app;
     }
 
-    /**
-     * Crea un usuario de prueba en la tabla `usuarios`
-     * y simula que está logueado (sesión manual).
-     *
-     * @param array $overrides  Campos opcionales que sobreescriben los defaults
-     * @return object           El registro del usuario (stdClass)
-     */
+   
     protected function crearYLoguearUsuario(array $overrides = []): object
     {
         $data = array_merge([
@@ -50,9 +43,7 @@ abstract class TestCase extends BaseTestCase
         return $usuario;
     }
 
-    /**
-     * Crea un usuario sin sesión (para pruebas de redirección).
-     */
+   
     protected function crearUsuario(array $overrides = []): object
     {
         $data = array_merge([

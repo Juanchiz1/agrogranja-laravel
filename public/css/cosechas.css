@@ -1,10 +1,4 @@
-/*
- * Agrogranja — Cosechas
- * Estilos específicos del módulo.
- * Cargado solo en las vistas: cosechas
- */
 
-/* ── Cosechas ──────────────────────────────────────── */
 .destino-chip {
   display:inline-flex;align-items:center;gap:3px;
   font-size:.7rem;padding:2px 7px;border-radius:99px;font-weight:600;

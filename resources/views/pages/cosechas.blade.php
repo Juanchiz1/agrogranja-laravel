@@ -76,14 +76,14 @@
   <button type="submit" class="btn btn-secondary">🔍</button>
 </form>
 
-{{-- LISTADO --}}
+//Lista de cosechas
 @if($cosechas->isEmpty())
 <div class="empty-state"><div class="emoji">🌾</div><p><strong>Sin cosechas registradas.</strong></p><p>Toca + para registrar tu primera cosecha.</p></div>
 @else
 @php $calidadColor=['excelente'=>'badge-green','buena'=>'badge-green','regular'=>'badge-orange','baja'=>'badge-red']; @endphp
 @foreach($cosechas as $cs)
 <div class="list-item">
-  {{-- Foto o ícono --}}
+  
   <div class="item-icon" style="background:var(--verde-bg);font-size:1.3rem;overflow:hidden;padding:0;">
     @if(isset($cs->foto) && $cs->foto)
       <img src="{{ asset($cs->foto) }}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onclick="openLightboxC('{{ asset($cs->foto) }}')">
@@ -121,7 +121,7 @@
   </div>
 </div>
 
-{{-- MODAL EDITAR --}}
+// MODAL EDITAR COSECHA
 <div class="modal-overlay" id="editCosecha{{ $cs->id }}" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">✏️ Editar cosecha</h3>
     <form method="POST" action="{{ route('cosechas.update',$cs->id) }}" enctype="multipart/form-data">@csrf
@@ -136,7 +136,7 @@
 @endforeach
 @endif
 
-{{-- MODAL NUEVA COSECHA --}}
+// MODAL NUEVA COSECHA
 <div class="modal-overlay" id="modalNuevaCosecha" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title">🌾 Registrar cosecha</h3>
     <form method="POST" action="{{ route('cosechas.store') }}" enctype="multipart/form-data">@csrf
@@ -149,7 +149,7 @@
   </div>
 </div>
 
-{{-- MODAL AYUDA --}}
+// MODAL AYUDA
 <div class="modal-overlay" id="modalAyudaCosechas" style="display:none;">
   <div class="modal-sheet"><div class="modal-handle"></div>
     <h3 class="modal-title">🌾 ¿Cómo funciona Cosechas?</h3>
@@ -171,7 +171,7 @@
   </div>
 </div>
 
-{{-- Lightbox --}}
+
 <div id="lightboxC" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center;">
   <img id="lightboxCImg" style="max-width:94vw;max-height:88vh;border-radius:10px;">
 </div>

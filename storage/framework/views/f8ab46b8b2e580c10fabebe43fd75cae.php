@@ -29,7 +29,7 @@
   </div>
   <div class="stat-card" style="background:var(--marron-bg);">
     <div class="stat-value text-brown" style="font-size:1rem;">$<?php echo e(number_format($totalGastos/1000,0)); ?>k</div>
-    <div class="stat-label">Total gastos</div>
+    <div class="stat-label">Total costos</div>
   </div>
   <div class="stat-card" style="background:<?php echo e($totalBalance >= 0 ? 'var(--verde-bg)' : '#fef2f2'); ?>;">
     <div class="stat-value" style="font-size:1rem;color:<?php echo e($totalBalance >= 0 ? 'var(--verde-dark)' : 'var(--rojo)'); ?>;">
@@ -63,7 +63,7 @@
 
 
 <div class="card mb-3">
-  <p class="font-bold mb-3">Ingresos vs Gastos por cultivo</p>
+  <p class="font-bold mb-3">Ingresos vs Costos por cultivo</p>
   <canvas id="chartComparativo" height="220"></canvas>
 </div>
 
@@ -76,10 +76,10 @@
 <?php else: ?>
 <?php $__currentLoopData = $datos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $d): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 <?php
-  $positivo = $d->rentabilidad >= 0;
-  $maxVal   = max($d->gastos, $d->ingresos, 1);
-  $pctG     = round($d->gastos / $maxVal * 100);
-  $pctI     = round($d->ingresos / $maxVal * 100);
+  $positivo    = $d->rentabilidad >= 0;
+  $maxVal      = max($d->costo_total, $d->ingresos, 1);
+  $pctCosto    = round($d->costo_total / $maxVal * 100);
+  $pctI        = round($d->ingresos   / $maxVal * 100);
   $estadoBadge = ['activo'=>'badge-green','cosechado'=>'badge-orange','vendido'=>'badge-brown'][$d->estado] ?? 'badge-green';
 ?>
 
@@ -104,20 +104,34 @@
   
   <div style="margin-bottom:10px;">
     <div class="flex items-center justify-between mb-2">
-      <span class="text-xs text-gray">💰 Gastos</span>
-      <span class="text-xs font-bold text-brown">$<?php echo e(number_format($d->gastos,0,',','.')); ?></span>
-    </div>
-    <div class="progress-bar" style="height:8px;">
-      <div class="progress-fill" style="width:<?php echo e($pctG); ?>%;background:var(--marron-light);"></div>
-    </div>
-
-    <div class="flex items-center justify-between mt-2 mb-2">
       <span class="text-xs text-gray">📈 Ingresos</span>
       <span class="text-xs font-bold text-green">$<?php echo e(number_format($d->ingresos,0,',','.')); ?></span>
     </div>
     <div class="progress-bar" style="height:8px;">
       <div class="progress-fill" style="width:<?php echo e($pctI); ?>%;background:var(--verde-dark);"></div>
     </div>
+
+    <div class="flex items-center justify-between mt-2 mb-2">
+      <span class="text-xs text-gray">💸 Costos</span>
+      <span class="text-xs font-bold text-brown">$<?php echo e(number_format($d->costo_total,0,',','.')); ?></span>
+    </div>
+    <div class="progress-bar" style="height:8px;">
+      <div class="progress-fill" style="width:<?php echo e($pctCosto); ?>%;background:var(--marron-light);"></div>
+    </div>
+
+    
+    <?php if($d->mano_de_obra > 0): ?>
+    <div style="display:flex;gap:12px;margin-top:6px;">
+      <span style="font-size:11px;color:#9CA3AF;">
+        Insumos: $<?php echo e(number_format($d->gastos,0,',','.')); ?>
+
+      </span>
+      <span style="font-size:11px;color:#7C3AED;">
+        M.O.: $<?php echo e(number_format($d->mano_de_obra,0,',','.')); ?>
+
+      </span>
+    </div>
+    <?php endif; ?>
   </div>
 
   
@@ -148,11 +162,16 @@
   <div style="margin-top:10px;">
     <p class="text-xs text-gray font-bold" style="margin-bottom:6px;">Principales gastos:</p>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <?php $__currentLoopData = $d->gastosPorCategoria->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+      <?php $__currentLoopData = $d->gastosPorCategoria->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
       <span style="background:#fff;border:1px solid var(--gris-border);border-radius:20px;padding:2px 9px;font-size:.72rem;">
-        <?php echo e($cat->categoria); ?>: $<?php echo e(number_format($cat->total/1000,0)); ?>k
+        <?php echo e($cat->categoria); ?>: $<?php echo e(number_format($cat->total/1000,1)); ?>k
       </span>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+      <?php if($d->mano_de_obra > 0): ?>
+      <span style="background:#EDE9FE;border:1px solid #DDD6FE;border-radius:20px;padding:2px 9px;font-size:.72rem;color:#6D28D9;">
+        M.O.: $<?php echo e(number_format($d->mano_de_obra/1000,1)); ?>k
+      </span>
+      <?php endif; ?>
     </div>
   </div>
   <?php endif; ?>
@@ -169,8 +188,6 @@ Chart.defaults.color = '#64748b';
 const labels   = <?php echo json_encode($chartLabels, 15, 512) ?>;
 const gastos   = <?php echo json_encode($chartGastos, 15, 512) ?>;
 const ingresos = <?php echo json_encode($chartIngresos, 15, 512) ?>;
-
-// Acortar etiquetas largas
 const labelsCortos = labels.map(l => l.length > 12 ? l.substring(0,12)+'…' : l);
 
 new Chart(document.getElementById('chartComparativo'), {
@@ -178,36 +195,18 @@ new Chart(document.getElementById('chartComparativo'), {
   data: {
     labels: labelsCortos,
     datasets: [
-      {
-        label: 'Ingresos',
-        data: ingresos,
-        backgroundColor: 'rgba(61,139,61,.75)',
-        borderRadius: 5,
-        borderSkipped: false,
-      },
-      {
-        label: 'Gastos',
-        data: gastos,
-        backgroundColor: 'rgba(122,79,42,.65)',
-        borderRadius: 5,
-        borderSkipped: false,
-      },
+      { label: 'Ingresos', data: ingresos, backgroundColor: 'rgba(61,139,61,.75)',  borderRadius: 5 },
+      { label: 'Costos',   data: gastos,   backgroundColor: 'rgba(122,79,42,.65)', borderRadius: 5 },
     ]
   },
   options: {
     responsive: true,
     plugins: {
       legend: { position: 'bottom' },
-      tooltip: {
-        callbacks: {
-          label: ctx => ' $' + ctx.raw.toLocaleString('es-CO')
-        }
-      }
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toLocaleString('es-CO') } }
     },
     scales: {
-      y: {
-        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' }
-      }
+      y: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
     }
   }
 });
