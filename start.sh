@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "==> Caching config..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+echo "==> Clearing cached config..."
+php artisan config:clear
+php artisan cache:clear
 
 echo "==> Running migrations..."
 php artisan migrate --force
