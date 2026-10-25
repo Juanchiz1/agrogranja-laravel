@@ -17,3 +17,10 @@ yarn-error.log
 # Logs locales
 /storage/logs/*.log
 /storage/logs/*.txt
+
+# Archivos generados por Laravel
+/bootstrap/cache/*.php
+/storage/framework/views/*.php
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/cache/data/
