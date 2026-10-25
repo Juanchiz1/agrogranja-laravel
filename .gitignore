@@ -13,3 +13,7 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Logs locales
+/storage/logs/*.log
+/storage/logs/*.txt
